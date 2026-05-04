@@ -1,0 +1,402 @@
+/* ===== CSS Variables ===== */
+:root {
+  --sidebar-width: 280px;
+  --sidebar-width-minimized: 80px;
+  --header-height: 64px;
+  --transition-speed: 0.3s;
+}
+
+/* ===== Layout Structure ===== */
+.app-layout {
+  display: flex;
+  min-height: 100dvh;
+  background-color: var(--md-sys-color-background);
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100dvh;
+  background-color: var(--md-sys-color-surface);
+  border-right: 1px solid var(--md-sys-color-outline-variant);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-speed) ease, width var(--transition-speed) ease;
+  z-index: 1000;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  overflow: hidden;
+}
+
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.sidebar-app-name {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--md-sys-color-primary);
+  white-space: nowrap;
+  transition: opacity var(--transition-speed) ease;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar-link:hover {
+  background-color: var(--md-sys-color-surface-variant);
+  color: var(--md-sys-color-on-surface);
+}
+
+.sidebar-link.active {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.sidebar-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.sidebar-link-text {
+  transition: opacity var(--transition-speed) ease;
+}
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.sidebar-logout-form {
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-logout-form .sidebar-link {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.sidebar-logout-form .sidebar-link:hover {
+  background-color: var(--md-sys-color-surface-variant);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* ===== Sidebar Minimized State (Desktop) ===== */
+.sidebar.minimized {
+  width: var(--sidebar-width-minimized);
+}
+
+.sidebar.minimized .sidebar-app-name,
+.sidebar.minimized .sidebar-link-text {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar.minimized .sidebar-header {
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.sidebar.minimized .sidebar-link {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+/* ===== Sidebar Overlay (Mobile) ===== */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+  z-index: 999;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ===== Main Wrapper ===== */
+.main-wrapper {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  transition: margin-left var(--transition-speed) ease;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.minimized ~ .main-wrapper,
+.main-wrapper.minimized {
+  margin-left: var(--sidebar-width-minimized);
+}
+
+/* ===== Header ===== */
+.app-header {
+  position: sticky;
+  top: 0;
+  height: var(--header-height);
+  background-color: var(--md-sys-color-surface);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  z-index: 100;
+}
+
+.header-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background-color: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--md-sys-color-on-surface);
+  transition: background-color 0.2s ease;
+}
+
+.header-toggle:hover {
+  background-color: var(--md-sys-color-surface-variant);
+}
+
+.header-title h1 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ===== Avatar Dropdown ===== */
+.avatar-dropdown {
+  position: relative;
+}
+
+.avatar-menu-toggle:checked + .avatar-trigger + .avatar-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.avatar-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.avatar-trigger:hover {
+  background-color: var(--md-sys-color-surface-variant);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-chevron {
+  color: var(--md-sys-color-on-surface-variant);
+  transition: transform 0.2s ease;
+}
+
+.avatar-menu-toggle:checked + .avatar-trigger .avatar-chevron {
+  transform: rotate(180deg);
+}
+
+.avatar-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background-color: var(--md-sys-color-surface);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.avatar-menu-header {
+  padding: 8px;
+}
+
+.avatar-menu-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.avatar-menu-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--md-sys-color-on-surface);
+}
+
+.avatar-menu-email {
+  font-size: 0.8rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.avatar-menu-divider {
+  height: 1px;
+  background-color: var(--md-sys-color-outline-variant);
+  margin: 8px 0;
+}
+
+.avatar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--md-sys-color-on-surface);
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.avatar-menu-item:hover {
+  background-color: var(--md-sys-color-surface-variant);
+}
+
+.avatar-logout-form {
+  margin: 0;
+  padding: 0;
+}
+
+.avatar-logout-form .avatar-menu-item {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.avatar-logout-form .avatar-menu-item:hover {
+  background-color: var(--md-sys-color-surface-variant);
+}
+
+.avatar-logout-form .avatar-menu-item svg {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.avatar-menu-item svg {
+  flex-shrink: 0;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Close dropdown when clicking outside */
+.avatar-menu-toggle:not(:checked) ~ .avatar-menu {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+}
+
+/* ===== Main Content ===== */
+.app-content {
+  flex: 1;
+  padding: 24px;
+}
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .main-wrapper {
+    margin-left: 0;
+  }
+
+  .sidebar.minimized ~ .main-wrapper,
+  .main-wrapper.minimized {
+    margin-left: 0;
+  }
+
+  .sidebar-header {
+    justify-content: center;
+  }
+
+  .sidebar-app-name {
+    display: none;
+  }
+}

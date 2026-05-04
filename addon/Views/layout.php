@@ -29,34 +29,9 @@
   </div>
 
   <!-- Content Injection Point -->
-  <div>
-    <div class="mazu-container">
-      <!-- Global Header -->
-      <header class="mazu-header">
-        <a data-spa href="<?= getBaseUrl('/') ?>" class="mazu-brand">
-          <img src="<?= getBaseUrl('/logo_app/mazu-logo.svg') ?>" alt="Mazu Engine" height="40" />
-        </a>
-        <nav class="mazu-nav">
-          <a href="https://github.com/mahfudz19/mazu-engine/docs" target="_blank">Documentation</a>
-          <a href="https://github.com/mahfudz19/mazu-engine" target="_blank">GitHub</a>
-        </nav>
-      </header>
-
-      <main id="app-content" data-layout="layout.php">
-        <?= $children; ?>
-      </main>
-
-      <!-- Global Footer -->
-      <footer class="mazu-footer">
-        <div>
-          &copy; <?= date('Y') ?> Mazu Framework. All rights reserved.
-        </div>
-        <div class="mazu-version">
-          v1.0.0 (PHP <?= phpversion() ?>)
-        </div>
-      </footer>
-    </div>
-  </div>
+  <main id="app-content" data-layout="layout.php">
+    <?= $children; ?>
+  </main>
 
   <!-- SPA Script -->
   <?= App\Core\View\View::renderScripts() ?>

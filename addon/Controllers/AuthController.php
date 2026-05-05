@@ -118,6 +118,7 @@ class AuthController
         $this->session->set('auth.user_email', $user['email']);
         $this->session->set('auth.user_name', $user['name']);
         $this->session->set('auth.user_avatar', $user['avatar'] ?? null);
+        $this->session->set('auth.user_avatar_url', $user['avatar_url'] ?? null);
 
         if (isset($user['role'])) {
             $this->session->set('auth.user_role', $user['role']);
@@ -459,7 +460,7 @@ class AuthController
                 ];
 
                 // Add role to Google OAuth user data
-        $userData['role'] = 'user';
+                $userData['role'] = 'user';
 
                 $userId = $this->users->create($userData);
                 $newUser = $this->users->find($userId);

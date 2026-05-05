@@ -13,7 +13,7 @@
             <span class="sidebar-app-name">Mazu App</span>
         </div>
         <nav class="sidebar-nav">
-            <a href="/dashboard" class="sidebar-link">
+            <a data-spa href="/dashboard" class="sidebar-link">
                 <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect width="7" height="9" x="3" y="3" rx="1" />
                     <rect width="7" height="5" x="14" y="3" rx="1" />
@@ -22,14 +22,14 @@
                 </svg>
                 <span class="sidebar-link-text">Dashboard</span>
             </a>
-            <a href="/profile" class="sidebar-link">
+            <a data-spa href="/profile" class="sidebar-link">
                 <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                     <circle cx="12" cy="7" r="4" />
                 </svg>
                 <span class="sidebar-link-text">Profile</span>
             </a>
-            <a href="/settings" class="sidebar-link">
+            <a data-spa href="/settings" class="sidebar-link">
                 <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
                     <circle cx="12" cy="12" r="3" />
@@ -74,7 +74,7 @@
                     <input type="checkbox" id="avatar-menu-toggle" class="avatar-menu-toggle" hidden>
                     <label for="avatar-menu-toggle" class="avatar-trigger">
                         <div class="avatar">
-                            <img src="/logo_app/mazu-icon.svg" alt="User Avatar" class="avatar-image">
+                            <img src=<?= $_SESSION['auth.user_avatar'] ?? $_SESSION['auth.user_avatar_url'] ?? "/logo_app/mazu-icon.svg"; ?> alt="User Avatar" class="avatar-image">
                         </div>
                         <svg class="avatar-chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m6 9 6 6 6-6" />
@@ -83,19 +83,19 @@
                     <div class="avatar-menu">
                         <div class="avatar-menu-header">
                             <div class="avatar-menu-info">
-                                <span class="avatar-menu-name">User Name</span>
-                                <span class="avatar-menu-email">user@example.com</span>
+                                <span class="avatar-menu-name"><?= $_SESSION['auth.user_name'] ?? 'User Name'; ?></span>
+                                <span class="avatar-menu-email"><?= $_SESSION['auth.user_email'] ?? 'user@example.com'; ?></span>
                             </div>
                         </div>
                         <div class="avatar-menu-divider"></div>
-                        <a href="/profile" class="avatar-menu-item">
+                        <a data-spa href="/profile" class="avatar-menu-item">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                                 <circle cx="12" cy="7" r="4" />
                             </svg>
                             <span>Profile</span>
                         </a>
-                        <a href="/settings" class="avatar-menu-item">
+                        <a data-spa href="/settings" class="avatar-menu-item">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
                                 <circle cx="12" cy="12" r="3" />

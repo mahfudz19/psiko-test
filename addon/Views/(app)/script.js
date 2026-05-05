@@ -122,4 +122,44 @@
     }
   });
 
+  /**
+   * Update active state untuk sidebar navigation links
+   * Dipanggil setelah SPA navigation selesai
+   */
+  function updateActiveState() {
+    const currentPath = window.location.pathname;
+    
+    // Hapus semua active class
+    document.querySelectorAll('.sidebar-link, .sidebar-nav-group-header').forEach(el => {
+      el.classList.remove('active');
+    });
+    
+    // Tambahkan active class ke link yang sesuai
+    document.querySelectorAll('.sidebar-link[data-spa]').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href === currentPath) {
+        link.classList.add('active');
+      }
+    });
+    
+    // Handle PMB Journey group - tambahkan active ke group header jika salah satu sub-link active
+    const pmbPages = ['/pmb/journey', '/pmb/simulation', '/pmb/scholarship'];
+    if (pmbPages.includes(currentPath)) {
+      const pmbGroupHeader = document.querySelector('.sidebar-nav-group-header');
+      if (pmbGroupHeader) {
+        pmbGroupHeader.classList.add('active');
+      }
+    }
+  }
+
+  // Listen ke SPA navigation event untuk update active state
+  window.addEventListener('spa:navigated', function() {
+    updateActiveState();
+    
+    // Close mobile sidebar setelah navigasi
+    if (isMobile) {
+      closeMobileSidebar();
+    }
+  });
+
 })();

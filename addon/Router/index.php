@@ -4,6 +4,7 @@ use App\Core\Http\Request;
 use App\Core\Http\Response;
 use Addon\Controllers\AuthController;
 use Addon\Controllers\ProfileController;
+use Addon\Controllers\PmbController;
 use Addon\Models\UserModel;
 use App\Services\SessionService;
 
@@ -84,4 +85,32 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
     // Staff routes
     $router->get('/profile/permissions', [ProfileController::class, 'permissions']);
     $router->post('/profile/permissions', [ProfileController::class, 'updatePermissions']);
+});
+
+// PMB routes (require login, role: user/siswa)
+$router->group(['middleware' => ['auth']], function () use ($router) {
+    // Main PMB pages
+    $router->get('/pmb', function (Request $request, Response $response) {
+        return $response->redirect('/pmb/journey');
+    });
+    $router->get('/pmb/journey', [PmbController::class, 'journey']);
+    $router->get('/pmb/simulation', [PmbController::class, 'simulation']);
+    $router->post('/pmb/simulation/step', [PmbController::class, 'saveSimulationStep']);
+    $router->get('/pmb/simulation/complete', [PmbController::class, 'completeSimulation']);
+    $router->post('/pmb/convert-to-real', [PmbController::class, 'convertToRealApplication']);
+
+    // Scholarship
+    $router->get('/pmb/scholarship', [PmbController::class, 'scholarship']);
+    $router->post('/pmb/scholarship/calculate', [PmbController::class, 'calculateScholarship']);
+    $router->post('/pmb/scholarship/apply', [PmbController::class, 'applyScholarship']);
+
+    // API endpoints (for AJAX)
+    $router->get('/api/pmb/match-score', [PmbController::class, 'getMatchScore']);
+    $router->get('/api/pmb/progress', [PmbController::class, 'getSimulationProgress']);
+    $router->get('/api/pmb/similar-students', [PmbController::class, 'getSimilarStudents']);
+});
+$router->group(['middleware' => ['auth']], function () use ($router) {
+    $router->get('/settings', function (Request $request, Response $response) {
+        return $response->renderPage();
+    });
 });

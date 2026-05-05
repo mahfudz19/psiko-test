@@ -139,6 +139,32 @@ $currentRole = $_SESSION['auth.user_role'];
                 </div>
             </div>
 
+            <!-- PMB Journey Preview Widget -->
+            <div class="profile-section pmb-preview-section">
+                <div class="pmb-preview-header">
+                    <h2>🎯 Journey ke Universal</h2>
+                    <a href="/pmb/journey" class="btn btn-primary btn-sm">Lihat Lengkap →</a>
+                </div>
+                <div class="pmb-preview-card">
+                    <div class="match-score-badge">
+                        <span class="score">92%</span>
+                        <span class="label">Match dengan TI</span>
+                    </div>
+                    <div class="preview-content">
+                        <p>Berdasarkan analisis potensi dan minat kamu,</p>
+                        <strong>Teknik Informatika di Universal</strong> sangat cocok!
+                    </div>
+                    <div class="pmb-preview-actions">
+                        <a href="/pmb/journey" class="btn btn-primary btn-sm">
+                            <span class="icon">🎯</span> Lihat Journey
+                        </a>
+                        <a href="/pmb/simulation" class="btn btn-secondary btn-sm">
+                            <span class="icon">📝</span> Simulasi PMB
+                        </a>
+                    </div>
+                </div>
+            </div>
+
         <?php elseif ($role === 'admin'): ?>
             <!-- Teacher Profile Section -->
             <div class="profile-section">
@@ -244,7 +270,6 @@ $currentRole = $_SESSION['auth.user_role'];
     }
 
     .profile-section {
-        background: var(--md-sys-color-surface-container-lowest, #ffffff);
         border-radius: 12px;
         padding: 24px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

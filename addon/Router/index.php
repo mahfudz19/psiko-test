@@ -3,6 +3,7 @@
 use App\Core\Http\Request;
 use App\Core\Http\Response;
 use Addon\Controllers\AuthController;
+use Addon\Controllers\ProfileController;
 use Addon\Models\UserModel;
 use App\Services\SessionService;
 
@@ -61,6 +62,26 @@ $router->get('/', function (Request $request, Response $response) {
     return $response->redirect('/dashboard');
 });
 
-$router->get('/profile', function (Request $request, Response $response) {
-    return $response->renderPage([], ['meta' => ['title' => 'Profile | ' . env('APP_NAME')]]);
+// Profile routes (require login)
+$router->group(['middleware' => ['auth']], function () use ($router) {
+    // Main profile pages
+    $router->get('/profile', [ProfileController::class, 'show']);
+    $router->get('/profile/edit', [ProfileController::class, 'edit']);
+    $router->post('/profile/update', [ProfileController::class, 'update']);
+    $router->post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
+
+    // Student routes
+    $router->get('/profile/academic', [ProfileController::class, 'academic']);
+    $router->post('/profile/academic', [ProfileController::class, 'updateAcademic']);
+    $router->get('/profile/achievements', [ProfileController::class, 'achievements']);
+    $router->post('/profile/achievements', [ProfileController::class, 'updateAchievements']);
+    $router->get('/profile/results', [ProfileController::class, 'results']);
+
+    // Teacher routes
+    $router->get('/profile/students', [ProfileController::class, 'listStudents']);
+    $router->get('/profile/schedule', [ProfileController::class, 'schedule']);
+
+    // Staff routes
+    $router->get('/profile/permissions', [ProfileController::class, 'permissions']);
+    $router->post('/profile/permissions', [ProfileController::class, 'updatePermissions']);
 });

@@ -53,7 +53,8 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
         $parts[] = $this->buildDefaultClause($def['default']);
       }
 
-      if (!empty($def['auto_increment'])) {
+      // Hanya tambahkan AUTO_INCREMENT jika belum ada di columnType (untuk type selain 'id')
+      if (!empty($def['auto_increment']) && !str_contains($columnType, 'AUTO_INCREMENT')) {
         $parts[] = 'AUTO_INCREMENT';
       }
 
@@ -77,9 +78,10 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
       if (!empty($def['foreign'])) {
         $foreignRef = $def['foreign']; // format: 'table.column'
         [$foreignTable, $foreignColumn] = explode('.', $foreignRef);
-        $onDelete = $def['on_delete'] ?? 'CASCADE';
+        // Normalisasi ON DELETE dan ON UPDATE ke uppercase
+        $onDelete = strtoupper($def['on_delete'] ?? 'CASCADE');
         // Gunakan 'fk_on_update' untuk foreign key agar tidak konflik dengan 'on_update' untuk timestamp
-        $fkOnUpdate = $def['fk_on_update'] ?? $def['on_update'] ?? 'RESTRICT';
+        $fkOnUpdate = strtoupper($def['fk_on_update'] ?? $def['on_update'] ?? 'RESTRICT');
         $foreignKeys[] = "CONSTRAINT `fk_{$table}_{$name}` FOREIGN KEY (`{$name}`) REFERENCES `{$foreignTable}`(`{$foreignColumn}`) ON DELETE {$onDelete} ON UPDATE {$fkOnUpdate}";
       }
     }
@@ -106,6 +108,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
   {
     switch ($type) {
       case 'id':
+        // Type 'id' sudah include AUTO_INCREMENT, jadi tidak perlu ditambahkan lagi di buildCreateTableSql
         return 'BIGINT UNSIGNED AUTO_INCREMENT';
       case 'ulid':
         return 'CHAR(26)';

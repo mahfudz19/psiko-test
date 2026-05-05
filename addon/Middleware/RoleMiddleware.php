@@ -13,7 +13,7 @@ class RoleMiddleware implements MiddlewareInterface
     public function handle($request, \Closure $next, array $params = [])
     {
         $allowedRoles = $params;
-        $userRole = $this->session->get('role');
+        $userRole = $this->session->get('auth.user_role');
 
         if (!$userRole || !in_array($userRole, $allowedRoles)) {
             $e = new AuthorizationException("Forbidden. Anda tidak memiliki izin untuk mengakses halaman ini.");

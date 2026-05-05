@@ -103,17 +103,16 @@
                 <h1><?= $meta->title ?? 'Dashboard'; ?></h1>
             </div>
             <div class="header-actions">
-                <!-- Avatar Dropdown -->
-                <div class="avatar-dropdown">
-                    <input type="checkbox" id="avatar-menu-toggle" class="avatar-menu-toggle" hidden>
-                    <label for="avatar-menu-toggle" class="avatar-trigger">
+                <!-- Avatar Dropdown using native <details> element - auto closes without JS -->
+                <details class="avatar-dropdown">
+                    <summary class="avatar-trigger">
                         <div class="avatar">
                             <img src=<?= $_SESSION['auth.user_avatar'] ?? $_SESSION['auth.user_avatar_url'] ?? "/logo_app/mazu-icon.svg"; ?> alt="User Avatar" class="avatar-image">
                         </div>
                         <svg class="avatar-chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m6 9 6 6 6-6" />
                         </svg>
-                    </label>
+                    </summary>
                     <div class="avatar-menu">
                         <div class="avatar-menu-header">
                             <div class="avatar-menu-info">
@@ -148,12 +147,12 @@
                             </button>
                         </form>
                     </div>
-                </div>
+                </details>
             </div>
         </header>
 
         <!-- Page Content -->
-        <main class="app-content">
+        <main class="app-content" data-layout="(app)/layout.php">
             <?= $children; ?>
         </main>
     </div>

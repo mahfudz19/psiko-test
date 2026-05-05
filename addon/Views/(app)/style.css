@@ -285,15 +285,18 @@
   gap: 12px;
 }
 
-/* ===== Avatar Dropdown ===== */
+/* ===== Avatar Dropdown (using <details> element) ===== */
 .avatar-dropdown {
   position: relative;
 }
 
-.avatar-menu-toggle:checked + .avatar-trigger + .avatar-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+/* Remove default details marker */
+.avatar-dropdown > summary {
+  list-style: none;
+}
+
+.avatar-dropdown > summary::-webkit-details-marker {
+  display: none;
 }
 
 .avatar-trigger {
@@ -329,7 +332,8 @@
   transition: transform 0.2s ease;
 }
 
-.avatar-menu-toggle:checked + .avatar-trigger .avatar-chevron {
+/* Rotate chevron when details is open */
+.avatar-dropdown[open] .avatar-chevron {
   transform: rotate(180deg);
 }
 
@@ -343,11 +347,20 @@
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   padding: 12px;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-8px);
-  transition: all 0.2s ease;
   z-index: 1000;
+  /* Animation using CSS only - works with details open state */
+  animation: menuFadeIn 0.2s ease;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .avatar-menu-header {

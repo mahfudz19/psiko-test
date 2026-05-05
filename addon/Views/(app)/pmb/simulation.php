@@ -28,7 +28,7 @@ $progressPercentage = $sim['progress_percentage'] ?? 0;
                 <span class="progress-label">Progress: <strong><?= $progressPercentage ?>%</strong></span>
                 <span class="progress-steps">Step <?= $currentStep ?>/<?= $totalSteps ?></span>
             </div>
-            <div class="progress-bar-container">
+            <div class="progress-bar-container-simulation">
                 <div class="progress-bar" style="width: <?= $progressPercentage ?>%"></div>
             </div>
             <div class="steps-indicator">
@@ -461,7 +461,7 @@ $progressPercentage = $sim['progress_percentage'] ?? 0;
         color: var(--md-sys-color-on-surface, #1a1a1a);
     }
 
-    .progress-bar-container {
+    .progress-bar-container-simulation {
         height: 12px;
         background: var(--md-sys-color-surface-container-high, #e0e0e0);
         border-radius: 6px;

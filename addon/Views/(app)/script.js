@@ -160,6 +160,30 @@
     if (isMobile) {
       closeMobileSidebar();
     }
+    
+    // Close avatar dropdown setelah navigasi
+    const avatarDropdown = document.querySelector('.avatar-dropdown');
+    if (avatarDropdown) {
+      avatarDropdown.removeAttribute('open');
+    }
+  });
+
+  // Avatar Dropdown - Close saat klik away
+  document.addEventListener('click', function(event) {
+    const avatarDropdown = document.querySelector('.avatar-dropdown');
+    if (avatarDropdown && avatarDropdown.hasAttribute('open')) {
+      const isClickInsideDropdown = avatarDropdown.contains(event.target);
+      const isClickOnSummary = event.target.closest('.avatar-trigger');
+      
+      // Close jika klik di luar dropdown atau klik menu item
+      if (!isClickInsideDropdown || (isClickInsideDropdown && !isClickOnSummary)) {
+        // Cek apakah yang diklik adalah menu item (bukan summary)
+        const isMenuItem = event.target.closest('.avatar-menu-item');
+        if (!isClickInsideDropdown || isMenuItem) {
+          avatarDropdown.removeAttribute('open');
+        }
+      }
+    }
   });
 
 })();

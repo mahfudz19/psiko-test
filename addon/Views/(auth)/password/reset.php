@@ -7,7 +7,6 @@
 <?php endif; ?>
 
 <form data-spa method="POST" action="/password/reset">
-  <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
   <?php if (isset($token)): ?>
     <input type="hidden" name="token" value="<?= $token ?>">
   <?php endif; ?>

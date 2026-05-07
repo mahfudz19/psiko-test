@@ -13,8 +13,6 @@
 <?php endif; ?>
 
 <form data-spa method="POST" action="/password/forgot">
-  <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
-
   <div class="auth-form-group">
     <label for="email" class="auth-label">Email</label>
     <input

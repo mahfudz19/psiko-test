@@ -13,8 +13,6 @@
 <?php endif; ?>
 
 <form data-spa method="POST" action="/register">
-  <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
-
   <div class="auth-form-group">
     <label for="name" class="auth-label">Nama Lengkap</label>
     <input

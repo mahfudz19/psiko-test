@@ -32,7 +32,6 @@
     <?php endif; ?>
 
     <form data-spa method="POST" action="/verify-otp" id="otp-form">
-        <input type="hidden" name="_csrf" value="<?= csrf_token() ?>">
         <input type="hidden" name="email" value="<?= htmlspecialchars($email ?? '') ?>">
 
         <div class="otp-inputs" role="group" aria-label="Kode verifikasi 6 digit">

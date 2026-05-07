@@ -134,6 +134,16 @@ class AuthController
         $this->session->destroy();
     }
 
+    function index(Request $request, Response $response): View
+    {
+        return $response->renderPage([], ['meta' => ['title' => 'Dashboard | ' . env('APP_NAME')]]);
+    }
+
+    function redirectDashboard(Request $request, Response $response): RedirectResponse
+    {
+        return $response->redirect('/dashboard');
+    }
+
     /**
      * Show login form
      */
@@ -648,5 +658,19 @@ class AuthController
             ['message' => 'Password berhasil direset. Silakan login dengan password baru',],
             ['path' => '/password/reset', 'meta' => ['title' => 'Password Direset | ' . env('APP_NAME')]]
         );
+    }
+
+
+    public function authGoogle(Request $request, Response $response): RedirectResponse
+    {
+        $client = new \Google_Client();
+        $client->setClientId(env('GOOGLE_CLIENT_ID'));
+        $client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
+        $client->setRedirectUri(env('GOOGLE_REDIRECT_URI'));
+        $client->addScope('email');
+        $client->addScope('profile');
+
+        $authUrl = $client->createAuthUrl();
+        return $response->redirect($authUrl);
     }
 }

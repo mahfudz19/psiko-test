@@ -240,12 +240,50 @@ class ProfileController
         $userProfile = $this->profileModel->findByUserId($currentUser);
 
         $data = $request->getBody();
+
+        // Handle academic scores dari smart textarea atau manual entry
+        $academicScores = [];
+
+        // Jika ada parsed_scores_data dari smart textarea
+        if (!empty($data['parsed_scores_data'])) {
+            try {
+                $parsedScores = json_decode($data['parsed_scores_data'], true);
+                if (is_array($parsedScores)) {
+                    foreach ($parsedScores as $score) {
+                        if (!empty($score['subject']) && isset($score['grade'])) {
+                            $academicScores[] = [
+                                'subject' => htmlspecialchars($score['subject']),
+                                'grade' => (int)$score['grade']
+                            ];
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore parsing error, fallback to manual input
+            }
+        }
+
+        // Jika tidak ada parsed scores, gunakan manual input (format lama)
+        if (empty($academicScores) && !empty($data['academic_scores'])) {
+            $subjects = $data['academic_scores']['subject'] ?? [];
+            $grades = $data['academic_scores']['grade'] ?? [];
+
+            foreach ($subjects as $index => $subject) {
+                if (!empty($subject) && isset($grades[$index])) {
+                    $academicScores[] = [
+                        'subject' => htmlspecialchars($subject),
+                        'grade' => (int)$grades[$index]
+                    ];
+                }
+            }
+        }
+
         $academicData = [
             'school_id' => $data['school_id'] ?? null,
             'student_id' => $data['student_id'] ?? null,
             'grade_level' => $data['grade_level'] ?? null,
             'major' => $data['major'] ?? null,
-            'academic_scores' => !empty($data['academic_scores']) ? json_encode($data['academic_scores']) : null,
+            'academic_scores' => !empty($academicScores) ? json_encode($academicScores, JSON_PRETTY_PRINT) : null,
             'parent_name' => $data['parent_name'] ?? null,
             'parent_phone' => $data['parent_phone'] ?? null,
             'parent_email' => $data['parent_email'] ?? null

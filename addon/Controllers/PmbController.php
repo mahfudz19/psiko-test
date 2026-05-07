@@ -4,6 +4,7 @@ namespace Addon\Controllers;
 
 use Addon\Models\ProfileModel;
 use Addon\Models\StudentProfileModel;
+use App\Core\Http\RedirectResponse;
 use App\Core\Http\Request;
 use App\Core\Http\Response;
 use App\Core\View\View;
@@ -21,6 +22,11 @@ class PmbController
         private ProfileModel $profileModel,
         private StudentProfileModel $studentProfileModel
     ) {}
+
+    public function index(Request $request, Response $response): RedirectResponse
+    {
+        return $response->redirect('/pmb/journey');
+    }
 
     /**
      * Display Match Score Dashboard (Journey page)

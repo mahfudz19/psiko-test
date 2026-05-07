@@ -53,7 +53,6 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
         $parts[] = $this->buildDefaultClause($def['default']);
       }
 
-      // Hanya tambahkan AUTO_INCREMENT jika belum ada di columnType (untuk type selain 'id')
       if (!empty($def['auto_increment']) && !str_contains($columnType, 'AUTO_INCREMENT')) {
         $parts[] = 'AUTO_INCREMENT';
       }
@@ -78,7 +77,6 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
       if (!empty($def['foreign'])) {
         $foreignRef = $def['foreign']; // format: 'table.column'
         [$foreignTable, $foreignColumn] = explode('.', $foreignRef);
-        // Normalisasi ON DELETE dan ON UPDATE ke uppercase
         $onDelete = strtoupper($def['on_delete'] ?? 'CASCADE');
         // Gunakan 'fk_on_update' untuk foreign key agar tidak konflik dengan 'on_update' untuk timestamp
         $fkOnUpdate = strtoupper($def['fk_on_update'] ?? $def['on_update'] ?? 'RESTRICT');
@@ -108,7 +106,6 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
   {
     switch ($type) {
       case 'id':
-        // Type 'id' sudah include AUTO_INCREMENT, jadi tidak perlu ditambahkan lagi di buildCreateTableSql
         return 'BIGINT UNSIGNED AUTO_INCREMENT';
       case 'ulid':
         return 'CHAR(26)';
@@ -121,7 +118,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
       case 'integer':
         $base = 'INT';
         break;
-      case 'string': // Alias untuk varchar standar Laravel
+      case 'string':
       case 'varchar':
         $length = $def['length'] ?? 255;
         return "VARCHAR({$length})";

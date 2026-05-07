@@ -5,6 +5,7 @@ use App\Core\Http\Response;
 use Addon\Controllers\AuthController;
 use Addon\Controllers\ProfileController;
 use Addon\Controllers\PmbController;
+use Addon\Controllers\SettingsController;
 use Addon\Models\UserModel;
 use App\Services\SessionService;
 
@@ -33,35 +34,21 @@ $router->group(['middleware' => ['guest']], function () use ($router) {
     $router->post('/password/reset', [AuthController::class, 'resetPassword']);
 
     // Google OAuth
-    $router->get('/auth/google', function (Request $request, Response $response) {
-        $client = new \Google_Client();
-        $client->setClientId(env('GOOGLE_CLIENT_ID'));
-        $client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
-        $client->setRedirectUri(env('GOOGLE_REDIRECT_URI'));
-        $client->addScope('email');
-        $client->addScope('profile');
-
-        $authUrl = $client->createAuthUrl();
-        return $response->redirect($authUrl);
-    });
+    $router->get('/auth/google', [AuthController::class, 'authGoogle']);
     $router->get('/auth/callback', [AuthController::class, 'googleCallback']);
 });
 
 // Auth routes (require login)
 $router->group(['middleware' => ['auth']], function () use ($router) {
     // Dashboard
-    $router->get('/dashboard', function (Request $request, Response $response) {
-        return $response->renderPage([], ['path' => '/dashboard', 'meta' => ['title' => 'Dashboard | ' . env('APP_NAME')]]);
-    });
+    $router->get('/dashboard', [AuthController::class, 'index']);
 
     // Logout
     $router->post('/logout', [AuthController::class, 'logout']);
 });
 
 // Home route
-$router->get('/', function (Request $request, Response $response) {
-    return $response->redirect('/dashboard');
-});
+$router->get('/', [AuthController::class, 'redirectDashboard']);
 
 // Profile routes (require login)
 $router->group(['middleware' => ['auth']], function () use ($router) {
@@ -90,9 +77,7 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
 // PMB routes (require login, role: user/siswa)
 $router->group(['middleware' => ['auth']], function () use ($router) {
     // Main PMB pages
-    $router->get('/pmb', function (Request $request, Response $response) {
-        return $response->redirect('/pmb/journey');
-    });
+    $router->get('/pmb', [PmbController::class, 'index']);
     $router->get('/pmb/journey', [PmbController::class, 'journey']);
     $router->get('/pmb/simulation', [PmbController::class, 'simulation']);
     $router->post('/pmb/simulation/step', [PmbController::class, 'saveSimulationStep']);
@@ -109,8 +94,7 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
     $router->get('/api/pmb/progress', [PmbController::class, 'getSimulationProgress']);
     $router->get('/api/pmb/similar-students', [PmbController::class, 'getSimilarStudents']);
 });
+
 $router->group(['middleware' => ['auth']], function () use ($router) {
-    $router->get('/settings', function (Request $request, Response $response) {
-        return $response->renderPage();
-    });
+    $router->get('/settings', [SettingsController::class, 'index']);
 });

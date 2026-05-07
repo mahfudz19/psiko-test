@@ -34,6 +34,29 @@ class TeacherProfileModel extends Model
         'counseling_schedule' => ['type' => 'json', 'nullable' => true]
     ];
 
+
+
+    protected array $seed = [
+        [
+            'profile_id' => 1,
+            'school_id' => 1,
+            'teacher_id' => '1234567890',
+            'subject_specialty' => 'Matematika',
+            'certification' => 'Guru BK Bersertifikat',
+            'managed_students' => '[1]',
+            'counseling_schedule' => '[]'
+        ],
+        [
+            'profile_id' => 2,
+            'school_id' => 2,
+            'teacher_id' => '9876543210',
+            'subject_specialty' => 'Bahasa Indonesia',
+            'certification' => 'Guru BK Bersertifikat',
+            'managed_students' => '[2]',
+            'counseling_schedule' => '[]'
+        ]
+    ];
+
     /**
      * Get all teacher profiles
      */
@@ -295,5 +318,31 @@ class TeacherProfileModel extends Model
         ];
 
         return $this->create($data);
+    }
+
+    /**
+     * Get school data for this teacher
+     */
+    public function getSchool(int $profileId): ?array
+    {
+        $teacher = $this->findByProfileId($profileId);
+        if (!$teacher || empty($teacher['school_id'])) {
+            return null;
+        }
+
+        $stmt = $this->getDb()->prepare("SELECT * FROM schools WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $teacher['school_id']]);
+        $row = $stmt->fetch();
+
+        return $row === false ? null : $row;
+    }
+
+    /**
+     * Check if teacher belongs to a specific school
+     */
+    public function belongsToSchool(int $profileId, int $schoolId): bool
+    {
+        $teacher = $this->findByProfileId($profileId);
+        return $teacher && $teacher['school_id'] === $schoolId;
     }
 }

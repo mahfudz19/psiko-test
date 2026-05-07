@@ -46,6 +46,39 @@ class StudentProfileModel extends Model
         'parent_email' => ['type' => 'string', 'nullable' => true]
     ];
 
+    protected array $seed = [
+        [
+            'profile_id' => 3,
+            'school_id' => 1,
+            'student_id' => 4,
+            'grade_level' => '11',
+            'major' => 'IPA',
+            'academic_scores' => '{"math": 85, "indonesian": 90}',
+            'extracurricular' => '[{"name": "Bulu Tangkis", "role": "Pemain", "year": "2022"}]',
+            'achievements' => '[{"title": "Juara Lomba Olahraga", "level": "Sekolah", "year": "2022", "certificate_url": "https://example.com/certificate.jpg"}]',
+            'psychological_tests' => '{"test_id": 1, "scores": [80, 75, 90], "timestamps": ["2022-01-01", "2022-02-01", "2022-03-01"]}',
+            'ai_analysis' => '{"potentials": ["Math", "Science"], "interests": ["Sports", "Music"], "talents": ["Leadership", "Problem Solving"], "recommendations": ["Math", "Science"]}',
+            'parent_name' => 'John Doe',
+            'parent_phone' => '1234567890',
+            'parent_email' => '5CtZ0@example.com',
+        ],
+        [
+            'profile_id' => 4,
+            'school_id' => 2,
+            'student_id' => 5,
+            'grade_level' => '12',
+            'major' => 'IPS',
+            'academic_scores' => '{"math": 80, "indonesian": 85}',
+            'extracurricular' => '[{"name": "Bulu Tangkis", "role": "Pemain", "year": "2022"}]',
+            'achievements' => '[{"title": "Juara Lomba Olahraga", "level": "Sekolah", "year": "2022", "certificate_url": "https://example.com/certificate.jpg"}]',
+            'psychological_tests' => '{"test_id": 1, "scores": [80, 75, 90], "timestamps": ["2022-01-01", "2022-02-01", "2022-03-01"]}',
+            'ai_analysis' => '{"potentials": ["Math", "Science"], "interests": ["Sports", "Music"], "talents": ["Leadership", "Problem Solving"], "recommendations": ["Math", "Science"]}',
+            'parent_name' => 'Jane Doe',
+            'parent_phone' => '9876543210',
+            'parent_email' => '5CtZ0@example.com',
+        ],
+    ];
+
     /**
      * Get all student profiles
      */
@@ -297,5 +330,31 @@ class StudentProfileModel extends Model
         ];
 
         return $this->create($data);
+    }
+
+    /**
+     * Get school data for this student
+     */
+    public function getSchool(int $profileId): ?array
+    {
+        $student = $this->findByProfileId($profileId);
+        if (!$student || empty($student['school_id'])) {
+            return null;
+        }
+
+        $stmt = $this->getDb()->prepare("SELECT * FROM schools WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $student['school_id']]);
+        $row = $stmt->fetch();
+
+        return $row === false ? null : $row;
+    }
+
+    /**
+     * Check if student belongs to a specific school
+     */
+    public function belongsToSchool(int $profileId, int $schoolId): bool
+    {
+        $student = $this->findByProfileId($profileId);
+        return $student && $student['school_id'] === $schoolId;
     }
 }

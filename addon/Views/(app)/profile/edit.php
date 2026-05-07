@@ -24,7 +24,7 @@
         </div>
     <?php endif; ?>
 
-    <form id="profile-edit-form" class="profile-edit-form" method="POST">
+    <form id="profile-edit-form" action="<?= getBaseUrl("/profile/update") ?>" class="profile-edit-form" method="POST">
         <!-- Personal Information Section -->
         <div class="edit-section">
             <h2>Informasi Pribadi</h2>

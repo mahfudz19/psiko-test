@@ -49,9 +49,9 @@ class UserModel extends Model
             'avatar_url' => null,
         ],
         [
-            'email' => 'admin@example.com',
+            'email' => 'admin_sman1@example.com',
             'password' => '$2y$10$XlyT7neGvzxYcZ5v.4gsP.QFqRq7UG8nNrJF1Bk4fiP/vQUCqXlDm', // password123
-            'name' => 'Admin User',
+            'name' => 'Admin User SMA N 1',
             'avatar' => null,
             'is_active' => 1,
             'last_login_at' => null,
@@ -60,16 +60,38 @@ class UserModel extends Model
             'avatar_url' => null,
         ],
         [
-            'email' => 'user@example.com',
+            'email' => 'admin_sman2@example.com',
             'password' => '$2y$10$XlyT7neGvzxYcZ5v.4gsP.QFqRq7UG8nNrJF1Bk4fiP/vQUCqXlDm', // password123
-            'name' => 'Regular User',
+            'name' => 'Admin User SMA N 2',
+            'avatar' => null,
+            'is_active' => 1,
+            'last_login_at' => null,
+            'role' => 'admin',
+            'google_id' => null,
+            'avatar_url' => null,
+        ],
+        [
+            'email' => 'user_smam1@example.com',
+            'password' => '$2y$10$XlyT7neGvzxYcZ5v.4gsP.QFqRq7UG8nNrJF1Bk4fiP/vQUCqXlDm', // password123
+            'name' => 'Regular User SMA N 1',
             'avatar' => null,
             'is_active' => 1,
             'last_login_at' => null,
             'role' => 'user',
             'google_id' => null,
             'avatar_url' => null,
-        ]
+        ],
+        [
+            'email' => 'user_smam2@example.com',
+            'password' => '$2y$10$XlyT7neGvzxYcZ5v.4gsP.QFqRq7UG8nNrJF1Bk4fiP/vQUCqXlDm', // password123
+            'name' => 'Regular User SMA N 2',
+            'avatar' => null,
+            'is_active' => 1,
+            'last_login_at' => null,
+            'role' => 'user',
+            'google_id' => null,
+            'avatar_url' => null,
+        ],
     ];
 
     /**
@@ -199,5 +221,4 @@ class UserModel extends Model
         }
         return false;
     }
-
 }

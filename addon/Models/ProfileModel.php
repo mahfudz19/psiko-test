@@ -36,6 +36,49 @@ class ProfileModel extends Model
         'social_media' => ['type' => 'json', 'nullable' => true] // {facebook, instagram, twitter, linkedin}
     ];
 
+    protected array $seed = [
+        [
+            'user_id' => 2,
+            'phone' => '08123456789',
+            'address' => 'Jl. Contoh, Kota Contoh',
+            'birth_place' => 'Contoh',
+            'birth_date' => '2000-01-01',
+            'gender' => 'male',
+            'avatar' => 'https://example.com/avatar.jpg',
+            'social_media' => '{"facebook": "https://www.facebook.com/example", "instagram": "https://www.instagram.com/example"}'
+        ],
+        [
+            'user_id' => 3,
+            'phone' => '08123456789',
+            'address' => 'Jl. Contoh, Kota Contoh',
+            'birth_place' => 'Contoh',
+            'birth_date' => '2000-01-01',
+            'gender' => 'female',
+            'avatar' => 'https://example.com/avatar.jpg',
+            'social_media' => '{"facebook": "https://www.facebook.com/example", "instagram": "https://www.instagram.com/example"}'
+        ],
+        [
+            'user_id' => 4,
+            'phone' => '08123456789',
+            'address' => 'Jl. Contoh, Kota Contoh',
+            'birth_place' => 'Contoh',
+            'birth_date' => '2000-01-01',
+            'gender' => 'male',
+            'avatar' => 'https://example.com/avatar.jpg',
+            'social_media' => '{"facebook": "https://www.facebook.com/example", "instagram": "https://www.instagram.com/example"}'
+        ],
+        [
+            'user_id' => 5,
+            'phone' => '08123456789',
+            'address' => 'Jl. Contoh, Kota Contoh',
+            'birth_place' => 'Contoh',
+            'birth_date' => '2000-01-01',
+            'gender' => 'female',
+            'avatar' => 'https://example.com/avatar.jpg',
+            'social_media' => '{"facebook": "https://www.facebook.com/example", "instagram": "https://www.instagram.com/example"}'
+        ]
+    ];
+
     /**
      * Get all profiles
      */

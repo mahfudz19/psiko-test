@@ -32,6 +32,25 @@ class SchoolModel extends Model
         'accreditation' => ['type' => 'enum', 'values' => ['A', 'B', 'C'], 'nullable' => true]
     ];
 
+    protected array $seed = [
+        [
+            'name' => 'SMA Negeri 1 Example',
+            'npsn' => '12345678',
+            'address' => 'Jl. Pendidikan No. 1, Example City',
+            'principal_name' => 'Dr. John Doe, M.Pd',
+            'contact' => '021-1234567',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMA Negeri 2 Example',
+            'npsn' => '87654321',
+            'address' => 'Jl. Ilmu No. 2, Example City',
+            'principal_name' => 'Dr. Jane Smith, M.Pd',
+            'contact' => '021-7654321',
+            'accreditation' => 'A'
+        ]
+    ];
+
     /**
      * Get all schools
      */
@@ -211,35 +230,94 @@ class SchoolModel extends Model
     }
 
     /**
-     * Seed default schools (optional)
+     * Get all students from this school
      */
-    public function seed(): void
+    public function getStudents(int $schoolId): array
     {
-        $schools = [
-            [
-                'name' => 'SMA Negeri 1 Example',
-                'npsn' => '12345678',
-                'address' => 'Jl. Pendidikan No. 1, Example City',
-                'principal_name' => 'Dr. John Doe, M.Pd',
-                'contact' => '021-1234567',
-                'accreditation' => 'A'
-            ],
-            [
-                'name' => 'SMA Negeri 2 Example',
-                'npsn' => '87654321',
-                'address' => 'Jl. Ilmu No. 2, Example City',
-                'principal_name' => 'Dr. Jane Smith, M.Pd',
-                'contact' => '021-7654321',
-                'accreditation' => 'A'
-            ]
-        ];
+        $stmt = $this->getDb()->prepare("
+            SELECT sp.*, p.*, u.email, u.name as user_name
+            FROM student_profiles sp
+            JOIN profiles p ON sp.profile_id = p.id
+            JOIN users u ON p.user_id = u.id
+            WHERE sp.school_id = :school_id
+        ");
+        $stmt->execute(['school_id' => $schoolId]);
+        return $stmt->fetchAll();
+    }
 
-        foreach ($schools as $school) {
-            try {
-                $this->create($school);
-            } catch (\Exception $e) {
-                // Skip if already exists
-            }
-        }
+    /**
+     * Get all teachers from this school
+     */
+    public function getTeachers(int $schoolId): array
+    {
+        $stmt = $this->getDb()->prepare("
+            SELECT tp.*, p.*, u.email, u.name as user_name
+            FROM teacher_profiles tp
+            JOIN profiles p ON tp.profile_id = p.id
+            JOIN users u ON p.user_id = u.id
+            WHERE tp.school_id = :school_id
+        ");
+        $stmt->execute(['school_id' => $schoolId]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Check if a student belongs to this school
+     */
+    public function hasStudent(int $schoolId, int $studentProfileId): bool
+    {
+        $stmt = $this->getDb()->prepare("
+            SELECT COUNT(*) as count
+            FROM student_profiles
+            WHERE school_id = :school_id AND id = :student_id
+        ");
+        $stmt->execute([
+            'school_id' => $schoolId,
+            'student_id' => $studentProfileId
+        ]);
+        $row = $stmt->fetch();
+        return (int) ($row['count'] ?? 0) > 0;
+    }
+
+    /**
+     * Check if a teacher belongs to this school
+     */
+    public function hasTeacher(int $schoolId, int $teacherProfileId): bool
+    {
+        $stmt = $this->getDb()->prepare("
+            SELECT COUNT(*) as count
+            FROM teacher_profiles
+            WHERE school_id = :school_id AND id = :teacher_id
+        ");
+        $stmt->execute([
+            'school_id' => $schoolId,
+            'teacher_id' => $teacherProfileId
+        ]);
+        $row = $stmt->fetch();
+        return (int) ($row['count'] ?? 0) > 0;
+    }
+
+    /**
+     * Assign a student to this school
+     */
+    public function assignStudent(int $schoolId, int $studentProfileId): bool
+    {
+        $sql = "UPDATE student_profiles SET school_id = :school_id WHERE profile_id = :profile_id";
+        return $this->getDb()->query($sql, [
+            'school_id' => $schoolId,
+            'profile_id' => $studentProfileId
+        ]);
+    }
+
+    /**
+     * Assign a teacher to this school
+     */
+    public function assignTeacher(int $schoolId, int $teacherProfileId): bool
+    {
+        $sql = "UPDATE teacher_profiles SET school_id = :school_id WHERE profile_id = :profile_id";
+        return $this->getDb()->query($sql, [
+            'school_id' => $schoolId,
+            'profile_id' => $teacherProfileId
+        ]);
     }
 }

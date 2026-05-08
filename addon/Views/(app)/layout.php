@@ -62,6 +62,27 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- Chat Consultation Menu (untuk siswa) -->
+                <?php
+                $isChatPage = str_starts_with($currentPath, '/profile/chat');
+                ?>
+                <div class="sidebar-nav-group">
+                    <div class="sidebar-nav-group-header <?= $isChatPage ? 'active' : '' ?>">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                        <span class="sidebar-link-text">💬 Konsultasi AI</span>
+                    </div>
+                    <div class="sidebar-nav-group-content">
+                        <a data-spa href="/profile/chat" class="sidebar-link sidebar-link-sub <?= $currentPath === '/profile/chat' ? 'active' : '' ?>">
+                            <span class="sidebar-link-text">📋 Riwayat Chat</span>
+                        </a>
+                        <a data-spa href="/profile/chat/create" class="sidebar-link sidebar-link-sub <?= $currentPath === '/profile/chat/create' ? 'active' : '' ?>">
+                            <span class="sidebar-link-text">✨ Chat Baru</span>
+                        </a>
+                    </div>
+                </div>
             <?php endif; ?>
             <?php if (($_SESSION['auth.user_role'] ?? '') === 'admin'): ?>
                 <!-- School Admin Menu (untuk Guru BK) -->
@@ -205,5 +226,3 @@
         </main>
     </div>
 </div>
-
-<script src="/addon/Views/(app)/script.js"></script>

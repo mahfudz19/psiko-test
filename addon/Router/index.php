@@ -8,6 +8,7 @@ use Addon\Controllers\PmbController;
 use Addon\Controllers\SettingsController;
 use Addon\Controllers\AdminController;
 use Addon\Controllers\SchoolAdminController;
+use Addon\Controllers\ChatController;
 use Addon\Models\UserModel;
 use App\Services\SessionService;
 
@@ -74,6 +75,14 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
     // Staff routes
     $router->get('/profile/permissions', [ProfileController::class, 'permissions']);
     $router->post('/profile/permissions', [ProfileController::class, 'updatePermissions'], ['csrf']);
+
+    // Chat Consultation routes (untuk siswa)
+    $router->get('/profile/chat', [ChatController::class, 'index']);
+    $router->get('/profile/chat/create', [ChatController::class, 'create']);
+    $router->post('/profile/chat', [ChatController::class, 'store']);
+    $router->get('/profile/chat/:session_id', [ChatController::class, 'show']);
+    $router->post('/profile/chat/send', [ChatController::class, 'sendMessage']);
+    $router->post('/profile/chat/delete', [ChatController::class, 'delete']);
 });
 
 // PMB routes (require login, role: user/siswa)

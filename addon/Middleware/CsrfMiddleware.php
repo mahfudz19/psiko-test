@@ -68,7 +68,7 @@ class CsrfMiddleware implements MiddlewareInterface
 
   protected function isReading(Request $request): bool
   {
-    return in_array($request->getMethod(), ['HEAD', 'GET', 'OPTIONS']);
+    return in_array($request->getMethod(), ['head', 'get', 'options']);
   }
 
   protected function isStatelessApi(Request $request): bool
@@ -112,17 +112,10 @@ class CsrfMiddleware implements MiddlewareInterface
 
   protected function getTokenFromRequest(Request $request): ?string
   {
-    // Cek dari body request (sudah di-parse oleh Request constructor)
     if (isset($request->body['_token'])) {
       return $request->body['_token'];
     }
 
-    // Cek langsung dari $_POST untuk FormData yang dikirim via fetch
-    if (isset($_POST['_token'])) {
-      return $_POST['_token'];
-    }
-
-    // Cek dari header X-CSRF-TOKEN
     if (isset($request->server['HTTP_X_CSRF_TOKEN'])) {
       return $request->server['HTTP_X_CSRF_TOKEN'];
     }

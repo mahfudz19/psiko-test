@@ -127,7 +127,7 @@ class {{CLASS_NAME}} implements MiddlewareInterface
 
   protected function isReading(Request $request): bool
   {
-    return in_array($request->getMethod(), ['HEAD', 'GET', 'OPTIONS']);
+    return in_array($request->getMethod(), ['head', 'get', 'options']);
   }
 
   protected function isStatelessApi(Request $request): bool

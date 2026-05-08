@@ -63,6 +63,30 @@
                     </div>
                 </div>
             <?php endif; ?>
+            <?php if (($_SESSION['auth.user_role'] ?? '') === 'super-admin'): ?>
+                <!-- Super Admin Menu -->
+                <?php
+                // Cek apakah sedang di halaman Admin
+                $isAdminPage = str_starts_with($currentPath, '/admin');
+                ?>
+                <div class="sidebar-nav-group">
+                    <div class="sidebar-nav-group-header <?= $isAdminPage ? 'active' : '' ?>">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            <path d="m9 12 2 2 4-4" />
+                        </svg>
+                        <span class="sidebar-link-text">Super Admin</span>
+                    </div>
+                    <div class="sidebar-nav-group-content">
+                        <a data-spa href="/admin" class="sidebar-link sidebar-link-sub <?= $currentPath === '/admin' ? 'active' : '' ?>">
+                            <span class="sidebar-link-text">🏛️ Dashboard</span>
+                        </a>
+                        <a data-spa href="/admin/schools" class="sidebar-link sidebar-link-sub <?= str_starts_with($currentPath, '/admin/schools') ? 'active' : '' ?>">
+                            <span class="sidebar-link-text">🏫 Sekolah</span>
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
             <a data-spa href="/settings" class="sidebar-link <?= $currentPath === '/settings' ? 'active' : '' ?>">
                 <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />

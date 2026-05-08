@@ -7,6 +7,7 @@ use Addon\Controllers\ProfileController;
 use Addon\Controllers\PmbController;
 use Addon\Controllers\SettingsController;
 use Addon\Controllers\AdminController;
+use Addon\Controllers\SchoolAdminController;
 use Addon\Models\UserModel;
 use App\Services\SessionService;
 
@@ -123,4 +124,21 @@ $router->group(['middleware' => ['auth', 'role:super-admin', 'csrf']], function 
     $router->get('/admin/schools/:id/students', [AdminController::class, 'schoolStudents']);
     $router->get('/admin/schools/:id/students/create', [AdminController::class, 'createStudent']);
     $router->post('/admin/schools/:id/students', [AdminController::class, 'storeStudent']);
+});
+
+// School Admin Routes (untuk role admin - mengelola sekolah sendiri)
+$router->group(['middleware' => ['auth', 'role:super-admin,admin', 'schooladmin', 'csrf']], function () use ($router) {
+    // Dashboard sekolah sendiri
+    $router->get('/admin/schools/my', [SchoolAdminController::class, 'mySchool']);
+    $router->get('/admin/schools/my/edit', [SchoolAdminController::class, 'editMySchool']);
+    $router->post('/admin/schools/my', [SchoolAdminController::class, 'updateMySchool']);
+
+    // CRUD Students di sekolah sendiri
+    $router->get('/admin/students', [SchoolAdminController::class, 'students']);
+    $router->get('/admin/students/create', [SchoolAdminController::class, 'createStudent']);
+    $router->post('/admin/students', [SchoolAdminController::class, 'storeStudent']);
+    $router->get('/admin/students/:id', [SchoolAdminController::class, 'showStudent']);
+    $router->get('/admin/students/:id/edit', [SchoolAdminController::class, 'editStudent']);
+    $router->post('/admin/students/:id', [SchoolAdminController::class, 'updateStudent']);
+    $router->post('/admin/students/:id/delete', [SchoolAdminController::class, 'deleteStudent']);
 });

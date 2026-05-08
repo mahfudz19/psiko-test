@@ -182,14 +182,86 @@ class UserModel extends Model {
 
 ### 4. Middleware (gunakan `php mazu make:middleware`)
 
+**Cara Membuat:**
+
+```bash
+php mazu make:middleware Auth    # Buat AuthMiddleware
+php mazu make:middleware Role    # Buat RoleMiddleware
+php mazu make:middleware Csrf    # Buat CsrfMiddleware
+```
+
+**Struktur Dasar:**
+
 ```php
 class AuthMiddleware implements MiddlewareInterface {
-    public function handle($request, Closure $next, array $params = []) {
-        if (!isset($_SESSION['user_id'])) throw new AuthenticationException();
+    public function handle($request, \Closure $next, array $params = []) {
+        // Cek authorization
+        if (!$authorized) {
+            throw new AuthorizationException('Forbidden');
+        }
         return $next($request);
     }
 }
 ```
+
+**Middleware dengan Dependency Injection:**
+
+```php
+class RoleMiddleware implements MiddlewareInterface {
+    public function __construct(private SessionService $session) {}
+
+    public function handle($request, \Closure $next, array $params = []) {
+        // $params berisi array dari route: 'role:admin,user'
+        $allowedRoles = $params;
+        $userRole = $this->session->get('auth.user_role');
+
+        if (!in_array($userRole, $allowedRoles)) {
+            throw new AuthorizationException('Forbidden');
+        }
+
+        return $next($request);
+    }
+}
+```
+
+**Cara Kerja:**
+
+1. **Auto-Discovery:** Middleware di-scan otomatis dari `addon/Middleware/` oleh `Kernel::getRouteMiddleware()`
+2. **Alias Mapping:** `AuthMiddleware` → `auth`, `RoleMiddleware` → `role` (lowercase, tanpa suffix "Middleware")
+3. **Pipeline:** Middleware dijalankan dalam pipeline (`array_reverse`) sebelum controller
+4. **Parameter Parsing:** `role:admin,user` → alias=`role`, params=`['admin', 'user']`
+
+**Konvensi Penamaan Alias:**
+
+- Alias di-generate otomatis: lowercase + hapus suffix "Middleware"
+- `AuthMiddleware` → `auth`
+- `RoleMiddleware` → `role`
+- `CsrfMiddleware` → `csrf`
+- `MyCustomMiddleware` → `mycustom`
+
+**PENTING:** Gunakan alias lowercase tanpa hyphen.
+
+**Penggunaan di Route:**
+
+```php
+// Single middleware
+$router->get('/admin', [AdminController::class, 'index'], ['auth']);
+
+// Multiple middleware
+$router->group(['middleware' => ['auth', 'role:admin', 'csrf']], function ($router) {
+    $router->get('/dashboard', [DashboardController::class, 'index']);
+});
+
+// Parameter middleware
+$router->get('/users/:id', [UserController::class, 'show'], ['auth', 'role:admin,user']);
+```
+
+**Best Practices:**
+
+- Gunakan middleware untuk authorization, logging, rate limiting
+- Middleware harus ringan - hindari query database berat
+- Gunakan dependency injection untuk model/service
+- Throw exception untuk error handling (AuthenticationException, AuthorizationException)
 
 ### CSRF Middleware (Opsional)
 

@@ -63,6 +63,30 @@
                     </div>
                 </div>
             <?php endif; ?>
+            <?php if (($_SESSION['auth.user_role'] ?? '') === 'admin'): ?>
+                <!-- School Admin Menu (untuk Guru BK) -->
+                <?php
+                // Cek apakah sedang di halaman School Admin
+                $isSchoolAdminPage = str_starts_with($currentPath, '/admin/schools/my') || str_starts_with($currentPath, '/admin/students');
+                ?>
+                <div class="sidebar-nav-group">
+                    <div class="sidebar-nav-group-header <?= $isSchoolAdminPage ? 'active' : '' ?>">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            <path d="m9 12 2 2 4-4" />
+                        </svg>
+                        <span class="sidebar-link-text">Admin Sekolah</span>
+                    </div>
+                    <div class="sidebar-nav-group-content">
+                        <a data-spa href="/admin/schools/my" class="sidebar-link sidebar-link-sub <?= $currentPath === '/admin/schools/my' || $currentPath === '/admin/schools/my/edit' ? 'active' : '' ?>">
+                            <span class="sidebar-link-text">🏛️ Sekolah Saya</span>
+                        </a>
+                        <a data-spa href="/admin/students" class="sidebar-link sidebar-link-sub <?= str_starts_with($currentPath, '/admin/students') ? 'active' : '' ?>">
+                            <span class="sidebar-link-text">👨‍🎓 Kelola Siswa</span>
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
             <?php if (($_SESSION['auth.user_role'] ?? '') === 'super-admin'): ?>
                 <!-- Super Admin Menu -->
                 <?php

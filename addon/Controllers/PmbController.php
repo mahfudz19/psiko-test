@@ -99,7 +99,7 @@ class PmbController
                     'name' => 'Andi Pratama',
                     'high_school' => 'SMA Negeri 1',
                     'similarity' => 'Minat: Coding',
-                    'testimonial' => 'Kuliah di Universal cocok banget untuk saya yang suka practical. Banyak proyek nyata dan internship di perusahaan top!',
+                    'testimonial' => 'Kuliah di Univeral cocok banget untuk saya yang suka practical. Banyak proyek nyata dan internship di perusahaan top!',
                     'current_status' => 'Mahasiswa TI Semester 3',
                 ],
                 [
@@ -139,7 +139,7 @@ class PmbController
 
         return $response->renderPage($data, [
             'path' => '/pmb/journey',
-            'meta' => ['title' => 'PMB Journey | Universitas Universal'],
+            'meta' => ['title' => 'PMB Journey | Universitas Univeral'],
         ]);
     }
 
@@ -216,8 +216,8 @@ class PmbController
                         'discount' => 0,
                         'total' => 500000,
                         'bank_accounts' => [
-                            ['bank' => 'BCA', 'account' => '1234567890', 'name' => 'Universitas Universal'],
-                            ['bank' => 'Mandiri', 'account' => '0987654321', 'name' => 'Universitas Universal'],
+                            ['bank' => 'BCA', 'account' => '1234567890', 'name' => 'Universitas Univeral'],
+                            ['bank' => 'Mandiri', 'account' => '0987654321', 'name' => 'Universitas Univeral'],
                         ],
                     ],
                 ],
@@ -235,7 +235,7 @@ class PmbController
 
         return $response->renderPage($data, [
             'path' => '/pmb/simulation',
-            'meta' => ['title' => 'Simulasi PMB | Universitas Universal'],
+            'meta' => ['title' => 'Simulasi PMB | Universitas Univeral'],
         ]);
     }
 
@@ -363,7 +363,7 @@ class PmbController
 
         return $response->renderPage($data, [
             'path' => '/pmb/scholarship',
-            'meta' => ['title' => 'Kalkulator Beasiswa | Universitas Universal'],
+            'meta' => ['title' => 'Kalkulator Beasiswa | Universitas Univeral'],
         ]);
     }
 
@@ -455,7 +455,7 @@ class PmbController
                     'name' => 'Andi Pratama',
                     'high_school' => 'SMA Negeri 1',
                     'similarity' => 'Minat: Coding',
-                    'testimonial' => 'Kuliah di Universal cocok banget!',
+                    'testimonial' => 'Kuliah di Univeral cocok banget!',
                     'current_status' => 'Mahasiswa TI Semester 3',
                 ],
             ],

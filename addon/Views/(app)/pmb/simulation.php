@@ -16,7 +16,7 @@ $progressPercentage = $sim['progress_percentage'] ?? 0;
     <div class="simulation-header">
         <div class="header-content">
             <h1>📝 Simulasi Pendaftaran Mahasiswa Baru</h1>
-            <p class="header-subtitle">Universitas Universal</p>
+            <p class="header-subtitle">Universitas Univeral</p>
             <p class="header-note">Lengkapi data kamu step by step. Kamu bisa save dan lanjut nanti!</p>
         </div>
     </div>
@@ -385,7 +385,7 @@ $progressPercentage = $sim['progress_percentage'] ?? 0;
         <div class="no-data-section">
             <div class="no-data-content">
                 <h2>📝 Simulasi Belum Dimulai</h2>
-                <p>Mulai simulasi pendaftaran untuk merasakan pengalaman mendaftar di Universitas Universal.</p>
+                <p>Mulai simulasi pendaftaran untuk merasakan pengalaman mendaftar di Universitas Univeral.</p>
                 <a href="/pmb/simulation?start=1" class="btn btn-primary">Mulai Simulasi →</a>
             </div>
         </div>

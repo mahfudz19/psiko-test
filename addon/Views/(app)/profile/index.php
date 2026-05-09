@@ -142,7 +142,7 @@ $currentRole = $_SESSION['auth.user_role'];
             <!-- PMB Journey Preview Widget -->
             <div class="profile-section pmb-preview-section">
                 <div class="pmb-preview-header">
-                    <h2>🎯 Journey ke Universal</h2>
+                    <h2>🎯 Journey ke Univeral</h2>
                     <a href="/pmb/journey" class="btn btn-primary btn-sm">Lihat Lengkap →</a>
                 </div>
                 <div class="pmb-preview-card">
@@ -152,7 +152,7 @@ $currentRole = $_SESSION['auth.user_role'];
                     </div>
                     <div class="preview-content">
                         <p>Berdasarkan analisis potensi dan minat kamu,</p>
-                        <strong>Teknik Informatika di Universal</strong> sangat cocok!
+                        <strong>Teknik Informatika di Univeral</strong> sangat cocok!
                     </div>
                     <div class="pmb-preview-actions">
                         <a href="/pmb/journey" class="btn btn-primary btn-sm">

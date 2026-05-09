@@ -15,7 +15,7 @@ $userName = $profile['user_name'] ?? 'Siswa';
     <!-- Hero Section -->
     <div class="journey-hero">
         <div class="hero-content">
-            <h1>🎯 Journey Kamu ke Universal</h1>
+            <h1>🎯 Journey Kamu ke Univeral</h1>
             <p class="hero-subtitle">"Kenalimu lebih dekat, masa depan lebih jelas"</p>
             <p class="hero-greeting">Halo, <strong><?= htmlspecialchars($userName) ?></strong>! Mari kita lihat potensi masa depanmu.</p>
         </div>
@@ -80,7 +80,7 @@ $userName = $profile['user_name'] ?? 'Siswa';
                     <div class="reasons-grid">
                         <div class="reason-item">
                             <span class="reason-icon">✅</span>
-                            <span>Program ini ada di Universal</span>
+                            <span>Program ini ada di Univeral</span>
                         </div>
                         <div class="reason-item">
                             <span class="reason-icon">🏆</span>
@@ -120,7 +120,7 @@ $userName = $profile['user_name'] ?? 'Siswa';
         <!-- Career Path Timeline -->
         <div class="career-path-section">
             <div class="section-header">
-                <h2>📊 Your Future at Universal</h2>
+                <h2>📊 Your Future at Univeral</h2>
                 <p class="section-description">Perjalanan akademismu dari semester 1 hingga graduation</p>
             </div>
 

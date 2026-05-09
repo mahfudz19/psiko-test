@@ -13,7 +13,7 @@ $scholarshipData = $scholarships ?? null;
     <div class="scholarship-header">
         <div class="header-content">
             <h1>💰 Kalkulator Beasiswa</h1>
-            <p class="header-subtitle">Universitas Universal</p>
+            <p class="header-subtitle">Universitas Univeral</p>
             <p class="header-note">Temukan beasiswa yang cocok untuk kamu dan hitung estimasi biaya kuliah</p>
         </div>
     </div>
@@ -158,7 +158,7 @@ $scholarshipData = $scholarships ?? null;
         <div class="no-data-section">
             <div class="no-data-content">
                 <h2>💰 Informasi Beasiswa</h2>
-                <p>Universitas Universal menyediakan berbagai jenis beasiswa untuk membantu biaya kuliah kamu.</p>
+                <p>Universitas Univeral menyediakan berbagai jenis beasiswa untuk membantu biaya kuliah kamu.</p>
                 <a href="/pmb/scholarship?load=1" class="btn btn-primary">Lihat Beasiswa Tersedia →</a>
             </div>
         </div>

@@ -7,6 +7,7 @@
  * @var array|null $profile User profile
  * @var array|null $student_profile Student profile data
  */
+
 $matchScore = $match_score ?? null;
 $userName = $profile['user_name'] ?? 'Siswa';
 ?>
@@ -20,6 +21,16 @@ $userName = $profile['user_name'] ?? 'Siswa';
             <p class="hero-greeting">Halo, <strong><?= htmlspecialchars($userName) ?></strong>! Mari kita lihat potensi masa depanmu.</p>
         </div>
     </div>
+
+    <?php if (!empty($ai_error_message)): ?>
+        <div class="alert alert-warning" style="margin: 20px; border-radius: 8px; padding: 15px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.5rem;">⚠️</span>
+            <div>
+                <strong>AI sedang sibuk!</strong> Menampilkan data rekomendasi Anda sebelumnya.<br>
+                <small style="opacity: 0.8;">Detail error: <?= htmlspecialchars($ai_error_message) ?></small>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <?php if ($matchScore): ?>
         <!-- Main Match Score Card -->
@@ -58,7 +69,8 @@ $userName = $profile['user_name'] ?? 'Siswa';
                     </div>
                 </div>
 
-                <!-- Skills Breakdown -->
+                <!-- Skills Breakdown (Hapus jika data tidak ada) -->
+                <?php if (!empty($matchScore['top_match']['skills_breakdown'])): ?>
                 <div class="skills-breakdown">
                     <h4>Analisis Kompetensi</h4>
                     <?php foreach ($matchScore['top_match']['skills_breakdown'] as $skill): ?>
@@ -73,27 +85,29 @@ $userName = $profile['user_name'] ?? 'Siswa';
                         </div>
                     <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
 
-                <!-- Why This Program -->
+                <!-- Kenapa Cocok? (Alasan dari AI) -->
                 <div class="why-this-program">
                     <h4>Kenapa Program Ini Cocok Untuk Kamu?</h4>
+                    <div class="reason-ai-summary">
+                        <p><?= htmlspecialchars($matchScore['top_match']['reason'] ?? 'Berdasarkan profil Anda, jurusan ini menawarkan peluang terbaik untuk pengembangan karier dan minat Anda.') ?></p>
+                    </div>
                     <div class="reasons-grid">
                         <div class="reason-item">
                             <span class="reason-icon">✅</span>
-                            <span>Program ini ada di Univeral</span>
+                            <span>Program ini ada di <?= env('APP_NAME') ?></span>
                         </div>
                         <div class="reason-item">
                             <span class="reason-icon">🏆</span>
-                            <span>Akreditasi A</span>
+                            <span>Akreditasi <?= htmlspecialchars($matchScore['top_match']['accreditation'] ?? 'A') ?></span>
                         </div>
+                        <?php if (!empty($matchScore['top_match']['degree_type'])): ?>
                         <div class="reason-item">
-                            <span class="reason-icon">💼</span>
-                            <span>95% lulusan kerja < 3 bulan</span>
+                            <span class="reason-icon">🎓</span>
+                            <span>Jenjang <?= htmlspecialchars($matchScore['top_match']['degree_type']) ?></span>
                         </div>
-                        <div class="reason-item">
-                            <span class="reason-icon">🤝</span>
-                            <span>Partner: Google, Tokopedia, Gojek</span>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -118,14 +132,15 @@ $userName = $profile['user_name'] ?? 'Siswa';
         </div>
 
         <!-- Career Path Timeline -->
+        <?php if (!empty($matchScore['career_paths'])): ?>
         <div class="career-path-section">
             <div class="section-header">
-                <h2>📊 Your Future at Univeral</h2>
+                <h2>📊 Masa Depanmu di <?= env('APP_NAME') ?></h2>
                 <p class="section-description">Perjalanan akademismu dari semester 1 hingga graduation</p>
             </div>
 
             <div class="timeline-container">
-                <?php foreach ($matchScore['top_match']['career_paths'] as $index => $path): ?>
+                <?php foreach ($matchScore['career_paths'] as $index => $path): ?>
                     <div class="timeline-item">
                         <div class="timeline-marker">
                             <span class="marker-icon">
@@ -137,33 +152,36 @@ $userName = $profile['user_name'] ?? 'Siswa';
                         </div>
                         <div class="timeline-content">
                             <div class="timeline-header">
-                                <span class="timeline-semester"><?= htmlspecialchars($path['semester']) ?></span>
-                                <span class="timeline-title"><?= htmlspecialchars($path['title']) ?></span>
+                                <span class="timeline-semester"><?= htmlspecialchars($path['semester'] ?? '') ?></span>
+                                <span class="timeline-title"><?= htmlspecialchars($path['title'] ?? '') ?></span>
                             </div>
-                            <p class="timeline-description"><?= htmlspecialchars($path['description']) ?></p>
+                            <p class="timeline-description"><?= htmlspecialchars($path['description'] ?? '') ?></p>
                         </div>
-                        <?php if ($index < count($matchScore['top_match']['career_paths']) - 1): ?>
+                        <?php if ($index < count($matchScore['career_paths']) - 1): ?>
                             <div class="timeline-connector"></div>
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Partner Companies -->
+        <?php if (!empty($matchScore['partner_companies'])): ?>
         <div class="partner-section">
             <div class="section-header">
                 <h2>🏢 Partner Companies untuk Internship</h2>
             </div>
             <div class="partners-grid">
-                <?php foreach ($matchScore['top_match']['partner_companies'] as $company): ?>
+                <?php foreach ($matchScore['partner_companies'] as $company): ?>
                     <div class="partner-card">
-                        <h4><?= htmlspecialchars($company['name']) ?></h4>
-                        <p><?= htmlspecialchars($company['type']) ?></p>
+                        <h4><?= htmlspecialchars($company['name'] ?? '') ?></h4>
+                        <p><?= htmlspecialchars($company['type'] ?? '') ?></p>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Scholarship Section -->
         <div class="scholarship-section">
@@ -201,38 +219,6 @@ $userName = $profile['user_name'] ?? 'Siswa';
             </div>
         </div>
 
-        <!-- Alumni Testimonials -->
-        <div class="alumni-section">
-            <div class="section-header">
-                <h2>👥 Siswa dengan Profil Mirip Kamu</h2>
-                <p class="section-description">Mereka berhasil, kamu juga bisa!</p>
-            </div>
-
-            <div class="testimonials-grid">
-                <?php foreach ($matchScore['alumni_testimonials'] as $testimonial): ?>
-                    <div class="testimonial-card">
-                        <div class="testimonial-header">
-                            <div class="testimonial-avatar">
-                                <?= strtoupper(substr($testimonial['name'], 0, 1)) ?>
-                            </div>
-                            <div class="testimonial-info">
-                                <h4><?= htmlspecialchars($testimonial['name']) ?></h4>
-                                <p class="testimonial-school"><?= htmlspecialchars($testimonial['high_school']) ?></p>
-                                <p class="testimonial-similarity"><?= htmlspecialchars($testimonial['similarity']) ?></p>
-                            </div>
-                        </div>
-                        <blockquote class="testimonial-content">
-                            "<?= htmlspecialchars($testimonial['testimonial']) ?>"
-                        </blockquote>
-                        <p class="testimonial-status"><?= htmlspecialchars($testimonial['current_status']) ?></p>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-
-            <div class="fomo-stat">
-                <p>📊 <strong>15 siswa lain</strong> dengan minat serupa sudah daftar bulan ini</p>
-            </div>
-        </div>
 
         <!-- Simulation CTA -->
         <div class="simulation-cta-section">

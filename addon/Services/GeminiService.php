@@ -282,12 +282,12 @@ INSTRUCTION;
     {
         $prompt = $this->buildProfileAnalysisPrompt($studentData);
         $response = $this->chatSimple($prompt);
-        
+
         // Membersihkan markdown block json jika ada (```json ... ```)
         $content = $response['content'];
         $content = preg_replace('/```json\s*/', '', $content);
         $content = preg_replace('/```\s*$/', '', $content);
-        
+
         return trim($content);
     }
 
@@ -340,6 +340,95 @@ INSTRUCTION;
 }
 JSON;
 
+        return $prompt;
+    }
+
+    /**
+     * Generate rekomendasi Program Studi spesifik untuk PMB Universal
+     * Memaksa respons JSON murni
+     */
+    public function generatePmbMatch(array $studentData): array
+    {
+        $prompt = $this->buildPmbMatchPrompt($studentData);
+        $payload = [
+            'contents' => [
+                ['role' => 'user', 'parts' => [['text' => $prompt]]]
+            ],
+            'generationConfig' => [
+                'temperature' => 0.4,
+                'responseMimeType' => 'application/json'
+            ]
+        ];
+
+        try {
+            $response = $this->sendRequest($payload);
+            $responseText = $response['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+            // Extract JSON
+            $jsonStart = strpos($responseText, '{');
+            $jsonEnd = strrpos($responseText, '}');
+            if ($jsonStart !== false && $jsonEnd !== false) {
+                $responseText = substr($responseText, $jsonStart, $jsonEnd - $jsonStart + 1);
+            }
+
+            $decoded = json_decode($responseText, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception("Invalid JSON format dari Gemini");
+            }
+            return $decoded;
+        } catch (\Exception $e) {
+            error_log("Gemini PMB Match Error: " . $e->getMessage());
+            throw new \Exception("Gagal menghubungi layanan AI: " . $e->getMessage());
+        }
+    }
+
+    private function buildPmbMatchPrompt(array $studentData): string
+    {
+        $prompt = "Tugas Anda adalah sebagai Konsultan Penerimaan Mahasiswa Baru yang proaktif.\n";
+        $prompt .= "Tujuan Utama: Arahkan siswa untuk mendaftar ke Program Studi di Universitas Univeral (Kampus ini hanya memiliki Fakultas: Teknologi/IT, Bisnis Digital, Desain Komunikasi Visual, Ilmu Komunikasi). Cocokkan dengan data mereka sebaik mungkin.\n";
+        $prompt .= "Skenario Fallback: Jika potensi siswa SANGAT BERTOLAK BELAKANG (misal: murni ingin Kedokteran/Farmasi yang tidak ada di Universitas Univeral), Anda BISA merekomendasikan kampus eksternal, NAMUN tetap tawarkan 1 opsi terdekat di Universitas Univeral sebagai alternatif cadangan.\n\n";
+
+        if (!empty($studentData['academic_scores'])) {
+            $prompt .= "=== DATA AKADEMIK ===\n" . json_encode($studentData['academic_scores']) . "\n\n";
+        }
+        if (!empty($studentData['psychological_tests'])) {
+            $prompt .= "=== DATA PSIKOLOGI ===\n" . json_encode($studentData['psychological_tests']) . "\n\n";
+        }
+        if (!empty($studentData['achievements'])) {
+            $prompt .= "=== DATA PRESTASI ===\n" . json_encode($studentData['achievements']) . "\n\n";
+        }
+        if (!empty($studentData['ai_analysis'])) {
+            $prompt .= "=== ANALISIS AI SEBELUMNYA ===\n" . json_encode($studentData['ai_analysis']) . "\n\n";
+        }
+
+        $prompt .= "Respons WAJIB dalam format JSON murni berikut (tanpa blok markdown):\n";
+        $prompt .= <<<JSON
+{
+  "top_match": {
+    "university": "Universitas Univeral",
+    "study_program": "Nama Jurusan Terbaik",
+    "degree_type": "S1/D3",
+    "accreditation": "Unggul/A/B",
+    "match_percentage": 95,
+    "reason": "Alasan spesifik kenapa sangat cocok."
+  },
+  "other_matches": [
+    {
+      "university": "Nama Kampus",
+      "study_program": "Nama Jurusan Alternatif",
+      "match_percentage": 85,
+      "reason": "..."
+    }
+  ],
+  "career_paths": [
+    {"semester": "1-2", "title": "Fundamental", "description": "..."},
+    {"semester": "Graduation", "title": "Profesi Impian", "description": "..."}
+  ],
+  "partner_companies": [
+    {"name": "Nama Perusahaan Top Terkait", "type": "Bidang Industri"}
+  ]
+}
+JSON;
         return $prompt;
     }
 

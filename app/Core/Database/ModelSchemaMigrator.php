@@ -108,20 +108,8 @@ class ModelSchemaMigrator
       $models[] = 'Addon\\Models\\' . $base;
     }
 
-    // Urutkan: UserModel harus selalu PERTAMA karena tabel lain punya foreign key ke users.id
-    usort($models, function ($a, $b) {
-      $aIsUser = str_ends_with($a, 'UserModel');
-      $bIsUser = str_ends_with($b, 'UserModel');
-
-      if ($aIsUser && !$bIsUser) {
-        return -1; // UserModel selalu pertama
-      }
-      if (!$aIsUser && $bIsUser) {
-        return 1;
-      }
-      // Selain UserModel, urutkan alfabetis
-      return strcmp($a, $b);
-    });
+    // Urutkan berdasarkan foreign key dependencies
+    $models = $this->sortModelsByDependencies($models);
 
     foreach ($models as $className) {
       try {
@@ -139,6 +127,98 @@ class ModelSchemaMigrator
     }
 
     return $results;
+  }
+
+  /**
+   * Urutkan model berdasarkan foreign key dependencies
+   * Model yang direferensikan oleh model lain harus di-migrate terlebih dahulu
+   */
+  private function sortModelsByDependencies(array $models): array
+  {
+    // Ambil instance dari setiap model untuk mendapatkan schema
+    $container = $this->dbManager->connection(); // Dummy untuk container check
+
+    // Bangun dependency graph
+    $dependencies = [];
+    foreach ($models as $modelClass) {
+      if (!class_exists($modelClass)) {
+        continue;
+      }
+
+      // Dapatkan nama tabel yang direferensikan oleh foreign keys
+      $reflection = new \ReflectionClass($modelClass);
+      $instance = $reflection->newInstanceWithoutConstructor();
+      $schema = $instance->getSchema() ?? [];
+
+      $referencedTables = [];
+      foreach ($schema as $field => $def) {
+        if (isset($def['foreign']) && is_string($def['foreign'])) {
+          // Parse 'table.column' format
+          $parts = explode('.', $def['foreign']);
+          if (count($parts) === 2) {
+            $referencedTables[] = $parts[0];
+          }
+        }
+      }
+
+      $dependencies[$modelClass] = $referencedTables;
+    }
+
+    // Topological sort - model tanpa dependensi pertama, model dengan dependensi terakhir
+    $sorted = [];
+    $visited = [];
+    $visiting = []; // Untuk detect circular dependencies
+
+    $visit = function ($modelClass) use (&$visit, &$sorted, &$visited, &$visiting, $dependencies) {
+      if (isset($visited[$modelClass])) {
+        return;
+      }
+
+      if (isset($visiting[$modelClass])) {
+        // Circular dependency detected, skip
+        return;
+      }
+
+      $visiting[$modelClass] = true;
+
+      // Visit dependencies first
+      $modelTable = $this->getModelTableName($modelClass);
+      foreach ($dependencies[$modelClass] ?? [] as $referencedTable) {
+        // Cari model yang memiliki tabel ini
+        foreach ($dependencies as $depClass => $depTables) {
+          if ($this->getModelTableName($depClass) === $referencedTable) {
+            $visit($depClass);
+            break;
+          }
+        }
+      }
+
+      unset($visiting[$modelClass]);
+      $visited[$modelClass] = true;
+      $sorted[] = $modelClass;
+    };
+
+    foreach ($models as $modelClass) {
+      $visit($modelClass);
+    }
+
+    return $sorted;
+  }
+
+  /**
+   * Dapatkan nama tabel dari model class
+   */
+  private function getModelTableName(string $modelClass): string
+  {
+    try {
+      $reflection = new \ReflectionClass($modelClass);
+      $instance = $reflection->newInstanceWithoutConstructor();
+      return $instance->getTableName();
+    } catch (\Throwable $e) {
+      // Fallback: convert class name to table name
+      $baseName = str_replace(['Addon\\Models\\', 'Model'], '', $modelClass);
+      return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $baseName)) . 's';
+    }
   }
 
   private function seedIfNeeded(Model $model, Database $db, string $table): void

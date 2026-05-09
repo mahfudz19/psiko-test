@@ -55,7 +55,6 @@ class ChatController
         'meta' => ['title' => 'Riwayat Chat Konsultasi']
       ]);
     } catch (\Exception $e) {
-      dd('Error fetching chat history: ', $e->getMessage());
       return $response->redirect('/dashboard?error=500&message=' . urlencode($e->getMessage()));
     }
   }
@@ -132,12 +131,23 @@ class ChatController
   {
     try {
       $user_id = $this->session->get('auth.user_id');
-      $studentProfile = $this->studentProfileModel->findByUserId($user_id);
-      $studentProfileId = $studentProfile ? (int) $studentProfile['id'] : null;
 
-      if (!$studentProfileId) {
-        return $response->json(['error' => 'Anda belum memiliki profil siswa'], 403);
+      // Validate user is logged in
+      if (!$user_id) {
+        return $response->json(['error' => 'Anda harus login terlebih dahulu'], 401);
       }
+
+      $studentProfile = $this->studentProfileModel->findByUserId($user_id);
+
+      // Validate student profile exists with proper structure
+      if (!$studentProfile || empty($studentProfile['student_profile_id'])) {
+        return $response->json([
+          'error' => 'Profil siswa tidak ditemukan',
+          'message' => 'Silakan lengkapi profil siswa Anda terlebih dahulu',
+          'redirect' => '/profile/edit'
+        ], 403);
+      }
+      $studentProfileId = (int) $studentProfile['student_profile_id'];
 
       $topic = $request->post('topic') ?? 'potential_analysis';
       $initialMessage = $request->post('message') ?? 'Halo, saya ingin konsultasi tentang potensi saya.';
@@ -145,34 +155,57 @@ class ChatController
       // Generate unique session ID
       $sessionId = 'chat_' . bin2hex(random_bytes(16));
 
-      // Create chat consultation session
-      $chatId = $this->chatConsultationModel->createWithSessionId([
-        'student_profile_id' => $studentProfileId,
-        'session_id' => $sessionId,
-        'topic' => $topic,
-      ]);
+      // Create chat consultation session with FK constraint handling
+      try {
+        $chatId = $this->chatConsultationModel->createWithSessionId([
+          'student_profile_id' => $studentProfileId,
+          'session_id' => $sessionId,
+          'topic' => $topic,
+        ]);
 
-      // Save initial user message
-      $this->chatMessageModel->addUserMessage($chatId, $initialMessage);
+        if (!$chatId) {
+          return $response->json(['error' => 'Gagal membuat sesi chat'], 500);
+        }
 
-      // Get student data for context
-      $contextData = $this->buildContextData($studentProfile);
+        // Save initial user message
+        $addedMessageId = $this->chatMessageModel->addUserMessage($chatId, $initialMessage);
 
-      // Send to Gemini AI
-      $aiResponse = $this->geminiService->chat([
-        ['role' => 'user', 'content' => $initialMessage]
-      ], $contextData);
+        if (!$addedMessageId) {
+          return $response->json(['error' => 'Gagal menyimpan pesan awal'], 500);
+        }
 
-      // Save AI response
-      $this->chatMessageModel->addAssistantMessage($chatId, $aiResponse['content'], $aiResponse['context_data']);
+        // Get student data for context
+        $contextData = $this->buildContextData($studentProfile);
 
-      return $response->json([
-        'success' => true,
-        'session_id' => $sessionId,
-        'redirect' => '/chat/' . $sessionId,
-      ]);
+        // Send to Gemini AI
+        $aiResponse = $this->geminiService->chat([
+          ['role' => 'user', 'content' => $initialMessage]
+        ], $contextData);
+
+        // Save AI response
+        $this->chatMessageModel->addAssistantMessage($chatId, $aiResponse['content'], $aiResponse['context_data']);
+
+        return $response->json([
+          'success' => true,
+          'session_id' => $sessionId,
+          'redirect' => '/chat/' . $sessionId,
+        ]);
+      } catch (\PDOException $e) {
+        // Handle foreign key constraint violation
+        if (str_contains($e->getMessage(), 'foreign key constraint fails')) {
+          // Log the error for debugging
+          error_log("Chat FK constraint violation - user_id: {$user_id}, student_profile_id: {$studentProfileId}");
+
+          return $response->json([
+            'error' => 'Profil siswa tidak valid',
+            'message' => 'Data profil siswa Anda mengalami masalah. Silakan hubungi administrator atau coba login ulang.',
+            'code' => 'FK_CONSTRAINT_VIOLATION'
+          ], 500);
+        }
+        throw $e;
+      }
     } catch (\Exception $e) {
-      return $response->json(['error' => $e->getMessage()], 500);
+      return $response->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
     }
   }
 
@@ -198,7 +231,7 @@ class ChatController
       // Validasi ownership
       $user_id = $this->session->get('auth.user_id');
       $studentProfile = $this->studentProfileModel->findByUserId($user_id);
-      $studentProfileId = $studentProfile ? (int) $studentProfile['id'] : null;
+      $studentProfileId = $studentProfile ? (int) $studentProfile['student_profile_id'] : null;
       if ((int) $chatConsultation['student_profile_id'] !== $studentProfileId) {
         return $response->json(['error' => 'Akses ditolak'], 403);
       }
@@ -279,7 +312,7 @@ class ChatController
 
     $studentProfile = $this->studentProfileModel->findByUserId($user_id);
 
-    return $studentProfile ? (int) $studentProfile['id'] : null;
+    return $studentProfile ? (int) $studentProfile['student_profile_id'] : null;
   }
 
   /**
@@ -309,7 +342,25 @@ class ChatController
         'personality_type' => $aiAnalysis['personality_type'] ?? null,
       ];
 
-      $contextData['interests'] = $aiAnalysis['interests'] ?? null;
+      // Normalize interests to flat array of strings
+      $interests = $aiAnalysis['interests'] ?? null;
+      if (is_array($interests)) {
+        // Flatten multidimensional array and extract string values
+        $flatInterests = [];
+        foreach ($interests as $item) {
+          if (is_string($item)) {
+            $flatInterests[] = $item;
+          } elseif (is_array($item) && isset($item['name'])) {
+            $flatInterests[] = $item['name'];
+          } elseif (is_array($item) && isset($item['field'])) {
+            $flatInterests[] = $item['field'];
+          }
+        }
+        $contextData['interests'] = !empty($flatInterests) ? $flatInterests : null;
+      } else {
+        $contextData['interests'] = null;
+      }
+
       $contextData['academic_performance'] = $aiAnalysis['academic_performance'] ?? null;
     }
 

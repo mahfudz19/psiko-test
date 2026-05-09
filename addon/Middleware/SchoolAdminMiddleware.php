@@ -47,6 +47,7 @@ class SchoolAdminMiddleware implements MiddlewareInterface
 
       // Simpan school_id di session untuk akses cepat
       $_SESSION['admin.school_id'] = $teacherProfile['school_id'];
+      $_SESSION['admin.teacher_profile_id'] = $teacherProfile['teacher_profile_id'];
 
       // Validasi jika ada parameter school_id di route
       // $routeSchoolId = $request->param('id');

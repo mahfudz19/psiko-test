@@ -283,7 +283,8 @@ class PmbController
         $currentHash = md5($rawString);
 
         // Cek di DB
-        $journey = $this->pmbJourneyModel->findByStudentId($studentProfile['id']);
+        $studentProfileId = $studentProfile['student_profile_id'] ?? $studentProfile['id'] ?? null;
+        $journey = $this->pmbJourneyModel->findByStudentId($studentProfileId);
 
         // Tentukan field dan method berdasarkan type
         // NOTE: 'scholarships' deprecated, sekarang menggunakan ScholarshipCalculator
@@ -300,7 +301,7 @@ class PmbController
             try {
                 // Call AI untuk generate data
                 $generatedData = $this->geminiService->$aiMethod($studentProfile);
-                $this->pmbJourneyModel->$updateMethod($studentProfile['id'], $generatedData, $currentHash);
+                $this->pmbJourneyModel->$updateMethod($studentProfileId, $generatedData, $currentHash);
                 $data = $generatedData;
             } catch (\Exception $e) {
                 // Fallback to existing if AI fails temporarily

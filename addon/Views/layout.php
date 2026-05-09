@@ -33,6 +33,9 @@
     <?= $children; ?>
   </main>
 
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
   <!-- SPA Script -->
   <?= App\Core\View\View::renderScripts() ?>
 </body>

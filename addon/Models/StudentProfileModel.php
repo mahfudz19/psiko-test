@@ -118,8 +118,36 @@ class StudentProfileModel extends Model
      */
     public function findByUserId(int $userId): ?array
     {
+        // sp.user_name,
+        // sp.extracurriculars,
+        // sp.counseling_notes,
+        // p.full_name,
+        // p.date_of_birth,
         $stmt = $this->getDb()->prepare("
-            SELECT sp.*, p.*, u.email, u.name as user_name
+            SELECT
+                sp.id as student_profile_id,
+                sp.profile_id,
+                sp.school_id,
+                sp.student_id,
+                sp.grade_level,
+                sp.major,
+                sp.academic_scores,
+                sp.achievements,
+                sp.psychological_tests,
+                sp.ai_analysis,
+                sp.parent_name,
+                sp.parent_phone,
+                sp.parent_email,
+                sp.created_at,
+                sp.updated_at,
+                p.id as profile_id,
+                p.user_id,
+                p.gender,
+                p.phone,
+                p.address,
+                u.id as user_id,
+                u.email,
+                u.name as user_name
             FROM {$this->table} sp
             JOIN profiles p ON sp.profile_id = p.id
             JOIN users u ON p.user_id = u.id

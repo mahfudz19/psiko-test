@@ -70,7 +70,26 @@ class StaffProfileModel extends Model
     public function findByUserId(int $userId): ?array
     {
         $stmt = $this->getDb()->prepare("
-            SELECT sp.*, p.*, u.email, u.name as user_name
+            SELECT
+                sp.id as staff_profile_id,
+                sp.profile_id,
+                sp.user_name,
+                sp.position,
+                sp.department,
+                sp.phone,
+                sp.address,
+                sp.created_at,
+                sp.updated_at,
+                p.id as profile_id,
+                p.user_id,
+                p.full_name,
+                p.date_of_birth,
+                p.gender,
+                p.phone,
+                p.address,
+                u.id as user_id,
+                u.email,
+                u.name as user_name
             FROM {$this->table} sp
             JOIN profiles p ON sp.profile_id = p.id
             JOIN users u ON p.user_id = u.id
@@ -301,15 +320,15 @@ class StaffProfileModel extends Model
         if (!is_array($data) || (!empty($data) && array_is_list($data))) {
             throw new \InvalidArgumentException('permissions harus berupa object (key-value)');
         }
-        
+
         $allowedKeys = ['can_manage_users', 'can_manage_schools', 'can_view_analytics', 'can_manage_settings'];
-        
+
         foreach ($data as $key => $value) {
             // 1. Validasi Key (Tolak jika tidak ada di skema)
             if (!in_array($key, $allowedKeys)) {
                 throw new \InvalidArgumentException("Key permission '{$key}' tidak terdaftar dalam skema.");
             }
-            
+
             // 2. Validasi Value Type
             if (!is_bool($value)) {
                 throw new \InvalidArgumentException("Nilai permission untuk '{$key}' harus berupa boolean.");

@@ -96,8 +96,29 @@ class TeacherProfileModel extends Model
      */
     public function findByUserId(int $userId): ?array
     {
+        // tp.user_name,
+        // tp.subject,
+        // tp.phone,
+        // tp.address,
+        // p.full_name,
+        // p.date_of_birth,
         $stmt = $this->getDb()->prepare("
-            SELECT tp.*, p.*, u.email, u.name as user_name
+            SELECT
+                tp.id as teacher_profile_id,
+                tp.profile_id,
+                tp.school_id,
+                tp.managed_students,
+                tp.counseling_schedule,
+                tp.created_at,
+                tp.updated_at,
+                p.id as profile_id,
+                p.user_id,
+                p.gender,
+                p.phone,
+                p.address,
+                u.id as user_id,
+                u.email,
+                u.name as user_name
             FROM {$this->table} tp
             JOIN profiles p ON tp.profile_id = p.id
             JOIN users u ON p.user_id = u.id
@@ -393,27 +414,27 @@ class TeacherProfileModel extends Model
         if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
             throw new \InvalidArgumentException('counseling_schedule harus berupa array of objects');
         }
-        
+
         $allowedKeys = ['date', 'time', 'student_profile_id', 'topic', 'status', 'meeting_link', 'student_notes', 'teacher_notes'];
         $allowedStatuses = ['pending', 'approved', 'completed', 'cancelled'];
-        
+
         foreach ($data as $index => $item) {
             if (!is_array($item)) {
                 throw new \InvalidArgumentException("Item counseling_schedule index {$index} harus berupa object");
             }
-            
+
             // Check required keys
             if (!isset($item['date']) || !isset($item['time']) || !isset($item['student_profile_id'])) {
                 throw new \InvalidArgumentException("Item counseling_schedule index {$index} kehilangan key wajib (date, time, student_profile_id)");
             }
-            
+
             // Validate keys
             foreach ($item as $key => $value) {
                 if (!in_array($key, $allowedKeys)) {
                     throw new \InvalidArgumentException("Key '{$key}' pada counseling_schedule index {$index} tidak diizinkan.");
                 }
             }
-            
+
             // Validate specific types
             if (!is_numeric($item['student_profile_id'])) {
                 throw new \InvalidArgumentException("student_profile_id pada counseling_schedule index {$index} harus berupa angka.");

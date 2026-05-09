@@ -86,7 +86,7 @@ class ScholarshipCalculator
         $metrics = $this->calculateMetrics($studentData);
 
         // Step 2: Apply rules
-        $eligible = $this->applyEligibilityRules($metrics, $studentData);
+        $eligible = $this->applyEligibilityRules($metrics);
         $notEligible = $this->getNotEligibleScholarships($eligible);
 
         // Step 3: Build response
@@ -260,10 +260,9 @@ class ScholarshipCalculator
      * - technology_interest_level == 'high' → Beasiswa Teknologi (25%)
      * 
      * @param array $metrics Metrics yang sudah dihitung
-     * @param array $studentData Data siswa lengkap
      * @return array List beasiswa yang eligible
      */
-    private function applyEligibilityRules(array $metrics, array $studentData): array
+    private function applyEligibilityRules(array $metrics): array
     {
         $eligible = [];
         $avgScore = $metrics['average_score'];

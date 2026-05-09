@@ -91,20 +91,14 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
     // Main PMB pages
     $router->get('/pmb', [PmbController::class, 'index']);
     $router->get('/pmb/journey', [PmbController::class, 'journey']);
+
+    // Simulation
     $router->get('/pmb/simulation', [PmbController::class, 'simulation']);
     $router->post('/pmb/simulation/step', [PmbController::class, 'saveSimulationStep'], ['csrf']);
     $router->get('/pmb/simulation/complete', [PmbController::class, 'completeSimulation']);
-    $router->post('/pmb/convert-to-real', [PmbController::class, 'convertToRealApplication'], ['csrf']);
 
     // Scholarship
     $router->get('/pmb/scholarship', [PmbController::class, 'scholarship']);
-    $router->post('/pmb/scholarship/calculate', [PmbController::class, 'calculateScholarship'], ['csrf']);
-    $router->post('/pmb/scholarship/apply', [PmbController::class, 'applyScholarship'], ['csrf']);
-
-    // API endpoints (for AJAX)
-    $router->get('/api/pmb/match-score', [PmbController::class, 'getMatchScore']);
-    $router->get('/api/pmb/progress', [PmbController::class, 'getSimulationProgress']);
-    $router->get('/api/pmb/similar-students', [PmbController::class, 'getSimilarStudents']);
 });
 
 $router->group(['middleware' => ['auth']], function () use ($router) {

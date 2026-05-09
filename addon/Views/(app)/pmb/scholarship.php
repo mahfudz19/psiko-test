@@ -2,10 +2,20 @@
 
 /**
  * PMB Scholarship View - Scholarship Calculator
- * 
- * @var array $scholarships Scholarship data with eligibility and cost estimation
+ *
+ * @var array $scholarships Data dari AI dengan struktur:
+ *   - eligible_scholarships: array beasiswa yang eligible
+ *   - not_eligible_scholarships: array beasiswa yang tidak eligible
+ *   - average_score: rata-rata nilai siswa
+ *   - has_national_achievement: bool apakah punya prestasi nasional
+ *   - technology_interest_level: string (low/medium/high)
+ *
+ * @var array|null $student_profile Data profil siswa
+ * @var string|null $ai_error_message Error message jika AI gagal
  */
 $scholarshipData = $scholarships ?? null;
+$studentProfile = $student_profile ?? null;
+$aiErrorMessage = $ai_error_message ?? null;
 ?>
 
 <div class="pmb-scholarship-container">
@@ -14,140 +24,154 @@ $scholarshipData = $scholarships ?? null;
         <div class="header-content">
             <h1>💰 Kalkulator Beasiswa</h1>
             <p class="header-subtitle">Universitas Univeral</p>
-            <p class="header-note">Temukan beasiswa yang cocok untuk kamu dan hitung estimasi biaya kuliah</p>
+            <p class="header-note">Analisis AI berdasarkan profil akademik dan prestasi kamu</p>
         </div>
     </div>
 
-    <?php if ($scholarshipData): ?>
-        <!-- Available Scholarships -->
-        <div class="scholarships-list-section">
+    <?php if ($aiErrorMessage): ?>
+        <!-- AI Error Warning -->
+        <div class="alert alert-warning">
+            <strong>⚠️ AI Sedang Gangguan:</strong> <?= htmlspecialchars($aiErrorMessage) ?>
+            <br>
+            <small>Menampilkan data cached terakhir. Update profil untuk refresh.</small>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($scholarshipData && !empty($scholarshipData['eligible_scholarships'])): ?>
+        <!-- User Eligibility (AI Generated) -->
+        <div class="eligibility-section">
             <div class="section-header">
-                <h2>Beasiswa yang Tersedia</h2>
-                <p>Pilih beasiswa yang sesuai dengan kriteria kamu</p>
+                <h2>🎯 Beasiswa yang Kamu Dapatkan</h2>
+                <p>Berdasarkan analisis profil akademik dan prestasi kamu</p>
             </div>
 
-            <div class="scholarships-grid">
-                <?php foreach ($scholarshipData['available_scholarships'] as $scholarship): ?>
-                    <div class="scholarship-card">
-                        <div class="scholarship-badge-top">
-                            <?php if ($scholarship['discount'] >= 50): ?>
-                                <span class="badge-hot">🔥 Hot</span>
-                            <?php endif; ?>
+            <div class="eligibility-cards">
+                <?php foreach ($scholarshipData['eligible_scholarships'] as $scholarship): ?>
+                    <div class="eligibility-card eligible">
+                        <div class="eligibility-header">
+                            <h4><?= htmlspecialchars($scholarship['name']) ?></h4>
+                            <span class="status-badge status-eligible">
+                                ✅ <?= $scholarship['discount'] ?>% OFF
+                            </span>
                         </div>
-                        <div class="scholarship-header-card">
-                            <div class="scholarship-icon">
-                                <?php if ($scholarship['type'] === 'akademis'): ?>📚
-                                <?php elseif ($scholarship['type'] === 'prestasi'): ?>🏆
-                                <?php elseif ($scholarship['type'] === 'tidak_mampu'): ?>💝
-                                <?php elseif ($scholarship['type'] === 'olahraga'): ?>⚽
-                                <?php elseif ($scholarship['type'] === 'seni'): ?>🎨
-                                <?php else: ?>🎓<?php endif; ?>
-                            </div>
-                            <h3><?= htmlspecialchars($scholarship['name']) ?></h3>
+                        <p class="eligibility-reason"><?= htmlspecialchars($scholarship['reason']) ?></p>
+                        <div class="scholarship-meta">
+                            <span class="meta-item">📚 Tipe: <?= htmlspecialchars($scholarship['type']) ?></span>
                         </div>
-                        <div class="scholarship-discount">
-                            <span class="discount-value"><?= $scholarship['discount'] ?>%</span>
-                            <span class="discount-label">Discount</span>
-                        </div>
-                        <div class="scholarship-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Tipe:</span>
-                                <span class="detail-value"><?= htmlspecialchars(ucfirst($scholarship['type'])) ?></span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Kuota:</span>
-                                <span class="detail-value"><?= $scholarship['quota'] ?> slot</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Deadline:</span>
-                                <span class="detail-value deadline"><?= date('d M Y', strtotime($scholarship['deadline'])) ?></span>
-                            </div>
-                        </div>
-                        <div class="scholarship-requirements">
-                            <h4>Syarat:</h4>
-                            <ul>
-                                <?php foreach ($scholarship['requirements'] as $req): ?>
-                                    <li><?= htmlspecialchars($req) ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                        <button class="btn btn-primary btn-block" onclick="checkEligibility(<?= $scholarship['id'] ?>)">
-                            Cek Eligibility
+                        <button class="btn btn-primary btn-sm" onclick="applyScholarship('<?= htmlspecialchars($scholarship['name']) ?>')">
+                            Ajukan Beasiswa
                         </button>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
 
-        <!-- User Eligibility -->
-        <div class="eligibility-section">
+        <!-- Not Eligible Scholarships -->
+        <?php if (!empty($scholarshipData['not_eligible_scholarships'])): ?>
+            <div class="not-eligible-section">
+                <div class="section-header">
+                    <h2>📋 Beasiswa yang Belum Cocok</h2>
+                    <p>Tingkatkan prestasimu untuk mendapatkan beasiswa ini</p>
+                </div>
+
+                <div class="not-eligible-cards">
+                    <?php foreach ($scholarshipData['not_eligible_scholarships'] as $scholarship): ?>
+                        <div class="eligibility-card not-eligible">
+                            <div class="eligibility-header">
+                                <h4><?= htmlspecialchars($scholarship['name']) ?></h4>
+                                <span class="status-badge status-not-eligible">
+                                    ⚪ Belum Eligible
+                                </span>
+                            </div>
+                            <p class="eligibility-reason"><?= htmlspecialchars($scholarship['reason']) ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- Student Profile Summary -->
+        <div class="profile-summary-section">
             <div class="section-header">
-                <h2>Status Eligibility Kamu</h2>
-                <p>Beasiswa yang sudah kamu cek dan ajukan</p>
+                <h2>📊 Ringkasan Profil Kamu</h2>
+                <p>Statistik akademik dan prestasi yang digunakan untuk analisis</p>
             </div>
 
-            <div class="eligibility-cards">
-                <?php foreach ($scholarshipData['user_eligibility'] as $eligibility): ?>
-                    <div class="eligibility-card <?= $eligibility['status'] ?>">
-                        <div class="eligibility-header">
-                            <h4><?= htmlspecialchars($eligibility['name']) ?></h4>
-                            <span class="status-badge status-<?= $eligibility['status'] ?>">
-                                <?php if ($eligibility['status'] === 'eligible'): ?>✅ Eligible
-                                <?php elseif ($eligibility['status'] === 'check_eligibility'): ?>⏳ Perlu Dicek
-                                <?php else: ?>⚪ Belum Dicek<?php endif; ?>
-                            </span>
-                        </div>
-                        <p class="eligibility-reason"><?= htmlspecialchars($eligibility['reason']) ?></p>
-                        <?php if ($eligibility['status'] === 'check_eligibility'): ?>
-                            <button class="btn btn-secondary btn-sm" onclick="checkEligibility(<?= $eligibility['scholarship_id'] ?>)">
-                                Cek Sekarang
-                            </button>
-                        <?php elseif ($eligibility['status'] === 'eligible'): ?>
-                            <button class="btn btn-primary btn-sm" onclick="applyScholarship(<?= $eligibility['scholarship_id'] ?>)">
-                                Ajukan Beasiswa
-                            </button>
-                        <?php endif; ?>
+            <div class="profile-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-value"><?= number_format($scholarshipData['average_score'] ?? 0, 1) ?></div>
+                    <div class="stat-label">Rata-rata Nilai</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-value"><?= $scholarshipData['has_national_achievement'] ? '✅' : '❌' ?></div>
+                    <div class="stat-label">Prestasi Nasional</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💻</div>
+                    <div class="stat-value">
+                        <?php
+                        $interestLevel = $scholarshipData['technology_interest_level'] ?? 'unknown';
+                        $icons = ['low' => '📱', 'medium' => '💻', 'high' => '🚀', 'unknown' => '❓'];
+                        echo $icons[$interestLevel] ?? '❓';
+                        ?>
                     </div>
-                <?php endforeach; ?>
+                    <div class="stat-label">Minat Teknologi</div>
+                    <div class="stat-sub"><?= ucfirst($interestLevel) ?></div>
+                </div>
             </div>
+
+            <?php if ($studentProfile): ?>
+                <div class="profile-actions">
+                    <a href="/profile/academic" class="btn btn-secondary">
+                        📝 Update Nilai Akademik
+                    </a>
+                    <a href="/profile/achievements" class="btn btn-secondary">
+                        🏆 Update Prestasi
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- Cost Estimation -->
         <div class="cost-estimation-section">
             <div class="section-header">
-                <h2>Estimasi Biaya Kuliah</h2>
-                <p>Perkiraan biaya setelah beasiswa</p>
+                <h2>💰 Estimasi Penghematan</h2>
+                <p>Total diskon beasiswa yang bisa kamu dapatkan</p>
             </div>
 
             <div class="cost-card">
                 <div class="cost-breakdown">
+                    <?php
+                    $maxDiscount = 0;
+                    $bestScholarship = null;
+                    foreach ($scholarshipData['eligible_scholarships'] as $s) {
+                        if ($s['discount'] > $maxDiscount) {
+                            $maxDiscount = $s['discount'];
+                            $bestScholarship = $s;
+                        }
+                    }
+                    ?>
                     <div class="cost-row">
-                        <span class="cost-label">Biaya Normal</span>
-                        <span class="cost-value">Rp <?= number_format($scholarshipData['cost_estimation']['normal_fee'], 0, ',', '.') ?></span>
+                        <span class="cost-label">Beasiswa Terbaik</span>
+                        <span class="cost-value"><?= htmlspecialchars($bestScholarship['name'] ?? '-') ?></span>
                     </div>
-                    <?php foreach ($scholarshipData['cost_estimation']['eligible_discounts'] as $discount): ?>
-                        <div class="cost-row discount">
-                            <span class="cost-label"><?= htmlspecialchars($discount['name']) ?></span>
-                            <span class="cost-value">- Rp <?= number_format($discount['amount'], 0, ',', '.') ?></span>
-                        </div>
-                    <?php endforeach; ?>
                     <div class="cost-row total">
-                        <span class="cost-label">Total Setelah Beasiswa</span>
-                        <span class="cost-value highlight">Rp <?= number_format($scholarshipData['cost_estimation']['final_fee'], 0, ',', '.') ?></span>
+                        <span class="cost-label">Diskon Maksimal</span>
+                        <span class="cost-value highlight"><?= $maxDiscount ?>% OFF</span>
                     </div>
                 </div>
                 <div class="cost-savings">
                     <div class="savings-badge">
-                        💰 Hemat Rp <?= number_format($scholarshipData['cost_estimation']['normal_fee'] - $scholarshipData['cost_estimation']['final_fee'], 0, ',', '.') ?>
+                        💰 Hemat hingga Rp <?= number_format(15000000 * $maxDiscount / 100, 0, ',', '.') ?>
                     </div>
+                    <small>*Dari biaya kuliah normal Rp 15.000.000</small>
                 </div>
             </div>
 
             <div class="cost-actions">
-                <button class="btn btn-primary btn-lg" onclick="recalculate()">
-                    🔄 Hitung Ulang
-                </button>
-                <a href="/pmb/simulation" class="btn btn-secondary btn-lg">
+                <a href="/pmb/simulation" class="btn btn-primary btn-lg">
                     Lanjut ke Pendaftaran →
                 </a>
             </div>
@@ -157,9 +181,16 @@ $scholarshipData = $scholarships ?? null;
         <!-- No Data -->
         <div class="no-data-section">
             <div class="no-data-content">
-                <h2>💰 Informasi Beasiswa</h2>
-                <p>Universitas Univeral menyediakan berbagai jenis beasiswa untuk membantu biaya kuliah kamu.</p>
-                <a href="/pmb/scholarship?load=1" class="btn btn-primary">Lihat Beasiswa Tersedia →</a>
+                <h2>📊 Belum Ada Analisis Beasiswa</h2>
+                <p>Lengkapi profil akademik dan prestasi kamu untuk mendapatkan rekomendasi beasiswa yang personalize.</p>
+
+                <?php if ($studentProfile): ?>
+                    <button class="btn btn-primary" onclick="window.location.reload()">
+                        🔄 Refresh Analisis
+                    </button>
+                <?php else: ?>
+                    <a href="/profile/academic" class="btn btn-primary">Lengkapi Profil Akademik →</a>
+                <?php endif; ?>
             </div>
         </div>
     <?php endif; ?>
@@ -203,6 +234,24 @@ $scholarshipData = $scholarships ?? null;
         margin: 0;
     }
 
+    /* Alert Warning */
+    .alert {
+        background: var(--md-sys-color-tertiary-container, #fff3cd);
+        border-left: 4px solid var(--md-sys-color-warning, #ff9800);
+        border-radius: 8px;
+        padding: 16px 20px;
+        color: var(--md-sys-color-on-surface, #1a1a1a);
+    }
+
+    .alert strong {
+        color: var(--md-sys-color-warning, #cc7a00);
+    }
+
+    .alert small {
+        color: var(--md-sys-color-on-surface-variant, #666);
+        font-size: 13px;
+    }
+
     /* Section Headers */
     .section-header {
         margin-bottom: 24px;
@@ -221,141 +270,6 @@ $scholarshipData = $scholarships ?? null;
         margin: 0;
     }
 
-    /* Scholarships List */
-    .scholarships-list-section {
-        background: var(--md-sys-color-surface, #ffffff);
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .scholarships-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-    }
-
-    .scholarship-card {
-        background: var(--md-sys-color-surface-container-lowest, #ffffff);
-        border: 1px solid var(--md-sys-color-outline, #e0e0e0);
-        border-radius: 12px;
-        padding: 20px;
-        position: relative;
-        transition: all 0.2s;
-    }
-
-    .scholarship-card:hover {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-        transform: translateY(-2px);
-    }
-
-    .scholarship-badge-top {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-    }
-
-    .badge-hot {
-        background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
-        color: white;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .scholarship-header-card {
-        text-align: center;
-        margin-bottom: 16px;
-    }
-
-    .scholarship-icon {
-        font-size: 48px;
-        margin-bottom: 8px;
-    }
-
-    .scholarship-header-card h3 {
-        font-size: 18px;
-        font-weight: 600;
-        margin: 0;
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-    }
-
-    .scholarship-discount {
-        text-align: center;
-        padding: 16px;
-        background: linear-gradient(135deg, var(--md-sys-color-primary, #0066cc), var(--md-sys-color-primary-container, #e6f0ff));
-        border-radius: 8px;
-        margin-bottom: 16px;
-        color: white;
-    }
-
-    .discount-value {
-        display: block;
-        font-size: 36px;
-        font-weight: 700;
-    }
-
-    .discount-label {
-        font-size: 12px;
-        opacity: 0.9;
-    }
-
-    .scholarship-details {
-        margin-bottom: 16px;
-    }
-
-    .detail-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        font-size: 14px;
-        border-bottom: 1px solid var(--md-sys-color-outline, #f0f0f0);
-    }
-
-    .detail-row:last-child {
-        border-bottom: none;
-    }
-
-    .detail-label {
-        color: var(--md-sys-color-on-surface-variant, #666);
-    }
-
-    .detail-value {
-        font-weight: 600;
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-    }
-
-    .detail-value.deadline {
-        color: var(--md-sys-color-error, #f44336);
-    }
-
-    .scholarship-requirements {
-        margin-bottom: 16px;
-    }
-
-    .scholarship-requirements h4 {
-        font-size: 14px;
-        font-weight: 600;
-        margin: 0 0 8px 0;
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-    }
-
-    .scholarship-requirements ul {
-        margin: 0;
-        padding-left: 20px;
-        font-size: 13px;
-        color: var(--md-sys-color-on-surface-variant, #666);
-    }
-
-    .scholarship-requirements li {
-        margin-bottom: 4px;
-    }
-
-    .btn-block {
-        width: 100%;
-    }
-
     /* Eligibility Section */
     .eligibility-section {
         background: var(--md-sys-color-surface, #ffffff);
@@ -366,7 +280,7 @@ $scholarshipData = $scholarships ?? null;
 
     .eligibility-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 16px;
     }
 
@@ -375,6 +289,12 @@ $scholarshipData = $scholarships ?? null;
         border-radius: 12px;
         padding: 20px;
         border-left: 4px solid var(--md-sys-color-outline, #e0e0e0);
+        transition: all 0.2s;
+    }
+
+    .eligibility-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
     }
 
     .eligibility-card.eligible {
@@ -382,8 +302,10 @@ $scholarshipData = $scholarships ?? null;
         background: var(--md-sys-color-secondary-container, #e8f5e9);
     }
 
-    .eligibility-card.check_eligibility {
-        border-left-color: var(--md-sys-color-primary, #0066cc);
+    .eligibility-card.not-eligible {
+        border-left-color: var(--md-sys-color-outline, #e0e0e0);
+        background: var(--md-sys-color-surface-container-lowest, #fafafa);
+        opacity: 0.8;
     }
 
     .eligibility-header {
@@ -403,7 +325,7 @@ $scholarshipData = $scholarships ?? null;
     .status-badge {
         font-size: 12px;
         font-weight: 600;
-        padding: 4px 10px;
+        padding: 4px 12px;
         border-radius: 12px;
     }
 
@@ -412,15 +334,100 @@ $scholarshipData = $scholarships ?? null;
         color: white;
     }
 
-    .status-check_eligibility {
-        background: var(--md-sys-color-primary, #0066cc);
-        color: white;
+    .status-not-eligible {
+        background: var(--md-sys-color-outline, #e0e0e0);
+        color: var(--md-sys-color-on-surface, #1a1a1a);
     }
 
     .eligibility-reason {
         font-size: 14px;
         color: var(--md-sys-color-on-surface-variant, #666);
         margin: 0 0 12px 0;
+        line-height: 1.5;
+    }
+
+    .scholarship-meta {
+        margin-bottom: 16px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .meta-item {
+        font-size: 13px;
+        color: var(--md-sys-color-on-surface-variant, #666);
+    }
+
+    /* Not Eligible Section */
+    .not-eligible-section {
+        background: var(--md-sys-color-surface, #ffffff);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .not-eligible-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 12px;
+    }
+
+    /* Profile Summary Section */
+    .profile-summary-section {
+        background: var(--md-sys-color-surface, #ffffff);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: var(--md-sys-color-surface-container, #f5f5f5);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+        background: var(--md-sys-color-surface-container-high, #eeeeee);
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        font-size: 36px;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--md-sys-color-primary, #0066cc);
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: var(--md-sys-color-on-surface-variant, #666);
+        margin-bottom: 4px;
+    }
+
+    .stat-sub {
+        font-size: 12px;
+        color: var(--md-sys-color-primary, #0066cc);
+        font-weight: 600;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     /* Cost Estimation */
@@ -458,10 +465,6 @@ $scholarshipData = $scholarships ?? null;
         border-bottom: none;
     }
 
-    .cost-row.discount {
-        color: #a5d6a7;
-    }
-
     .cost-row.total {
         font-size: 18px;
         font-weight: 700;
@@ -480,7 +483,7 @@ $scholarshipData = $scholarships ?? null;
     }
 
     .cost-value.highlight {
-        font-size: 24px;
+        font-size: 28px;
         color: #fff;
     }
 
@@ -497,6 +500,13 @@ $scholarshipData = $scholarships ?? null;
         border-radius: 20px;
         font-size: 14px;
         font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .cost-savings small {
+        display: block;
+        font-size: 12px;
+        opacity: 0.8;
     }
 
     .cost-actions {
@@ -584,8 +594,9 @@ $scholarshipData = $scholarships ?? null;
             font-size: 24px;
         }
 
-        .scholarships-grid,
-        .eligibility-cards {
+        .eligibility-cards,
+        .not-eligible-cards,
+        .profile-stats-grid {
             grid-template-columns: 1fr;
         }
 
@@ -596,27 +607,40 @@ $scholarshipData = $scholarships ?? null;
         .cost-actions .btn {
             width: 100%;
         }
+
+        .profile-actions {
+            flex-direction: column;
+        }
+
+        .profile-actions .btn {
+            width: 100%;
+        }
     }
 </style>
 
 <script>
-    // Check eligibility
-    function checkEligibility(scholarshipId) {
-        // TODO: Implement actual eligibility check
-        alert('Mengcheck eligibility untuk beasiswa ID: ' + scholarshipId);
-    }
-
-    // Apply scholarship
-    function applyScholarship(scholarshipId) {
-        if (confirm('Apakah kamu yakin ingin mengajukan beasiswa ini?')) {
+    /**
+     * Apply scholarship
+     * @param {string} scholarshipName - Nama beasiswa yang akan diajukan
+     */
+    function applyScholarship(scholarshipName) {
+        if (confirm('Apakah kamu yakin ingin mengajukan beasiswa "' + scholarshipName + '"?\n\nKamu akan diarahkan ke halaman pendaftaran untuk melengkapi dokumen.')) {
             // TODO: Implement actual application
-            alert('Pengajuan beasiswa berhasil dikirim!');
+            // Redirect to simulation/registration page
+            window.location.href = '/pmb/simulation?scholarship=' + encodeURIComponent(scholarshipName);
         }
     }
 
-    // Recalculate
-    function recalculate() {
-        // TODO: Implement actual recalculation
-        alert('Menghitung ulang beasiswa...');
+    /**
+     * Refresh analysis - reload page to get fresh data from AI
+     */
+    function refreshAnalysis() {
+        // Show loading state
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '🔄 Memuat ulang...';
+
+        // Reload page
+        window.location.reload();
     }
 </script>

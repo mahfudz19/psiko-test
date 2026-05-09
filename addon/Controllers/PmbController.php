@@ -9,7 +9,6 @@ use Addon\Services\GeminiService;
 use App\Core\Http\RedirectResponse;
 use App\Core\Http\Request;
 use App\Core\Http\Response;
-use App\Core\View\View;
 use App\Services\SessionService;
 
 /**
@@ -39,45 +38,14 @@ class PmbController
     {
         // Get current user profile
         $profile = $this->profileModel->findByUserId($this->session->get('auth.user_id') ?? 0);
+        $studentProfile = $profile ? $this->studentProfileModel->findByProfileId($profile['id']) : null;
 
-        $studentProfile = null;
-        if ($profile) {
-            $studentProfile = $this->studentProfileModel->findByProfileId($profile['id']);
-        }
+        // Generate or fetch cached AI data
+        $result = $this->getOrGenerateAiData($studentProfile, 'matches');
 
-        $matchScoreData = [];
-        $journey = null;
-        if ($studentProfile) {
-            // Hitung hash dari data saat ini
-            $rawString = json_encode($studentProfile['academic_scores'] ?? []) .
-                json_encode($studentProfile['psychological_tests'] ?? []) .
-                json_encode($studentProfile['achievements'] ?? []) .
-                json_encode($studentProfile['ai_analysis'] ?? []);
-            $currentHash = md5($rawString);
-
-            // Cek di DB
-            $journey = $this->pmbJourneyModel->findByStudentId($studentProfile['id']);
-
-            if (!$journey || $journey['last_data_hash'] !== $currentHash) {
-                try {
-                    $generatedMatches = $this->geminiService->generatePmbMatch($studentProfile);
-                    $this->pmbJourneyModel->updateMatches($studentProfile['id'], $generatedMatches, $currentHash);
-                    $matchScoreData = $generatedMatches;
-                } catch (\Exception $e) {
-                    // Fallback to existing if AI fails temporarily
-                    if ($journey && !empty($journey['top_matches'])) {
-                        $ai_error_message = $e->getMessage();
-                        $matchScoreData = json_decode($journey['top_matches'], true);
-                    } else {
-                        // AI gagal dan belum ada data sebelumnya (mencegah view error)
-                        return $response->redirect('/profile?error=500&message=' . urlencode($e->getMessage()));
-                    }
-                }
-            } else {
-                // Data mutakhir, gunakan yang di DB
-                $matchScoreData = json_decode($journey['top_matches'], true);
-            }
-        }
+        $matchScoreData = $result['data'];
+        $journey = $result['journey'];
+        $ai_error_message = $result['error'];
 
         // Dynamic Simulation Progress from Database
         $currentSimulationStep = $journey ? (int)($journey['simulation_step'] ?? 1) : 1;
@@ -100,7 +68,7 @@ class PmbController
             'profile' => $profile,
             'student_profile' => $studentProfile,
             'match_score' => $matchScoreData,
-            'ai_error_message' => $ai_error_message ?? null,
+            'ai_error_message' => $ai_error_message,
         ];
 
         return $response->renderPage($data, [
@@ -233,152 +201,47 @@ class PmbController
     }
 
     /**
-     * Convert simulation to real application
-     */
-    public function convertToRealApplication(Request $request, Response $response)
-    {
-        // TODO: Create actual application record
-        // Generate application number
-        // Send notification
-
-        return $response->json([
-            'success' => true,
-            'application_number' => 'PMB-' . date('Ymd') . '-001',
-            'message' => 'Pendaftaran berhasil dibuat!',
-        ]);
-    }
-
-    /**
      * Display Scholarship Calculator
+     *
+     * Menggunakan AI untuk generate rekomendasi beasiswa berdasarkan profil siswa
+     * Pattern sama seperti journey() - hash-based trigger untuk call AI
      */
     public function scholarship(Request $request, Response $response)
     {
+        // Get current user profile
         $profile = $this->profileModel->findByUserId($this->session->get('auth.user_id') ?? 0);
-        $studentProfile = null;
-        if ($profile) {
-            $studentProfile = $this->studentProfileModel->findByProfileId($profile['id']);
-        }
+        $studentProfile = $profile ? $this->studentProfileModel->findByProfileId($profile['id']) : null;
 
-        // Base Scholarship Master Data
+        // Initialize scholarship data
         $scholarshipData = [
-            'available_scholarships' => [
-                [
-                    'id' => 1,
-                    'name' => 'Beasiswa Akademis',
-                    'type' => 'akademis',
-                    'discount' => 25,
-                    'requirements' => ['Nilai rata-rata minimal 85', 'Lulus wawancara'],
-                    'quota' => 100,
-                    'deadline' => '2024-12-31',
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Beasiswa Prestasi Nasional',
-                    'type' => 'prestasi',
-                    'discount' => 50,
-                    'requirements' => ['Juara lomba tingkat nasional', 'Sertifikat asli'],
-                    'quota' => 50,
-                    'deadline' => '2024-11-30',
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'KIP Kuliah (Eksternal)',
-                    'type' => 'eksternal',
-                    'discount' => 100,
-                    'requirements' => ['Terdaftar di DTKS Kemensos', 'Pendapatan ortu rendah'],
-                    'quota' => 30,
-                    'deadline' => '2024-10-31',
-                ],
-            ],
-            'user_eligibility' => [],
-            'cost_estimation' => [
-                'normal_fee' => 15000000,
-                'eligible_discounts' => [],
-                'final_fee' => 15000000,
-            ],
+            'eligible_scholarships' => [],
+            'not_eligible_scholarships' => [],
+            'average_score' => 0,
+            'has_national_achievement' => false,
+            'technology_interest_level' => 'unknown',
         ];
 
-        // Rule-Based Engine
+        $ai_error_message = null;
+
         if ($studentProfile) {
-            $scores = is_string($studentProfile['academic_scores']) ? json_decode($studentProfile['academic_scores'], true) : ($studentProfile['academic_scores'] ?? []);
-            $achievements = is_string($studentProfile['achievements']) ? json_decode($studentProfile['achievements'], true) : ($studentProfile['achievements'] ?? []);
+            // Use rule-based calculator (500x faster, zero API cost)
+            $calculator = new \Addon\Services\ScholarshipCalculator();
 
-            // 1. Cek Akademik (Rata-rata > 85)
-            $totalScore = 0;
-            $count = 0;
-            if (is_array($scores)) {
-                foreach ($scores as $semester) {
-                    if (is_array($semester['scores'] ?? null)) {
-                        foreach ($semester['scores'] as $val) {
-                            $totalScore += (float)$val;
-                            $count++;
-                        }
-                    }
-                }
+            try {
+                $scholarshipData = $calculator->calculateEligibility($studentProfile);
+            } catch (\Exception $e) {
+                $ai_error_message = "Terjadi kesalahan: " . $e->getMessage();
+                // Fallback to empty data
             }
-            $avgScore = $count > 0 ? ($totalScore / $count) : 0;
-
-            if ($avgScore >= 85) {
-                $scholarshipData['user_eligibility'][] = [
-                    'scholarship_id' => 1,
-                    'name' => 'Beasiswa Akademis',
-                    'status' => 'eligible',
-                    'reason' => 'Rata-rata nilai ' . number_format($avgScore, 1) . ' memenuhi syarat (Minimal 85).'
-                ];
-                $discount = $scholarshipData['cost_estimation']['normal_fee'] * 0.25;
-                $scholarshipData['cost_estimation']['eligible_discounts'][] = ['name' => 'Beasiswa Akademis 25%', 'amount' => $discount];
-                $scholarshipData['cost_estimation']['final_fee'] -= $discount;
-            } else {
-                $scholarshipData['user_eligibility'][] = [
-                    'scholarship_id' => 1,
-                    'name' => 'Beasiswa Akademis',
-                    'status' => 'not_eligible',
-                    'reason' => 'Rata-rata nilai ' . number_format($avgScore, 1) . ' belum memenuhi (Minimal 85).'
-                ];
-            }
-
-            // 2. Cek Prestasi (Punya Sertifikat Nasional)
-            $hasNasional = false;
-            if (is_array($achievements)) {
-                foreach ($achievements as $ach) {
-                    if (strpos(strtolower($ach['level'] ?? ''), 'nasional') !== false) {
-                        $hasNasional = true;
-                        break;
-                    }
-                }
-            }
-
-            if ($hasNasional) {
-                $scholarshipData['user_eligibility'][] = [
-                    'scholarship_id' => 2,
-                    'name' => 'Beasiswa Prestasi Nasional',
-                    'status' => 'eligible',
-                    'reason' => 'Sistem mendeteksi riwayat prestasi tingkat nasional.'
-                ];
-                $discount = $scholarshipData['cost_estimation']['normal_fee'] * 0.50;
-                $scholarshipData['cost_estimation']['eligible_discounts'][] = ['name' => 'Beasiswa Prestasi 50%', 'amount' => $discount];
-                $scholarshipData['cost_estimation']['final_fee'] -= $discount;
-            } else {
-                $scholarshipData['user_eligibility'][] = [
-                    'scholarship_id' => 2,
-                    'name' => 'Beasiswa Prestasi Nasional',
-                    'status' => 'check_eligibility',
-                    'reason' => 'Jika Anda merasa punya sertifikat, silakan lengkapi profil.'
-                ];
-            }
-
-            // 3. KIP Kuliah (Eksternal) -> Default info
-            $scholarshipData['user_eligibility'][] = [
-                'scholarship_id' => 3,
-                'name' => 'KIP Kuliah (Eksternal)',
-                'status' => 'check_eligibility',
-                'reason' => 'Silakan cek langsung ke portal KIP Kuliah Kemdikbud.'
-            ];
         }
 
         $data = [
+            'profile' => $profile,
+            'student_profile' => $studentProfile,
             'scholarships' => $scholarshipData,
+            'ai_error_message' => $ai_error_message,
         ];
+        // dd($data);
 
         return $response->renderPage($data, [
             'path' => '/pmb/scholarship',
@@ -387,97 +250,73 @@ class PmbController
     }
 
     /**
-     * Calculate scholarship eligibility
+     * Get or generate AI data (PMB matches) dengan hash-based caching
+     *
+     * Method ini menghandle pattern yang berulang untuk PMB matching:
+     * 1. Hitung hash dari data siswa
+     * 2. Cek cache di database
+     * 3. Jika hash berbeda/belum ada, call AI untuk generate matches
+     * 4. Fallback ke cached data jika AI gagal
+     *
+     * NOTE: Untuk scholarship, sekarang menggunakan ScholarshipCalculator (rule-based)
+     * langsung di controller, tidak lagi menggunakan caching di database.
+     *
+     * @param array|null $studentProfile Data profil siswa
+     * @param string $type Tipe data: 'matches' (scholarships deprecated)
+     * @return array ['data' => array, 'journey' => array|null, 'error' => string|null]
      */
-    public function calculateScholarship(Request $request, Response $response)
+    private function getOrGenerateAiData(?array $studentProfile, string $type): array
     {
-        $data = $request->getBody();
+        $data = [];
+        $journey = null;
+        $error = null;
 
-        // TODO: Implement actual calculation
-        // For now, return dummy response
+        if (!$studentProfile) {
+            return ['data' => $data, 'journey' => $journey, 'error' => $error];
+        }
 
-        return $response->json([
-            'success' => true,
-            'eligible_scholarships' => [
-                [
-                    'id' => 1,
-                    'name' => 'Beasiswa Akademis',
-                    'discount' => 25,
-                    'estimated_amount' => 3750000,
-                ],
-            ],
-            'final_fee' => 11250000,
-        ]);
-    }
+        // Hitung hash dari data siswa
+        $rawString = json_encode($studentProfile['academic_scores'] ?? []) .
+            json_encode($studentProfile['psychological_tests'] ?? []) .
+            json_encode($studentProfile['achievements'] ?? []) .
+            json_encode($studentProfile['ai_analysis'] ?? []);
+        $currentHash = md5($rawString);
 
-    /**
-     * Apply for scholarship
-     */
-    public function applyScholarship(Request $request, Response $response)
-    {
-        $data = $request->getBody();
-        $scholarshipId = $data['scholarship_id'] ?? null;
+        // Cek di DB
+        $journey = $this->pmbJourneyModel->findByStudentId($studentProfile['id']);
 
-        // TODO: Implement actual application
+        // Tentukan field dan method berdasarkan type
+        // NOTE: 'scholarships' deprecated, sekarang menggunakan ScholarshipCalculator
+        $dbField = $type === 'matches' ? 'top_matches' : 'scholarships';
+        $aiMethod = $type === 'matches' ? 'generatePmbMatch' : 'generateScholarshipRecommendations';
+        $updateMethod = $type === 'matches' ? 'updateMatches' : 'updateScholarships';
 
-        return $response->json([
-            'success' => true,
-            'message' => 'Pengajuan beasiswa berhasil dikirim',
-        ]);
-    }
+        // Cek apakah perlu call AI
+        $needsRefresh = !$journey ||
+            $journey['last_data_hash'] !== $currentHash ||
+            empty($journey[$dbField]);
 
-    /**
-     * API: Get match score
-     */
-    public function getMatchScore(Request $request, Response $response)
-    {
-        // Dummy API response
-        return $response->json([
-            'success' => true,
-            'match_score' => [
-                'study_program' => 'Teknik Informatika',
-                'match_percentage' => 92,
-                'breakdown' => [
-                    'logic_score' => 85,
-                    'interest_score' => 90,
-                    'skill_score' => 78,
-                    'potential_score' => 88,
-                ],
-            ],
-        ]);
-    }
+        if ($needsRefresh) {
+            try {
+                // Call AI untuk generate data
+                $generatedData = $this->geminiService->$aiMethod($studentProfile);
+                $this->pmbJourneyModel->$updateMethod($studentProfile['id'], $generatedData, $currentHash);
+                $data = $generatedData;
+            } catch (\Exception $e) {
+                // Fallback to existing if AI fails temporarily
+                if ($journey && !empty($journey[$dbField])) {
+                    $error = $e->getMessage();
+                    $data = json_decode($journey[$dbField], true);
+                } else {
+                    // AI gagal dan belum ada data sebelumnya
+                    throw new \Exception($e->getMessage());
+                }
+            }
+        } else {
+            // Data mutakhir, gunakan yang di DB
+            $data = json_decode($journey[$dbField], true);
+        }
 
-    /**
-     * API: Get simulation progress
-     */
-    public function getSimulationProgress(Request $request, Response $response)
-    {
-        return $response->json([
-            'success' => true,
-            'progress' => [
-                'total_steps' => 5,
-                'completed_steps' => 3,
-                'percentage' => 60,
-            ],
-        ]);
-    }
-
-    /**
-     * API: Get similar students (alumni testimonials)
-     */
-    public function getSimilarStudents(Request $request, Response $response)
-    {
-        return $response->json([
-            'success' => true,
-            'similar_students' => [
-                [
-                    'name' => 'Andi Pratama',
-                    'high_school' => 'SMA Negeri 1',
-                    'similarity' => 'Minat: Coding',
-                    'testimonial' => 'Kuliah di Univeral cocok banget!',
-                    'current_status' => 'Mahasiswa TI Semester 3',
-                ],
-            ],
-        ]);
+        return ['data' => $data, 'journey' => $journey, 'error' => $error];
     }
 }

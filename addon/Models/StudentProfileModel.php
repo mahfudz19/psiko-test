@@ -57,7 +57,7 @@ class StudentProfileModel extends Model
             'extracurricular' => '[{"name": "Bulu Tangkis", "role": "Pemain", "year": "2022"}, {"name": "Pramuka", "role": "Anggota", "year": "2022"}]',
             'achievements' => '[{"title": "Juara 1 Lomba Olahraga", "level": "Sekolah", "year": "2022", "certificate_url": "https://example.com/certificate.jpg"}]',
             'psychological_tests' => '[{"test_name": "Tes IQ Standar", "date": "2023-10-01", "result": "Diatas Rata-rata", "score": 115, "metrics": {"verbal": 110, "performance": 120}}, {"test_name": "Tes MBTI", "date": "2023-10-05", "result": "INTJ"}]',
-            'ai_analysis' => '{"potentials": ["Logika Matematika", "Sains"], "interests": ["Olahraga", "Musik"], "talents": ["Problem Solving"], "recommendations": ["Teknik Informatika", "Sistem Informasi"]}',
+            'ai_analysis' => null,
             'parent_name' => 'John Doe',
             'parent_phone' => '1234567890',
             'parent_email' => 'parent1@example.com',
@@ -72,7 +72,7 @@ class StudentProfileModel extends Model
             'extracurricular' => '[{"name": "PMR", "role": "Ketua", "year": "2023"}]',
             'achievements' => '[{"title": "Juara Harapan 1 Debat", "level": "Kota", "year": "2023", "certificate_url": "https://example.com/cert.jpg"}]',
             'psychological_tests' => '[{"test_name": "Tes Gaya Belajar", "date": "2023-11-01", "result": "Visual"}]',
-            'ai_analysis' => '{"potentials": ["Komunikasi", "Negosiasi"], "interests": ["Sastra", "Sosial"], "talents": ["Public Speaking"], "recommendations": ["Ilmu Komunikasi", "Hubungan Internasional"]}',
+            'ai_analysis' => null,
             'parent_name' => 'Jane Doe',
             'parent_phone' => '0987654321',
             'parent_email' => 'parent2@example.com',
@@ -398,7 +398,7 @@ class StudentProfileModel extends Model
         if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
             throw new \InvalidArgumentException('academic_scores harus berupa array of objects (multi-semester)');
         }
-        
+
         foreach ($data as $semesterIndex => $semesterData) {
             if (!is_array($semesterData) || !isset($semesterData['semester']) || !isset($semesterData['subjects'])) {
                 throw new \InvalidArgumentException("Data akademik index {$semesterIndex} harus memiliki 'semester' dan 'subjects'");
@@ -406,16 +406,16 @@ class StudentProfileModel extends Model
             if (!is_array($semesterData['subjects']) || (!empty($semesterData['subjects']) && !array_is_list($semesterData['subjects']))) {
                 throw new \InvalidArgumentException("'subjects' pada semester '{$semesterData['semester']}' harus berupa array");
             }
-            
+
             foreach ($semesterData['subjects'] as $subjectIndex => $subject) {
                 if (!is_array($subject) || !isset($subject['name'])) {
                     throw new \InvalidArgumentException("Item subject index {$subjectIndex} pada semester '{$semesterData['semester']}' harus berupa object dengan 'name'");
                 }
-                
+
                 if (isset($subject['final_score']) && !is_numeric($subject['final_score'])) {
                     throw new \InvalidArgumentException("final_score untuk '{$subject['name']}' harus berupa angka");
                 }
-                
+
                 if (isset($subject['sub_scores'])) {
                     if (!is_array($subject['sub_scores']) || array_is_list($subject['sub_scores'])) {
                         throw new \InvalidArgumentException("sub_scores untuk '{$subject['name']}' harus berupa object (key-value)");
@@ -439,18 +439,18 @@ class StudentProfileModel extends Model
         if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
             throw new \InvalidArgumentException('extracurricular harus berupa array of objects');
         }
-        
+
         $allowedKeys = ['name', 'role', 'year'];
-        
+
         foreach ($data as $index => $item) {
             if (!is_array($item)) throw new \InvalidArgumentException("Item extracurricular index {$index} harus berupa object");
-            
+
             foreach ($allowedKeys as $req) {
                 if (!array_key_exists($req, $item)) {
                     throw new \InvalidArgumentException("Item extracurricular index {$index} harus memiliki '{$req}'");
                 }
             }
-            
+
             foreach ($item as $key => $value) {
                 if (!in_array($key, $allowedKeys)) {
                     throw new \InvalidArgumentException("Key '{$key}' pada extracurricular index {$index} tidak diizinkan");
@@ -471,16 +471,16 @@ class StudentProfileModel extends Model
         if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
             throw new \InvalidArgumentException('achievements harus berupa array of objects');
         }
-        
+
         $allowedKeys = ['title', 'level', 'year', 'certificate_url'];
-        
+
         foreach ($data as $index => $item) {
             if (!is_array($item)) throw new \InvalidArgumentException("Item achievements index {$index} harus berupa object");
-            
+
             if (!isset($item['title']) || !isset($item['level']) || !isset($item['year'])) {
                 throw new \InvalidArgumentException("Item achievements index {$index} harus memiliki title, level, dan year");
             }
-            
+
             foreach ($item as $key => $value) {
                 if (!in_array($key, $allowedKeys)) {
                     throw new \InvalidArgumentException("Key '{$key}' pada achievements index {$index} tidak diizinkan");
@@ -498,26 +498,26 @@ class StudentProfileModel extends Model
         if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
             throw new \InvalidArgumentException('psychological_tests harus berupa array of objects');
         }
-        
+
         $allowedKeys = ['test_name', 'date', 'result', 'score', 'metrics', 'report_url'];
-        
+
         foreach ($data as $index => $item) {
             if (!is_array($item)) throw new \InvalidArgumentException("Item psychological_tests index {$index} harus berupa object");
-            
+
             if (!isset($item['test_name']) || !isset($item['date'])) {
                 throw new \InvalidArgumentException("Item psychological_tests index {$index} harus memiliki test_name dan date");
             }
-            
+
             foreach ($item as $key => $value) {
                 if (!in_array($key, $allowedKeys)) {
                     throw new \InvalidArgumentException("Key '{$key}' pada psychological_tests index {$index} tidak diizinkan");
                 }
             }
-            
+
             if (isset($item['score']) && $item['score'] !== null && !is_numeric($item['score'])) {
                 throw new \InvalidArgumentException("Nilai score pada psychological_tests index {$index} harus berupa angka atau null");
             }
-            
+
             if (isset($item['metrics'])) {
                 if (!is_array($item['metrics']) || array_is_list($item['metrics'])) {
                     throw new \InvalidArgumentException("metrics pada psychological_tests index {$index} harus berupa object (key-value)");
@@ -540,14 +540,14 @@ class StudentProfileModel extends Model
         if (!is_array($data) || (!empty($data) && array_is_list($data))) {
             throw new \InvalidArgumentException('ai_analysis harus berupa object');
         }
-        
+
         $allowedKeys = ['summary', 'potential', 'interests', 'talents', 'recommendations', 'career_suggestions', 'generated_at', 'last_data_hash'];
-        
+
         foreach ($data as $key => $value) {
             if (!in_array($key, $allowedKeys)) {
                 throw new \InvalidArgumentException("Key '{$key}' pada ai_analysis tidak diizinkan");
             }
-            
+
             // Validasi string keys
             if (in_array($key, ['summary', 'generated_at', 'last_data_hash'])) {
                 if (!is_string($value)) {

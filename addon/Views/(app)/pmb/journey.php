@@ -71,20 +71,20 @@ $userName = $profile['user_name'] ?? 'Siswa';
 
                 <!-- Skills Breakdown (Hapus jika data tidak ada) -->
                 <?php if (!empty($matchScore['top_match']['skills_breakdown'])): ?>
-                <div class="skills-breakdown">
-                    <h4>Analisis Kompetensi</h4>
-                    <?php foreach ($matchScore['top_match']['skills_breakdown'] as $skill): ?>
-                        <div class="skill-bar">
-                            <div class="skill-info">
-                                <span class="skill-name"><?= htmlspecialchars($skill['name']) ?></span>
-                                <span class="skill-score"><?= $skill['score'] ?>%</span>
+                    <div class="skills-breakdown">
+                        <h4>Analisis Kompetensi</h4>
+                        <?php foreach ($matchScore['top_match']['skills_breakdown'] as $skill): ?>
+                            <div class="skill-bar">
+                                <div class="skill-info">
+                                    <span class="skill-name"><?= htmlspecialchars($skill['name']) ?></span>
+                                    <span class="skill-score"><?= $skill['score'] ?>%</span>
+                                </div>
+                                <div class="skill-progress">
+                                    <div class="skill-progress-bar" style="width: <?= $skill['score'] ?>%"></div>
+                                </div>
                             </div>
-                            <div class="skill-progress">
-                                <div class="skill-progress-bar" style="width: <?= $skill['score'] ?>%"></div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
 
                 <!-- Kenapa Cocok? (Alasan dari AI) -->
@@ -103,10 +103,10 @@ $userName = $profile['user_name'] ?? 'Siswa';
                             <span>Akreditasi <?= htmlspecialchars($matchScore['top_match']['accreditation'] ?? 'A') ?></span>
                         </div>
                         <?php if (!empty($matchScore['top_match']['degree_type'])): ?>
-                        <div class="reason-item">
-                            <span class="reason-icon">🎓</span>
-                            <span>Jenjang <?= htmlspecialchars($matchScore['top_match']['degree_type']) ?></span>
-                        </div>
+                            <div class="reason-item">
+                                <span class="reason-icon">🎓</span>
+                                <span>Jenjang <?= htmlspecialchars($matchScore['top_match']['degree_type']) ?></span>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -133,54 +133,54 @@ $userName = $profile['user_name'] ?? 'Siswa';
 
         <!-- Career Path Timeline -->
         <?php if (!empty($matchScore['career_paths'])): ?>
-        <div class="career-path-section">
-            <div class="section-header">
-                <h2>📊 Masa Depanmu di <?= env('APP_NAME') ?></h2>
-                <p class="section-description">Perjalanan akademismu dari semester 1 hingga graduation</p>
-            </div>
+            <div class="career-path-section">
+                <div class="section-header">
+                    <h2>📊 Masa Depanmu di <?= env('APP_NAME') ?></h2>
+                    <p class="section-description">Perjalanan akademismu dari semester 1 hingga graduation</p>
+                </div>
 
-            <div class="timeline-container">
-                <?php foreach ($matchScore['career_paths'] as $index => $path): ?>
-                    <div class="timeline-item">
-                        <div class="timeline-marker">
-                            <span class="marker-icon">
-                                <?php if ($index === 0): ?>📚
-                                <?php elseif ($index === 1): ?>🎯
-                                <?php elseif ($index === 2): ?>💼
-                                <?php else: ?>🎓<?php endif; ?>
-                            </span>
-                        </div>
-                        <div class="timeline-content">
-                            <div class="timeline-header">
-                                <span class="timeline-semester"><?= htmlspecialchars($path['semester'] ?? '') ?></span>
-                                <span class="timeline-title"><?= htmlspecialchars($path['title'] ?? '') ?></span>
+                <div class="timeline-container">
+                    <?php foreach ($matchScore['career_paths'] as $index => $path): ?>
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <span class="marker-icon">
+                                    <?php if ($index === 0): ?>📚
+                                    <?php elseif ($index === 1): ?>🎯
+                                    <?php elseif ($index === 2): ?>💼
+                                    <?php else: ?>🎓<?php endif; ?>
+                                </span>
                             </div>
-                            <p class="timeline-description"><?= htmlspecialchars($path['description'] ?? '') ?></p>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <span class="timeline-semester"><?= htmlspecialchars($path['semester'] ?? '') ?></span>
+                                    <span class="timeline-title"><?= htmlspecialchars($path['title'] ?? '') ?></span>
+                                </div>
+                                <p class="timeline-description"><?= htmlspecialchars($path['description'] ?? '') ?></p>
+                            </div>
+                            <?php if ($index < count($matchScore['career_paths']) - 1): ?>
+                                <div class="timeline-connector"></div>
+                            <?php endif; ?>
                         </div>
-                        <?php if ($index < count($matchScore['career_paths']) - 1): ?>
-                            <div class="timeline-connector"></div>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
-        </div>
         <?php endif; ?>
 
         <!-- Partner Companies -->
         <?php if (!empty($matchScore['partner_companies'])): ?>
-        <div class="partner-section">
-            <div class="section-header">
-                <h2>🏢 Partner Companies untuk Internship</h2>
+            <div class="partner-section">
+                <div class="section-header">
+                    <h2>🏢 Partner Companies untuk Internship</h2>
+                </div>
+                <div class="partners-grid">
+                    <?php foreach ($matchScore['partner_companies'] as $company): ?>
+                        <div class="partner-card">
+                            <h4><?= htmlspecialchars($company['name'] ?? '') ?></h4>
+                            <p><?= htmlspecialchars($company['type'] ?? '') ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
             </div>
-            <div class="partners-grid">
-                <?php foreach ($matchScore['partner_companies'] as $company): ?>
-                    <div class="partner-card">
-                        <h4><?= htmlspecialchars($company['name'] ?? '') ?></h4>
-                        <p><?= htmlspecialchars($company['type'] ?? '') ?></p>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
         <?php endif; ?>
 
         <!-- Scholarship Section -->
@@ -235,7 +235,7 @@ $userName = $profile['user_name'] ?? 'Siswa';
                 <div class="steps-list">
                     <?php foreach ($matchScore['simulation_progress']['steps'] as $step): ?>
                         <div class="step-item <?= $step['is_completed'] ? 'completed' : 'pending' ?>">
-                            <span class="step-icon"><?= $step['is_completed'] ? '✅' : '⏳' ?></span>
+                            <span class="step-icon"><?= $step['is_completed'] ? '✅' : '❌' ?></span>
                             <span class="step-name"><?= htmlspecialchars($step['name']) ?></span>
                         </div>
                     <?php endforeach; ?>

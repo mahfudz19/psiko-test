@@ -16,13 +16,83 @@ class GeminiService
     private string $modelName;
 
     /**
+     * Data hardcoded Universitas Univeral - Phase 1 (MVP)
+     * Akan diganti dengan API integration di Phase 2
+     */
+    private array $universitasUniveral = [
+        'name' => 'Universitas Univeral',
+        'faculties' => [
+            [
+                'name' => 'Fakultas Teknologi',
+                'programs' => [
+                    ['name' => 'Teknik Informatika', 'degree_type' => 'S1', 'accreditation' => 'Unggul'],
+                    ['name' => 'Sistem Informasi', 'degree_type' => 'S1', 'accreditation' => 'Unggul'],
+                    ['name' => 'Teknologi Informasi', 'degree_type' => 'D3', 'accreditation' => 'B'],
+                ]
+            ],
+            [
+                'name' => 'Fakultas Bisnis Digital',
+                'programs' => [
+                    ['name' => 'Bisnis Digital', 'degree_type' => 'S1', 'accreditation' => 'Unggul'],
+                    ['name' => 'Manajemen', 'degree_type' => 'S1', 'accreditation' => 'A'],
+                    ['name' => 'Akuntansi', 'degree_type' => 'S1', 'accreditation' => 'A'],
+                ]
+            ],
+            [
+                'name' => 'Fakultas Desain Komunikasi Visual',
+                'programs' => [
+                    ['name' => 'Desain Komunikasi Visual', 'degree_type' => 'S1', 'accreditation' => 'Unggul'],
+                    ['name' => 'Desain Produk', 'degree_type' => 'S1', 'accreditation' => 'B'],
+                ]
+            ],
+            [
+                'name' => 'Fakultas Ilmu Komunikasi',
+                'programs' => [
+                    ['name' => 'Ilmu Komunikasi', 'degree_type' => 'S1', 'accreditation' => 'Unggul'],
+                    ['name' => 'Broadcasting', 'degree_type' => 'S1', 'accreditation' => 'B'],
+                    ['name' => 'Public Relations', 'degree_type' => 'S1', 'accreditation' => 'A'],
+                ]
+            ],
+        ],
+        'scholarships' => [
+            [
+                'name' => 'Beasiswa Unggulan',
+                'discount' => 100,
+                'type' => 'Akademik',
+                'requirements' => ['Nilai rata-rata > 90', 'Lulus wawancara'],
+            ],
+            [
+                'name' => 'Beasiswa Prestasi',
+                'discount' => 50,
+                'type' => 'Prestasi',
+                'requirements' => ['Juara lomba tingkat nasional', 'Sertifikat asli'],
+            ],
+            [
+                'name' => 'Beasiswa Teknologi',
+                'discount' => 25,
+                'type' => 'Minat Bakat',
+                'requirements' => ['Minat tinggi di bidang teknologi', 'Portfolio coding'],
+            ],
+        ],
+    ];
+
+    /**
      * Constructor - inisialisasi konfigurasi Gemini API
+     * @throws \RuntimeException Jika API key tidak dikonfigurasi
      */
     public function __construct()
     {
         $this->apiKey = env('GEMINI_PROJECT_KEY');
-        $this->apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-        $this->modelName = 'gemini-3-flash-preview';
+        $this->apiUrl = env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta/models');
+        $this->modelName = env('GEMINI_MODEL', 'gemini-2.5-flash-preview-05-20');
+
+        // Validate required configuration
+        if (empty($this->apiKey)) {
+            throw new \RuntimeException(
+                "GEMINI_PROJECT_KEY tidak dikonfigurasi. " .
+                    "Silakan tambahkan 'GEMINI_PROJECT_KEY=your_api_key' di file .env"
+            );
+        }
     }
 
     /**
@@ -87,17 +157,17 @@ class GeminiService
     private function buildSystemInstruction(?array $contextData): string
     {
         $baseInstruction = <<<INSTRUCTION
-Anda adalah asisten konselor sekolah yang ramah, suportif, dan profesional. 
-Tugas Anda adalah membantu siswa memahami potensi, minat, dan bakat mereka berdasarkan hasil tes psikologi.
+            Anda adalah asisten konselor sekolah yang ramah, suportif, dan profesional. 
+            Tugas Anda adalah membantu siswa memahami potensi, minat, dan bakat mereka berdasarkan hasil tes psikologi.
 
-Pedoman respons:
-1. Gunakan bahasa Indonesia yang santai namun tetap profesional
-2. Berikan penjelasan yang mudah dipahami siswa SMA
-3. Fokus pada kekuatan dan potensi siswa
-4. Berikan saran yang actionable dan realistis
-5. Hindari memberikan diagnosis atau label negatif
-6. Dorong siswa untuk mengembangkan potensi mereka
-INSTRUCTION;
+            Pedoman respons:
+            1. Gunakan bahasa Indonesia yang santai namun tetap profesional
+            2. Berikan penjelasan yang mudah dipahami siswa SMA
+            3. Fokus pada kekuatan dan potensi siswa
+            4. Berikan saran yang actionable dan realistis
+            5. Hindari memberikan diagnosis atau label negatif
+            6. Dorong siswa untuk mengembangkan potensi mereka
+        INSTRUCTION;
 
         if (empty($contextData)) {
             return $baseInstruction;
@@ -317,28 +387,28 @@ INSTRUCTION;
         $prompt .= "=== INSTRUKSI OUTPUT ===\n";
         $prompt .= "Anda WAJIB memberikan respons HANYA dalam format JSON yang valid. Jangan tambahkan teks apa pun di luar JSON. Gunakan skema JSON berikut:\n";
         $prompt .= <<<JSON
-{
-  "summary": "Ringkasan eksekutif tentang profil siswa (1 paragraf kuat)",
-  "potential": [
-    "Potensi 1", "Potensi 2", "Potensi 3"
-  ],
-  "interests": [
-    {"name": "Nama Minat 1", "level": 85},
-    {"name": "Nama Minat 2", "level": 70}
-  ],
-  "talents": [
-    {"name": "Bakat Utama", "icon": "⭐", "score": 90},
-    {"name": "Bakat Tambahan", "icon": "🎨", "score": 80}
-  ],
-  "recommendations": [
-    "Saran pengembangan diri 1",
-    "Saran pengembangan diri 2"
-  ],
-  "career_suggestions": [
-    "Profesi A", "Profesi B", "Profesi C"
-  ]
-}
-JSON;
+            {
+            "summary": "Ringkasan eksekutif tentang profil siswa (1 paragraf kuat)",
+            "potential": [
+                "Potensi 1", "Potensi 2", "Potensi 3"
+            ],
+            "interests": [
+                {"name": "Nama Minat 1", "level": 85},
+                {"name": "Nama Minat 2", "level": 70}
+            ],
+            "talents": [
+                {"name": "Bakat Utama", "icon": "⭐", "score": 90},
+                {"name": "Bakat Tambahan", "icon": "🎨", "score": 80}
+            ],
+            "recommendations": [
+                "Saran pengembangan diri 1",
+                "Saran pengembangan diri 2"
+            ],
+            "career_suggestions": [
+                "Profesi A", "Profesi B", "Profesi C"
+            ]
+            }
+        JSON;
 
         return $prompt;
     }
@@ -385,8 +455,25 @@ JSON;
     private function buildPmbMatchPrompt(array $studentData): string
     {
         $prompt = "Tugas Anda adalah sebagai Konsultan Penerimaan Mahasiswa Baru yang proaktif.\n";
-        $prompt .= "Tujuan Utama: Arahkan siswa untuk mendaftar ke Program Studi di Universitas Univeral (Kampus ini hanya memiliki Fakultas: Teknologi/IT, Bisnis Digital, Desain Komunikasi Visual, Ilmu Komunikasi). Cocokkan dengan data mereka sebaik mungkin.\n";
-        $prompt .= "Skenario Fallback: Jika potensi siswa SANGAT BERTOLAK BELAKANG (misal: murni ingin Kedokteran/Farmasi yang tidak ada di Universitas Univeral), Anda BISA merekomendasikan kampus eksternal, NAMUN tetap tawarkan 1 opsi terdekat di Universitas Univeral sebagai alternatif cadangan.\n\n";
+        $prompt .= "Tujuan Utama: Arahkan siswa untuk mendaftar ke Program Studi di {$this->universitasUniveral['name']}.\n";
+        $prompt .= "Skenario Fallback: Jika potensi siswa SANGAT BERTOLAK BELAKANG (misal: murni ingin Kedokteran/Farmasi yang tidak ada di {$this->universitasUniveral['name']}), Anda BISA merekomendasikan kampus eksternal, NAMUN tetap tawarkan 1 opsi terdekat di {$this->universitasUniveral['name']} sebagai alternatif cadangan.\n\n";
+
+        // Informasi Fakultas dan Program Studi
+        $prompt .= "=== FAKULTAS DAN PROGRAM STUDI DI {$this->universitasUniveral['name']} ===\n";
+        foreach ($this->universitasUniveral['faculties'] as $faculty) {
+            $prompt .= "\n{$faculty['name']}:\n";
+            foreach ($faculty['programs'] as $program) {
+                $prompt .= "  • {$program['name']} ({$program['degree_type']}, Akreditasi {$program['accreditation']})\n";
+            }
+        }
+
+        // Informasi Beasiswa
+        $prompt .= "\n=== BEASISWA YANG TERSEDIA ===\n";
+        foreach ($this->universitasUniveral['scholarships'] as $scholarship) {
+            $prompt .= "- {$scholarship['name']} ({$scholarship['discount']}% - {$scholarship['type']}): " .
+                implode(', ', $scholarship['requirements']) . "\n";
+        }
+        $prompt .= "\n";
 
         if (!empty($studentData['academic_scores'])) {
             $prompt .= "=== DATA AKADEMIK ===\n" . json_encode($studentData['academic_scores']) . "\n\n";
@@ -403,33 +490,55 @@ JSON;
 
         $prompt .= "Respons WAJIB dalam format JSON murni berikut (tanpa blok markdown):\n";
         $prompt .= <<<JSON
-{
-  "top_match": {
-    "university": "Universitas Univeral",
-    "study_program": "Nama Jurusan Terbaik",
-    "degree_type": "S1/D3",
-    "accreditation": "Unggul/A/B",
-    "match_percentage": 95,
-    "reason": "Alasan spesifik kenapa sangat cocok."
-  },
-  "other_matches": [
-    {
-      "university": "Nama Kampus",
-      "study_program": "Nama Jurusan Alternatif",
-      "match_percentage": 85,
-      "reason": "..."
-    }
-  ],
-  "career_paths": [
-    {"semester": "1-2", "title": "Fundamental", "description": "..."},
-    {"semester": "Graduation", "title": "Profesi Impian", "description": "..."}
-  ],
-  "partner_companies": [
-    {"name": "Nama Perusahaan Top Terkait", "type": "Bidang Industri"}
-  ]
-}
-JSON;
+            {
+            "top_match": {
+                "university": "Universitas Univeral",
+                "study_program": "Nama Jurusan Terbaik",
+                "degree_type": "S1/D3",
+                "accreditation": "Unggul/A/B",
+                "match_percentage": 95,
+                "reason": "Alasan spesifik kenapa sangat cocok."
+            },
+            "other_matches": [
+                {
+                "university": "Nama Kampus",
+                "study_program": "Nama Jurusan Alternatif",
+                "match_percentage": 85,
+                "reason": "..."
+                }
+            ],
+            "career_paths": [
+                {"semester": "1-2", "title": "Fundamental", "description": "..."},
+                {"semester": "Graduation", "title": "Profesi Impian", "description": "..."}
+            ],
+            "partner_companies": [
+                {"name": "Nama Perusahaan Top Terkait", "type": "Bidang Industri"}
+            ]
+            }
+        JSON;
         return $prompt;
+    }
+
+    /**
+     * @deprecated Use ScholarshipCalculator::calculateEligibility() instead
+     *
+     * Generate scholarship recommendations using AI
+     * This method will be removed in future versions.
+     * Rule-based calculation is now preferred for:
+     * - Better performance (500x faster)
+     * - Zero API cost
+     * - 100% deterministic results
+     *
+     * @param array $studentData Data siswa lengkap
+     * @return array Scholarship recommendations
+     */
+    public function generateScholarshipRecommendations(array $studentData): array
+    {
+        // Deprecated: Use rule-based ScholarshipCalculator instead
+        throw new \LogicException(
+            "generateScholarshipRecommendations() is deprecated. " .
+                "Use ScholarshipCalculator::calculateEligibility() for rule-based calculation."
+        );
     }
 
     /**

@@ -13,40 +13,32 @@ class PmbJourneyModel extends Model
     protected array $schema = [
         'id' => ['type' => 'id', 'primary' => true, 'auto_increment' => true],
         'student_profile_id' => [
-            'type' => 'bigint', 'unsigned' => true,
+            'type' => 'bigint',
+            'unsigned' => true,
             'foreign' => 'student_profiles.id',
             'on_delete' => 'cascade'
         ],
         // Data hasil analisis AI untuk PMB
-        'top_matches' => ['type' => 'json', 'nullable' => true], 
+        'top_matches' => ['type' => 'json', 'nullable' => true],
         'scholarships' => ['type' => 'json', 'nullable' => true],
-        
+
         // Tracking status simulasi pendaftaran
         'simulation_status' => [
-            'type' => 'enum', 
-            'values' => ['not_started', 'in_progress', 'completed', 'converted'], 
+            'type' => 'enum',
+            'values' => ['not_started', 'in_progress', 'completed', 'converted'],
             'default' => 'not_started'
         ],
         'simulation_step' => ['type' => 'int', 'default' => 1],
         'simulation_data' => ['type' => 'json', 'nullable' => true], // Data form pendaftaran mentah
-        
+
         // Hash untuk mendeteksi kapan perlu update data AI
         'last_data_hash' => ['type' => 'varchar', 'length' => 255, 'nullable' => true],
-        
+
         'created_at' => ['type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP'],
         'updated_at' => ['type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP', 'on_update' => 'CURRENT_TIMESTAMP'],
     ];
 
-    protected array $seed = [
-        [
-            'student_profile_id' => 1,
-            'top_matches' => '{"top_match": {"study_program": "Bisnis Digital", "degree_type": "S1", "accreditation": "Unggul", "match_percentage": 95, "reason": "Kombinasi nilai matematika tinggi dan minat pada teknologi modern."}, "other_matches": [{"study_program": "Sistem Informasi", "match_percentage": 88}, {"study_program": "Ilmu Komunikasi", "match_percentage": 82}]}',
-            'scholarships' => '[{"name": "Beasiswa Prestasi Gemilang", "percentage": 100, "type": "Akademik", "reason": "Memenuhi syarat rata-rata nilai > 90 dan prestasi tingkat nasional."}, {"name": "Beasiswa Jalur Minat Bakat", "percentage": 50, "type": "Non-Akademik", "reason": "Cocok dengan potensi kepemimpinan."}]',
-            'simulation_status' => 'not_started',
-            'simulation_step' => 1,
-            'last_data_hash' => 'dummy_hash_123',
-        ]
-    ];
+    protected array $seed = [];
 
     public function all(): array
     {
@@ -66,28 +58,28 @@ class PmbJourneyModel extends Model
     public function create(array $data): bool
     {
         if (empty($data)) return false;
-        
+
         $columns = array_keys($data);
         $placeholders = array_map(fn($col) => ':' . $col, $columns);
-        
+
         $sql = "INSERT INTO {$this->table} (" . implode(', ', $columns) . ")
                 VALUES (" . implode(', ', $placeholders) . ")";
-        
+
         return $this->getDb()->query($sql, $data);
     }
 
     public function updateById(string|int $id, array $data): bool
     {
         if (empty($data)) return false;
-        
+
         $setParts = [];
         foreach ($data as $column => $value) {
             $setParts[] = "{$column} = :{$column}";
         }
-        
+
         $sql = "UPDATE {$this->table} SET " . implode(', ', $setParts) . " WHERE id = :id";
         $data['id'] = $id;
-        
+
         return $this->getDb()->query($sql, $data);
     }
 
@@ -115,7 +107,7 @@ class PmbJourneyModel extends Model
     public function updateMatches(int $studentProfileId, array $matches, string $hash): bool
     {
         $journey = $this->findByStudentId($studentProfileId);
-        
+
         $data = [
             'top_matches' => json_encode($matches),
             'last_data_hash' => $hash
@@ -130,12 +122,24 @@ class PmbJourneyModel extends Model
     }
 
     /**
+     * @deprecated Scholarship sekarang menggunakan rule-based calculation (tidak perlu simpan ke DB)
+     * Use ScholarshipCalculator::calculateEligibility() langsung di controller
+     */
+    public function updateScholarships(int $studentProfileId, array $scholarships, string $hash): bool
+    {
+        throw new \LogicException(
+            "updateScholarships() is deprecated. " .
+                "Scholarship sekarang menggunakan rule-based calculation langsung di controller."
+        );
+    }
+
+    /**
      * Update simulation progress
      */
     public function updateSimulationProgress(int $studentProfileId, int $step, array $simulationData, string $status = 'in_progress'): bool
     {
         $journey = $this->findByStudentId($studentProfileId);
-        
+
         $data = [
             'simulation_step' => $step,
             'simulation_status' => $status,

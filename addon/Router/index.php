@@ -67,6 +67,7 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
     $router->get('/profile/achievements', [ProfileController::class, 'achievements']);
     $router->post('/profile/achievements', [ProfileController::class, 'updateAchievements'], ['csrf']);
     $router->get('/profile/results', [ProfileController::class, 'results']);
+    $router->post('/profile/results/generate', [ProfileController::class, 'generateAiAnalysis'], ['csrf']);
 
     // Teacher routes
     $router->get('/profile/students', [ProfileController::class, 'listStudents']);

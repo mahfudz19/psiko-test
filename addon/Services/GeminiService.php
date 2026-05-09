@@ -275,6 +275,75 @@ INSTRUCTION;
     }
 
     /**
+     * Generate analisis profil siswa secara komprehensif (Akademik, Psikologi, Prestasi)
+     * Format output: JSON String
+     */
+    public function generateProfileAnalysis(array $studentData): string
+    {
+        $prompt = $this->buildProfileAnalysisPrompt($studentData);
+        $response = $this->chatSimple($prompt);
+        
+        // Membersihkan markdown block json jika ada (```json ... ```)
+        $content = $response['content'];
+        $content = preg_replace('/```json\s*/', '', $content);
+        $content = preg_replace('/```\s*$/', '', $content);
+        
+        return trim($content);
+    }
+
+    /**
+     * Build prompt untuk analisis profil lengkap (dengan output JSON)
+     */
+    private function buildProfileAnalysisPrompt(array $studentData): string
+    {
+        $prompt = "Berperanlah sebagai psikolog pendidikan dan konselor karir ahli. ";
+        $prompt .= "Berdasarkan data siswa berikut (Akademik, Psikologi, Prestasi), berikan analisis potensi yang komprehensif.\n\n";
+
+        if (!empty($studentData['academic_scores'])) {
+            $prompt .= "=== DATA AKADEMIK (Nilai Rapor per Semester) ===\n";
+            $prompt .= json_encode($studentData['academic_scores'], JSON_PRETTY_PRINT) . "\n\n";
+        }
+
+        if (!empty($studentData['psychological_tests'])) {
+            $prompt .= "=== DATA TES PSIKOLOGI ===\n";
+            $prompt .= json_encode($studentData['psychological_tests'], JSON_PRETTY_PRINT) . "\n\n";
+        }
+
+        if (!empty($studentData['achievements'])) {
+            $prompt .= "=== DATA PRESTASI ===\n";
+            $prompt .= json_encode($studentData['achievements'], JSON_PRETTY_PRINT) . "\n\n";
+        }
+
+        $prompt .= "=== INSTRUKSI OUTPUT ===\n";
+        $prompt .= "Anda WAJIB memberikan respons HANYA dalam format JSON yang valid. Jangan tambahkan teks apa pun di luar JSON. Gunakan skema JSON berikut:\n";
+        $prompt .= <<<JSON
+{
+  "summary": "Ringkasan eksekutif tentang profil siswa (1 paragraf kuat)",
+  "potential": [
+    "Potensi 1", "Potensi 2", "Potensi 3"
+  ],
+  "interests": [
+    {"name": "Nama Minat 1", "level": 85},
+    {"name": "Nama Minat 2", "level": 70}
+  ],
+  "talents": [
+    {"name": "Bakat Utama", "icon": "⭐", "score": 90},
+    {"name": "Bakat Tambahan", "icon": "🎨", "score": 80}
+  ],
+  "recommendations": [
+    "Saran pengembangan diri 1",
+    "Saran pengembangan diri 2"
+  ],
+  "career_suggestions": [
+    "Profesi A", "Profesi B", "Profesi C"
+  ]
+}
+JSON;
+
+        return $prompt;
+    }
+
+    /**
      * Test koneksi ke Gemini API
      */
     public function testConnection(): bool

@@ -541,18 +541,22 @@ class StudentProfileModel extends Model
             throw new \InvalidArgumentException('ai_analysis harus berupa object');
         }
         
-        $allowedKeys = ['potentials', 'interests', 'talents', 'recommendations'];
+        $allowedKeys = ['summary', 'potential', 'interests', 'talents', 'recommendations', 'career_suggestions', 'generated_at', 'last_data_hash'];
         
         foreach ($data as $key => $value) {
             if (!in_array($key, $allowedKeys)) {
                 throw new \InvalidArgumentException("Key '{$key}' pada ai_analysis tidak diizinkan");
             }
-            if (!is_array($value) || (!empty($value) && !array_is_list($value))) {
-                throw new \InvalidArgumentException("Nilai '{$key}' pada ai_analysis harus berupa array berurutan (list)");
-            }
-            foreach ($value as $item) {
-                if (!is_string($item)) {
-                    throw new \InvalidArgumentException("Item di dalam array '{$key}' ai_analysis harus berupa string");
+            
+            // Validasi string keys
+            if (in_array($key, ['summary', 'generated_at', 'last_data_hash'])) {
+                if (!is_string($value)) {
+                    throw new \InvalidArgumentException("Nilai '{$key}' pada ai_analysis harus berupa string");
+                }
+            } else {
+                // Sisa keys harus array (bisa array of strings atau array of objects)
+                if (!is_array($value)) {
+                    throw new \InvalidArgumentException("Nilai '{$key}' pada ai_analysis harus berupa array");
                 }
             }
         }

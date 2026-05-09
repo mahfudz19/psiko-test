@@ -241,40 +241,24 @@ class ProfileController
 
         $data = $request->getBody();
 
-        // Handle academic scores dari smart textarea atau manual entry
-        $academicScores = [];
-
-        // Jika ada parsed_scores_data dari smart textarea
-        if (!empty($data['parsed_scores_data'])) {
-            try {
-                $parsedScores = json_decode($data['parsed_scores_data'], true);
-                if (is_array($parsedScores)) {
-                    foreach ($parsedScores as $score) {
-                        if (!empty($score['subject']) && isset($score['grade'])) {
-                            $academicScores[] = [
-                                'subject' => htmlspecialchars($score['subject']),
-                                'grade' => (int)$score['grade']
-                            ];
+        // Handle academic scores dari input JSON hidden field
+        $academicScoresJson = null;
+        if (!empty($data['academic_scores_json'])) {
+            $decoded = json_decode($data['academic_scores_json'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // Konversi string numerik menjadi float/int agar lolos validasi is_numeric di model
+                foreach ($decoded as &$semester) {
+                    if (isset($semester['subjects']) && is_array($semester['subjects'])) {
+                        foreach ($semester['subjects'] as &$subject) {
+                            if (isset($subject['final_score']) && $subject['final_score'] !== '') {
+                                $subject['final_score'] = $subject['final_score'] + 0;
+                            } else {
+                                unset($subject['final_score']);
+                            }
                         }
                     }
                 }
-            } catch (\Exception $e) {
-                // Ignore parsing error, fallback to manual input
-            }
-        }
-
-        // Jika tidak ada parsed scores, gunakan manual input (format lama)
-        if (empty($academicScores) && !empty($data['academic_scores'])) {
-            $subjects = $data['academic_scores']['subject'] ?? [];
-            $grades = $data['academic_scores']['grade'] ?? [];
-
-            foreach ($subjects as $index => $subject) {
-                if (!empty($subject) && isset($grades[$index])) {
-                    $academicScores[] = [
-                        'subject' => htmlspecialchars($subject),
-                        'grade' => (int)$grades[$index]
-                    ];
-                }
+                $academicScoresJson = json_encode($decoded);
             }
         }
 
@@ -283,7 +267,7 @@ class ProfileController
             'student_id' => $data['student_id'] ?? null,
             'grade_level' => $data['grade_level'] ?? null,
             'major' => $data['major'] ?? null,
-            'academic_scores' => !empty($academicScores) ? json_encode($academicScores, JSON_PRETTY_PRINT) : null,
+            'academic_scores' => $academicScoresJson,
             'parent_name' => $data['parent_name'] ?? null,
             'parent_phone' => $data['parent_phone'] ?? null,
             'parent_email' => $data['parent_email'] ?? null
@@ -340,14 +324,43 @@ class ProfileController
 
         $achievementData = [];
 
-        // Update extracurricular
-        if (!empty($data['extracurricular'])) {
-            $achievementData['extracurricular'] = json_encode($data['extracurricular']);
+        // Update extracurricular (Map array of columns to array of objects)
+        if (!empty($data['extracurricular']['name'])) {
+            $extra = [];
+            foreach ($data['extracurricular']['name'] as $idx => $name) {
+                if (!empty($name)) {
+                    $extra[] = [
+                        'name' => $name,
+                        'position' => $data['extracurricular']['position'][$idx] ?? null,
+                        'year_start' => $data['extracurricular']['year_start'][$idx] ?? null,
+                        'year_end' => $data['extracurricular']['year_end'][$idx] ?? null,
+                        'description' => $data['extracurricular']['description'][$idx] ?? null,
+                    ];
+                }
+            }
+            $achievementData['extracurricular'] = json_encode($extra);
+        } else {
+            $achievementData['extracurricular'] = json_encode([]);
         }
 
-        // Update achievements
-        if (!empty($data['achievements'])) {
-            $achievementData['achievements'] = json_encode($data['achievements']);
+        // Update achievements (Map array of columns to array of objects)
+        if (!empty($data['achievements']['name'])) {
+            $ach = [];
+            foreach ($data['achievements']['name'] as $idx => $name) {
+                if (!empty($name)) {
+                    $ach[] = [
+                        'name' => $name,
+                        'rank' => $data['achievements']['rank'][$idx] ?? null,
+                        'level' => $data['achievements']['level'][$idx] ?? null,
+                        'year' => $data['achievements']['year'][$idx] ?? null,
+                        'organizer' => $data['achievements']['organizer'][$idx] ?? null,
+                        'description' => $data['achievements']['description'][$idx] ?? null,
+                    ];
+                }
+            }
+            $achievementData['achievements'] = json_encode($ach);
+        } else {
+            $achievementData['achievements'] = json_encode([]);
         }
 
         if ($studentProfile && !empty($achievementData)) {
@@ -376,6 +389,69 @@ class ProfileController
             'profile' => $userProfile,
             'studentProfile' => $studentProfile
         ], ['path' => '/profile/results', 'meta' => ['title' => 'Hasil Psykotest | ' . env('APP_NAME')]]);
+    }
+
+    /**
+     * Generate AI Analysis using Gemini
+     */
+    public function generateAiAnalysis(Request $request, Response $response)
+    {
+        $currentUser = $this->session->get('auth.user_id');
+        $currentRole = $this->session->get('auth.user_role');
+
+        if ($currentRole !== 'user') {
+            throw new AuthorizationException('Forbidden');
+        }
+
+        $userProfile = $this->profileModel->findByUserId($currentUser);
+        $studentProfile = $this->studentModel->findByProfileId($userProfile['id']);
+
+        if (!$studentProfile) {
+            return $response->redirect('/profile/results?error=' . urlencode('Profil siswa tidak ditemukan'));
+        }
+
+        // Calculate Current Hash
+        $academic = $studentProfile['academic_scores'] ?? '';
+        $psycho = $studentProfile['psychological_tests'] ?? '';
+        $achievements = $studentProfile['achievements'] ?? '';
+        $currentHash = md5($academic . $psycho . $achievements);
+
+        $aiAnalysis = !empty($studentProfile['ai_analysis']) ? json_decode($studentProfile['ai_analysis'], true) : [];
+        $lastHash = $aiAnalysis['last_data_hash'] ?? null;
+
+        if ($currentHash === $lastHash) {
+            return $response->redirect('/profile/results?success=' . urlencode('Analisis AI Anda sudah paling mutakhir berdasarkan data terbaru.'));
+        }
+
+        // Gather data for Gemini
+        $studentData = [
+            'academic_scores' => !empty($academic) ? json_decode($academic, true) : [],
+            'psychological_tests' => !empty($psycho) ? json_decode($psycho, true) : [],
+            'achievements' => !empty($achievements) ? json_decode($achievements, true) : []
+        ];
+
+        try {
+            $gemini = new \Addon\Services\GeminiService();
+            $aiResponseJson = $gemini->generateProfileAnalysis($studentData);
+            
+            $newAiAnalysis = json_decode($aiResponseJson, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception('Respons dari AI bukan JSON yang valid');
+            }
+
+            // Tambahkan metadata
+            $newAiAnalysis['last_data_hash'] = $currentHash;
+            $newAiAnalysis['generated_at'] = date('Y-m-d H:i:s');
+
+            // Simpan ke database
+            $this->studentModel->updateByProfileId($userProfile['id'], [
+                'ai_analysis' => json_encode($newAiAnalysis)
+            ]);
+
+            return $response->redirect('/profile/results?success=' . urlencode('Analisis AI berhasil diperbarui!'));
+        } catch (\Exception $e) {
+            return $response->redirect('/profile/results?error=' . urlencode('Gagal generate AI: ' . $e->getMessage()));
+        }
     }
 
     /**

@@ -100,130 +100,26 @@
         </div>
 
         <div class="form-section">
-            <h2>Nilai Akademik</h2>
+            <h2>Nilai Akademik (Multi-Semester)</h2>
             <p class="section-description">
-                Masukkan nilai rapor untuk setiap mata pelajaran. Skala 0-100.
+                Masukkan nilai rapor berdasarkan semester. Anda dapat menambahkan beberapa semester sekaligus.
             </p>
 
-            <!-- Smart Input Mode Toggle -->
-            <div class="input-mode-toggle">
-                <button type="button" class="mode-btn active" data-mode="smart" onclick="switchInputMode('smart')">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                    Smart Paste
-                </button>
-                <button type="button" class="mode-btn" data-mode="manual" onclick="switchInputMode('manual')">
+            <div id="semesters-container" class="semesters-container">
+                <!-- Semester blocks will be injected here by JS -->
+            </div>
+
+            <div class="semester-actions">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addSemester()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    Manual Entry
+                    Tambah Semester Baru
                 </button>
             </div>
-
-            <!-- Smart Textarea Mode -->
-            <div id="smart-input-mode" class="smart-input-mode">
-                <div class="smart-input-header">
-                    <p class="smart-input-description">
-                        <strong>Cara menggunakan:</strong> Copy data dari Excel/Google Sheets (2 kolom: Mata Pelajaran | Nilai),
-                        lalu paste di bawah ini. Atau ketik manual dengan format: <code>Mata Pelajaran, Nilai</code>
-                    </p>
-                    <button type="button" class="btn btn-outline btn-sm" onclick="downloadTemplate()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download Template Excel
-                    </button>
-                </div>
-
-                <textarea
-                    id="smart-scores-input"
-                    class="smart-textarea"
-                    placeholder="Contoh paste dari Excel:
-Mathematics    85
-English    90
-Physics    88
-
-Atau ketik manual:
-Mathematics, 85
-English, 90"
-                    rows="8"></textarea>
-
-                <div class="smart-input-actions">
-                    <button type="button" class="btn btn-primary" onclick="parseSmartInput()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="9 11 12 14 22 4"></polyline>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                        Parse Data
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="clearSmartInput()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                        Clear
-                    </button>
-                    <span class="parse-status" id="parse-status"></span>
-                </div>
-            </div>
-
-            <!-- Live Preview Table -->
-            <div id="preview-container" class="preview-container" style="display: none;">
-                <div class="preview-header">
-                    <h3>Preview Data Nilai</h3>
-                    <div class="preview-actions">
-                        <span class="score-count" id="score-count">0 mata pelajaran</span>
-                        <button type="button" class="btn btn-outline btn-sm" onclick="editFromPreview()">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                            Edit
-                        </button>
-                    </div>
-                </div>
-                <div class="preview-table-wrapper">
-                    <table class="preview-table" id="preview-table">
-                        <thead>
-                            <tr>
-                                <th width="40">#</th>
-                                <th>Mata Pelajaran</th>
-                                <th width="100">Nilai</th>
-                                <th width="60">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="preview-tbody">
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Hidden input untuk menyimpan data parsed -->
-                <input type="hidden" id="parsed-scores-data" name="parsed_scores_data" value="">
-            </div>
-
-            <!-- Manual Entry Mode (Fallback) -->
-            <div id="manual-input-mode" class="manual-input-mode" style="display: none;">
-                <div id="academic-scores-container">
-                    <div class="score-entry">
-                        <div class="score-input-group">
-                            <input type="text" name="academic_scores[subject][]" placeholder="Mata Pelajaran" class="subject-input">
-                            <input type="number" name="academic_scores[grade][]" placeholder="Nilai" min="0" max="100" class="grade-input">
-                            <button type="button" class="btn-remove-score" onclick="removeScoreRow(this)">×</button>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="button" class="btn btn-secondary btn-sm" onclick="addScoreRow()">
-                    + Tambah Mata Pelajaran
-                </button>
-            </div>
+            
+            <input type="hidden" id="academic_scores_json" name="academic_scores_json" value="">
         </div>
 
         <div class="form-actions">
@@ -347,315 +243,125 @@ English, 90"
         color: var(--md-sys-color-on-surface-variant, #666);
     }
 
-    /* Input Mode Toggle */
-    .input-mode-toggle {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 16px;
-        padding: 4px;
-        background: var(--md-sys-color-surface-container, #f5f5f5);
-        border-radius: 8px;
-    }
-
-    .mode-btn {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        border: none;
-        background: transparent;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--md-sys-color-on-surface-variant, #666);
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .mode-btn:hover {
-        background: var(--md-sys-color-surface-container-high, #e8e8e8);
-    }
-
-    .mode-btn.active {
-        background: var(--md-sys-color-surface, #ffffff);
-        color: var(--md-sys-color-primary, #0066cc);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .mode-btn svg {
-        width: 16px;
-        height: 16px;
-    }
-
-    /* Smart Input Mode */
-    .smart-input-mode {
+    /* Semester Builder Styles */
+    .semesters-container {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 20px;
+        margin-bottom: 20px;
     }
 
-    .smart-input-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 16px;
-        padding: 16px;
-        background: var(--md-sys-color-surface-container-low, #f9f9f9);
-        border-radius: 8px;
+    .semester-block {
         border: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
-    }
-
-    .smart-input-description {
-        flex: 1;
-        font-size: 14px;
-        color: var(--md-sys-color-on-surface-variant, #666);
-        margin: 0;
-        line-height: 1.6;
-    }
-
-    .smart-input-description code {
-        background: var(--md-sys-color-surface-container-high, #e8e8e8);
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: 'Consolas', 'Monaco', monospace;
-        font-size: 13px;
-        color: var(--md-sys-color-primary, #0066cc);
-    }
-
-    .smart-textarea {
-        width: 100%;
-        padding: 16px;
-        border: 2px solid var(--md-sys-color-outline-variant, #e0e0e0);
-        border-radius: 8px;
-        font-family: 'Consolas', 'Monaco', monospace;
-        font-size: 14px;
-        line-height: 1.6;
-        resize: vertical;
-        transition: all 0.2s;
-        background: var(--md-sys-color-surface, #ffffff);
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-        box-sizing: border-box;
-    }
-
-    .smart-textarea:focus {
-        outline: none;
-        border-color: var(--md-sys-color-primary, #0066cc);
-        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
-    }
-
-    .smart-textarea::placeholder {
-        color: var(--md-sys-color-on-surface-variant, #999);
-        font-family: inherit;
-    }
-
-    .smart-input-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .btn-outline {
-        background: transparent;
-        border: 1px solid var(--md-sys-color-outline, #ccc);
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-    }
-
-    .btn-outline:hover {
-        background: var(--md-sys-color-surface-container-high, #e8e8e8);
-    }
-
-    .parse-status {
-        font-size: 14px;
-        margin-left: auto;
-        padding: 8px 12px;
-        border-radius: 6px;
-        display: none;
-    }
-
-    .parse-status.success {
-        display: inline-block;
-        background: var(--md-sys-color-secondary-container, #e8f5e9);
-        color: var(--md-sys-color-on-secondary-container, #2e7d32);
-    }
-
-    .parse-status.error {
-        display: inline-block;
-        background: var(--md-sys-color-error-container, #ffebee);
-        color: var(--md-sys-color-on-error-container, #c62828);
-    }
-
-    /* Preview Container */
-    .preview-container {
-        margin-top: 24px;
-        border: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
-        border-radius: 8px;
+        border-radius: 12px;
         overflow: hidden;
+        background: var(--md-sys-color-surface, #ffffff);
+        transition: box-shadow 0.2s;
     }
 
-    .preview-header {
+    .semester-block:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .semester-header {
+        background: var(--md-sys-color-surface-container-low, #f5f5f5);
+        padding: 12px 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 16px 20px;
-        background: var(--md-sys-color-surface-container, #f5f5f5);
         border-bottom: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
     }
 
-    .preview-header h3 {
-        margin: 0;
+    .semester-title-input {
         font-size: 16px;
         font-weight: 600;
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-    }
-
-    .preview-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .score-count {
-        font-size: 14px;
-        color: var(--md-sys-color-on-surface-variant, #666);
-    }
-
-    .preview-table-wrapper {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-
-    .preview-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .preview-table th {
-        position: sticky;
-        top: 0;
-        background: var(--md-sys-color-surface-container-high, #e8e8e8);
-        padding: 12px 16px;
-        text-align: left;
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-        border-bottom: 2px solid var(--md-sys-color-outline, #ccc);
-        z-index: 1;
-    }
-
-    .preview-table td {
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
-        font-size: 14px;
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-    }
-
-    .preview-table tbody tr:hover {
-        background: var(--md-sys-color-surface-container-low, #f9f9f9);
-    }
-
-    .preview-table tbody tr.editing {
-        background: var(--md-sys-color-primary-container, #e6f0ff);
-    }
-
-    .btn-icon-sm {
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
         border: none;
         background: transparent;
+        padding: 4px 8px;
+        width: 250px;
+        border-radius: 4px;
+        color: var(--md-sys-color-on-surface, #1a1a1a);
+    }
+
+    .semester-title-input:focus {
+        background: white;
+        outline: 1px solid var(--md-sys-color-primary, #0066cc);
+    }
+
+    .btn-icon {
+        background: transparent;
+        border: none;
+        color: var(--md-sys-color-on-surface-variant, #666);
         cursor: pointer;
-        display: inline-flex;
+        padding: 6px;
+        border-radius: 6px;
+        display: flex;
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
     }
 
-    .btn-icon-sm.edit {
-        color: var(--md-sys-color-primary, #0066cc);
-    }
-
-    .btn-icon-sm.edit:hover {
-        background: var(--md-sys-color-primary, #0066cc);
-        color: white;
-    }
-
-    .btn-icon-sm.delete {
+    .btn-icon:hover {
+        background: var(--md-sys-color-surface-container-highest, #e0e0e0);
         color: var(--md-sys-color-error, #dc3545);
     }
 
-    .btn-icon-sm.delete:hover {
-        background: var(--md-sys-color-error, #dc3545);
-        color: white;
+    .semester-body {
+        padding: 20px;
     }
 
-    .preview-input-cell {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
-
-    .preview-input-cell input {
-        padding: 6px 10px;
-        border: 1px solid var(--md-sys-color-outline, #ccc);
-        border-radius: 4px;
-        font-size: 14px;
-    }
-
-    .preview-input-cell input:focus {
-        outline: none;
-        border-color: var(--md-sys-color-primary, #0066cc);
-        box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
-    }
-
-    .preview-input-cell .subject-input {
-        flex: 2;
-        min-width: 150px;
-    }
-
-    .preview-input-cell .grade-input {
-        flex: 1;
-        width: 80px;
-    }
-
-    /* Manual Input Mode */
-    .manual-input-mode {
-        margin-top: 16px;
-    }
-
-    .score-entry {
-        margin-bottom: 12px;
-    }
-
-    .score-input-group {
+    .subject-row {
         display: flex;
         gap: 12px;
         align-items: center;
+        margin-bottom: 12px;
     }
 
     .subject-input {
         flex: 2;
+        padding: 10px 14px;
+        border: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
+        border-radius: 6px;
+        font-size: 14px;
     }
 
-    .grade-input {
+    .score-input {
         flex: 1;
         max-width: 120px;
+        padding: 10px 14px;
+        border: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
+        border-radius: 6px;
+        font-size: 14px;
     }
 
-    .btn-remove-score {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        border: none;
+    .subject-input:focus, .score-input:focus {
+        outline: none;
+        border-color: var(--md-sys-color-primary, #0066cc);
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+
+    .btn-remove-subject {
         background: var(--md-sys-color-error-container, #ffebee);
         color: var(--md-sys-color-error, #dc3545);
-        font-size: 20px;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        font-size: 18px;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         transition: all 0.2s;
     }
 
-    .btn-remove-score:hover {
+    .btn-remove-subject:hover {
         background: var(--md-sys-color-error, #dc3545);
         color: white;
+    }
+
+    .semester-actions {
+        padding-top: 8px;
     }
 
     .form-actions {
@@ -741,353 +447,162 @@ English, 90"
 </style>
 
 <script>
-    // Global state untuk smart textarea
-    let parsedScores = [];
-    let currentInputMode = 'smart';
+    // Global state untuk menyimpan data multi-semester
+    let academicData = [];
 
-    // Initialize with existing scores
+    // Initialize with existing scores if any
     <?php if (!empty($studentProfile['academic_scores'])): ?>
-        const existingScores = <?= $studentProfile['academic_scores'] ?>;
-        existingScores.forEach(score => {
-            addScoreRow(score.subject, score.grade);
-        });
+        try {
+            const parsed = <?= $studentProfile['academic_scores'] ?>;
+            if (Array.isArray(parsed)) {
+                academicData = parsed.map(sem => ({
+                    id: 'sem_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    semester: sem.semester || 'Semester Baru',
+                    subjects: (sem.subjects || []).map(sub => ({
+                        id: 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                        name: sub.name || '',
+                        final_score: sub.final_score !== undefined ? sub.final_score : ''
+                    }))
+                }));
+            }
+        } catch(e) {
+            console.error("Error parsing initial academic scores", e);
+        }
     <?php endif; ?>
 
-    // Switch input mode
-    function switchInputMode(mode) {
-        currentInputMode = mode;
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.mode === mode);
-        });
-        document.getElementById('smart-input-mode').style.display = mode === 'smart' ? 'flex' : 'none';
-        document.getElementById('manual-input-mode').style.display = mode === 'manual' ? 'block' : 'none';
-        document.getElementById('preview-container').style.display = (mode === 'smart' && parsedScores.length > 0) ? 'block' : 'none';
+    // Default if empty
+    if (academicData.length === 0) {
+        addSemester();
+    } else {
+        renderSemesters();
     }
 
-    // Download template Excel (CSV format)
-    function downloadTemplate() {
-        const templateData = [
-            ['Mata Pelajaran', 'Nilai'],
-            ['Mathematics', '85'],
-            ['English', '90'],
-            ['Physics', '88'],
-            ['Chemistry', '87'],
-            ['Biology', '89'],
-            ['History', '85'],
-            ['Geography', '86'],
-            ['Economics', '88'],
-            ['Indonesian', '90'],
-            ['Art', '85']
-        ];
-
-        const csvContent = templateData.map(row => row.join('\t')).join('\n');
-        const blob = new Blob([csvContent], {
-            type: 'text/tab-separated-values;charset=utf-8;'
+    function addSemester() {
+        academicData.push({
+            id: 'sem_' + Date.now(),
+            semester: 'Semester ' + (academicData.length + 1),
+            subjects: [
+                { id: 'sub_' + Date.now(), name: '', final_score: '' }
+            ]
         });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'template_nilai_akademik.tsv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        renderSemesters();
     }
 
-    // Parse smart input
-    function parseSmartInput() {
-        const textarea = document.getElementById('smart-scores-input');
-        const input = textarea.value.trim();
-        const statusEl = document.getElementById('parse-status');
+    function removeSemester(semId) {
+        if (confirm('Hapus semester ini beserta semua nilainya?')) {
+            academicData = academicData.filter(s => s.id !== semId);
+            renderSemesters();
+        }
+    }
 
-        if (!input) {
-            showParseStatus('Silakan masukkan data terlebih dahulu', 'error');
+    function updateSemesterName(semId, newName) {
+        const sem = academicData.find(s => s.id === semId);
+        if (sem) sem.semester = newName;
+    }
+
+    function addSubject(semId) {
+        const sem = academicData.find(s => s.id === semId);
+        if (sem) {
+            sem.subjects.push({ id: 'sub_' + Date.now() + '_' + Math.random(), name: '', final_score: '' });
+            renderSemesters();
+        }
+    }
+
+    function removeSubject(semId, subId) {
+        const sem = academicData.find(s => s.id === semId);
+        if (sem) {
+            sem.subjects = sem.subjects.filter(sub => sub.id !== subId);
+            renderSemesters();
+        }
+    }
+
+    function updateSubject(semId, subId, field, value) {
+        const sem = academicData.find(s => s.id === semId);
+        if (sem) {
+            const sub = sem.subjects.find(s => s.id === subId);
+            if (sub) {
+                sub[field] = value;
+            }
+        }
+    }
+
+    function renderSemesters() {
+        const container = document.getElementById('semesters-container');
+        container.innerHTML = '';
+
+        if (academicData.length === 0) {
+            container.innerHTML = '<p class="text-muted" style="text-align: center; padding: 20px;">Belum ada data semester.</p>';
             return;
         }
 
-        try {
-            const scores = parseInputData(input);
+        academicData.forEach((sem, index) => {
+            const block = document.createElement('div');
+            block.className = 'semester-block';
+            
+            let subjectsHtml = '';
+            sem.subjects.forEach(sub => {
+                subjectsHtml += `
+                    <div class="subject-row">
+                        <input type="text" class="subject-input" placeholder="Mata Pelajaran" value="${escapeHtml(sub.name)}" 
+                            onchange="updateSubject('${sem.id}', '${sub.id}', 'name', this.value)">
+                        <input type="number" class="score-input" placeholder="Nilai (0-100)" min="0" max="100" value="${sub.final_score}" 
+                            onchange="updateSubject('${sem.id}', '${sub.id}', 'final_score', this.value)">
+                        <button type="button" class="btn-remove-subject" onclick="removeSubject('${sem.id}', '${sub.id}')" title="Hapus Mapel">×</button>
+                    </div>
+                `;
+            });
 
-            if (scores.length === 0) {
-                showParseStatus('Tidak ada data yang valid. Pastikan format: Mata Pelajaran, Nilai', 'error');
-                return;
-            }
-
-            parsedScores = scores;
-            renderPreviewTable();
-            showParseStatus(`Berhasil parse ${scores.length} mata pelajaran`, 'success');
-
-            // Update hidden input
-            document.getElementById('parsed-scores-data').value = JSON.stringify(scores);
-
-            // Show preview
-            document.getElementById('preview-container').style.display = 'block';
-        } catch (error) {
-            showParseStatus('Error parsing: ' + error.message, 'error');
-        }
-    }
-
-    // Parser untuk berbagai format input
-    function parseInputData(input) {
-        const lines = input.split('\n').filter(line => line.trim());
-        const scores = [];
-
-        for (const line of lines) {
-            let subject = '';
-            let grade = '';
-
-            // Coba parse dengan tab (Excel paste)
-            if (line.includes('\t')) {
-                const parts = line.split('\t');
-                if (parts.length >= 2) {
-                    subject = parts[0].trim();
-                    grade = parts[1].trim();
-                }
-            }
-            // Coba parse dengan koma
-            else if (line.includes(',')) {
-                const parts = line.split(',');
-                if (parts.length >= 2) {
-                    subject = parts[0].trim();
-                    grade = parts[parts.length - 1].trim();
-                }
-            }
-            // Coba parse dengan pipe
-            else if (line.includes('|')) {
-                const parts = line.split('|');
-                if (parts.length >= 2) {
-                    subject = parts[0].trim();
-                    grade = parts[1].trim();
-                }
-            }
-            // Coba parse dengan titik dua
-            else if (line.includes(':')) {
-                const parts = line.split(':');
-                if (parts.length >= 2) {
-                    subject = parts[0].trim();
-                    grade = parts[1].trim();
-                }
-            }
-            // Default: ambil angka terakhir sebagai nilai
-            else {
-                const match = line.match(/(.+?)\s*(\d+)\s*$/);
-                if (match) {
-                    subject = match[1].trim();
-                    grade = match[2].trim();
-                }
-            }
-
-            // Validasi
-            if (subject && grade && !isNaN(parseInt(grade))) {
-                const gradeNum = parseInt(grade);
-                if (gradeNum >= 0 && gradeNum <= 100) {
-                    scores.push({
-                        subject: subject,
-                        grade: gradeNum,
-                        _id: Date.now() + Math.random() // Unique ID untuk edit/delete
-                    });
-                }
-            }
-        }
-
-        return scores;
-    }
-
-    function showParseStatus(message, type) {
-        const statusEl = document.getElementById('parse-status');
-        statusEl.textContent = message;
-        statusEl.className = 'parse-status ' + type;
-        setTimeout(() => {
-            statusEl.className = 'parse-status';
-        }, 5000);
-    }
-
-    function clearSmartInput() {
-        document.getElementById('smart-scores-input').value = '';
-        document.getElementById('parse-status').className = 'parse-status';
-        parsedScores = [];
-        document.getElementById('preview-container').style.display = 'none';
-        document.getElementById('parsed-scores-data').value = '';
-    }
-
-    function renderPreviewTable() {
-        const tbody = document.getElementById('preview-tbody');
-        tbody.innerHTML = '';
-
-        parsedScores.forEach((score, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td class="subject-cell">${escapeHtml(score.subject)}</td>
-                <td class="grade-cell">${score.grade}</td>
-                <td>
-                    <button type="button" class="btn-icon-sm edit" onclick="editScoreRow(${score._id})" title="Edit">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
-                    </button>
-                    <button type="button" class="btn-icon-sm delete" onclick="deleteScoreRow(${score._id})" title="Hapus">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            block.innerHTML = `
+                <div class="semester-header">
+                    <input type="text" class="semester-title-input" value="${escapeHtml(sem.semester)}" 
+                        onchange="updateSemesterName('${sem.id}', this.value)" placeholder="Nama Semester (Contoh: Semester 1 Kelas 10)">
+                    <button type="button" class="btn-icon" onclick="removeSemester('${sem.id}')" title="Hapus Semester">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
                     </button>
-                </td>
+                </div>
+                <div class="semester-body">
+                    <div class="subjects-container">
+                        ${subjectsHtml}
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm mt-2" onclick="addSubject('${sem.id}')">
+                        + Tambah Mata Pelajaran
+                    </button>
+                </div>
             `;
-            tbody.appendChild(tr);
+            container.appendChild(block);
         });
-
-        document.getElementById('score-count').textContent = `${parsedScores.length} mata pelajaran`;
-    }
-
-    function editScoreRow(id) {
-        const score = parsedScores.find(s => s._id === id);
-        if (!score) return;
-
-        const tbody = document.getElementById('preview-tbody');
-        const tr = tbody.querySelector(`tr:nth-child(${parsedScores.indexOf(score) + 1})`);
-        if (!tr) return;
-
-        tr.classList.add('editing');
-        tr.innerHTML = `
-            <td>${parsedScores.indexOf(score) + 1}</td>
-            <td>
-                <div class="preview-input-cell">
-                    <input type="text" class="subject-input" value="${escapeHtml(score.subject)}">
-                </div>
-            </td>
-            <td>
-                <div class="preview-input-cell">
-                    <input type="number" class="grade-input" value="${score.grade}" min="0" max="100">
-                </div>
-            </td>
-            <td>
-                <button type="button" class="btn-icon-sm edit" onclick="saveScoreRow(${score._id})" title="Simpan">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </button>
-                <button type="button" class="btn-icon-sm delete" onclick="cancelEditRow(${score._id})" title="Batal">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </td>
-        `;
-    }
-
-    function saveScoreRow(id) {
-        const score = parsedScores.find(s => s._id === id);
-        if (!score) return;
-
-        const tbody = document.getElementById('preview-tbody');
-        const tr = tbody.querySelector(`tr:nth-child(${parsedScores.indexOf(score) + 1})`);
-        if (!tr) return;
-
-        const newSubject = tr.querySelector('.subject-input').value.trim();
-        const newGrade = parseInt(tr.querySelector('.grade-input').value);
-
-        if (!newSubject || isNaN(newGrade) || newGrade < 0 || newGrade > 100) {
-            alert('Nilai harus antara 0-100 dan mata pelajaran tidak boleh kosong');
-            return;
-        }
-
-        score.subject = newSubject;
-        score.grade = newGrade;
-        renderPreviewTable();
-        document.getElementById('parsed-scores-data').value = JSON.stringify(parsedScores);
-    }
-
-    function cancelEditRow(id) {
-        renderPreviewTable();
-    }
-
-    function deleteScoreRow(id) {
-        if (confirm('Hapus mata pelajaran ini?')) {
-            parsedScores = parsedScores.filter(s => s._id !== id);
-            renderPreviewTable();
-            document.getElementById('parsed-scores-data').value = JSON.stringify(parsedScores);
-
-            if (parsedScores.length === 0) {
-                document.getElementById('preview-container').style.display = 'none';
-            }
-        }
-    }
-
-    function editFromPreview() {
-        // Switch ke manual mode untuk edit lebih lanjut jika perlu
-        const textarea = document.getElementById('smart-scores-input');
-        if (parsedScores.length > 0) {
-            // Generate text dari parsed scores untuk edit di textarea
-            const text = parsedScores.map(s => `${s.subject}\t${s.grade}`).join('\n');
-            textarea.value = text;
-            textarea.focus();
-            textarea.select();
-        }
     }
 
     function escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-
-    // Prepare hidden inputs untuk form submission
-    function prepareFormSubmission() {
-        // Jika menggunakan smart mode dan ada parsed scores, tambahkan ke form
-        if (currentInputMode === 'smart' && parsedScores.length > 0) {
-            // Remove existing hidden inputs
-            document.querySelectorAll('input[name="academic_scores[subject][]"]').forEach(el => el.remove());
-            document.querySelectorAll('input[name="academic_scores[grade][]"]').forEach(el => el.remove());
-
-            // Add hidden inputs dari parsed scores
-            parsedScores.forEach(score => {
-                const subjectInput = document.createElement('input');
-                subjectInput.type = 'hidden';
-                subjectInput.name = 'academic_scores[subject][]';
-                subjectInput.value = score.subject;
-                document.getElementById('academic-form').appendChild(subjectInput);
-
-                const gradeInput = document.createElement('input');
-                gradeInput.type = 'hidden';
-                gradeInput.name = 'academic_scores[grade][]';
-                gradeInput.value = score.grade;
-                document.getElementById('academic-form').appendChild(gradeInput);
-            });
-        }
-    }
-
-    function addScoreRow(subject = '', grade = '') {
-        const container = document.getElementById('academic-scores-container');
-        const entry = document.createElement('div');
-        entry.className = 'score-entry';
-        entry.innerHTML = `
-        <div class="score-input-group">
-            <input type="text" name="academic_scores[subject][]" placeholder="Mata Pelajaran" class="subject-input" value="${subject}">
-            <input type="number" name="academic_scores[grade][]" placeholder="Nilai" min="0" max="100" class="grade-input" value="${grade}">
-            <button type="button" class="btn-remove-score" onclick="removeScoreRow(this)">×</button>
-        </div>
-    `;
-        container.appendChild(entry);
-    }
-
-    function removeScoreRow(button) {
-        const container = document.getElementById('academic-scores-container');
-        if (container.children.length > 1) {
-            button.closest('.score-entry').remove();
-        } else {
-            alert('Minimal harus ada satu mata pelajaran');
-        }
     }
 
     // Form submission
     document.getElementById('academic-form').addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        // Prepare hidden inputs dari parsed scores jika menggunakan smart mode
-        prepareFormSubmission();
+        // Prepare JSON payload
+        // Bersihkan id sementara dan pastikan format sesuai
+        const cleanData = academicData.map(sem => {
+            return {
+                semester: sem.semester,
+                subjects: sem.subjects.filter(sub => sub.name.trim() !== '').map(sub => {
+                    const cleanSub = { name: sub.name.trim() };
+                    if (sub.final_score !== '') {
+                        cleanSub.final_score = sub.final_score;
+                    }
+                    return cleanSub;
+                })
+            };
+        }).filter(sem => sem.subjects.length > 0); // Buang semester kosong
+
+        document.getElementById('academic_scores_json').value = JSON.stringify(cleanData);
 
         const form = this;
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -1109,13 +624,16 @@ English, 90"
             } else if (response.ok) {
                 window.location.href = '/profile/academic';
             } else {
-                const error = await response.text();
-                alert('Gagal menyimpan: ' + error);
+                const errorText = await response.text();
+                // Ekstrak pesan dari HTML Exception Mazu jika memungkinkan, atau tampilkan raw
+                alert('Gagal menyimpan: Cek kembali format data Anda.');
+                console.error(errorText);
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
         } catch (error) {
-            alert('Terjadi kesalahan: ' + error.message);
+            alert('Terjadi kesalahan koneksi.');
+            console.error(error);
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
         }

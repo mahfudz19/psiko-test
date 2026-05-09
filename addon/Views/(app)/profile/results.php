@@ -10,6 +10,13 @@
 // Decode JSON data
 $psychologicalTests = !empty($studentProfile['psychological_tests']) ? json_decode($studentProfile['psychological_tests'], true) : [];
 $aiAnalysis = !empty($studentProfile['ai_analysis']) ? json_decode($studentProfile['ai_analysis'], true) : [];
+
+// Calculate data hash for AI update check
+$academic = $studentProfile['academic_scores'] ?? '';
+$psycho = $studentProfile['psychological_tests'] ?? '';
+$achievements = $studentProfile['achievements'] ?? '';
+$currentHash = md5($academic . $psycho . $achievements);
+$lastHash = $aiAnalysis['last_data_hash'] ?? null;
 ?>
 
 <div class="results-container">
@@ -27,13 +34,28 @@ $aiAnalysis = !empty($studentProfile['ai_analysis']) ? json_decode($studentProfi
             <?= htmlspecialchars($_GET['success']) ?>
         </div>
     <?php endif; ?>
+    <?php if (isset($_GET['error'])): ?>
+        <div class="alert alert-error">
+            <?= htmlspecialchars($_GET['error']) ?>
+        </div>
+    <?php endif; ?>
 
     <!-- AI Analysis Summary -->
     <?php if (!empty($aiAnalysis)): ?>
         <div class="ai-analysis-card">
             <div class="ai-header">
-                <span class="ai-icon">🤖</span>
-                <h2>Analisis AI</h2>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="ai-icon">🤖</span>
+                    <h2>Analisis AI</h2>
+                </div>
+                <?php if ($currentHash !== $lastHash): ?>
+                    <form method="POST" action="/profile/results/generate" class="ai-generate-form" onsubmit="this.querySelector('button').textContent='Memproses...';">
+                        <input type="hidden" name="_token" value="<?= csrf_token() ?>">
+                        <button type="submit" class="btn btn-primary btn-sm">✨ Update Analisis AI</button>
+                    </form>
+                <?php else: ?>
+                    <span class="badge badge-success" style="font-size: 13px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,0.2);">✅ Mutakhir</span>
+                <?php endif; ?>
             </div>
 
             <?php if (!empty($aiAnalysis['summary'])): ?>
@@ -121,7 +143,11 @@ $aiAnalysis = !empty($studentProfile['ai_analysis']) ? json_decode($studentProfi
         <div class="no-analysis-card">
             <div class="no-analysis-icon">📊</div>
             <h3>Belum Ada Analisis AI</h3>
-            <p>Hasil psykotest kamu belum dianalisis oleh AI. Silakan tunggu hingga analisis selesai.</p>
+            <p style="margin-bottom: 20px;">Sistem AI belum menganalisis potensi dan bakatmu berdasarkan data akademik, psikologi, dan prestasimu.</p>
+            <form method="POST" action="/profile/results/generate" class="ai-generate-form" onsubmit="this.querySelector('button').textContent='Memproses...';">
+                <input type="hidden" name="_token" value="<?= csrf_token() ?>">
+                <button type="submit" class="btn btn-primary" style="font-size: 16px; padding: 12px 24px;">✨ Generate Analisis Pertamamu</button>
+            </form>
         </div>
     <?php endif; ?>
 
@@ -138,20 +164,20 @@ $aiAnalysis = !empty($studentProfile['ai_analysis']) ? json_decode($studentProfi
                         <?php endif; ?>
 
                         <div class="test-header">
-                            <h3><?= htmlspecialchars($test['name'] ?? 'Test Psikologi') ?></h3>
-                            <span class="test-date"><?= date('d M Y', strtotime($test['taken_at'] ?? 'now')) ?></span>
+                            <h3><?= htmlspecialchars($test['test_name'] ?? 'Test Psikologi') ?></h3>
+                            <span class="test-date"><?= date('d M Y', strtotime($test['date'] ?? 'now')) ?></span>
                         </div>
 
                         <div class="test-body">
-                            <?php if (!empty($test['categories'])): ?>
+                            <?php if (!empty($test['metrics'])): ?>
                                 <div class="test-categories">
-                                    <?php foreach ($test['categories'] as $category => $score): ?>
+                                    <?php foreach ($test['metrics'] as $metricName => $score): ?>
                                         <div class="category-item">
-                                            <span class="category-name"><?= htmlspecialchars($category) ?></span>
+                                            <span class="category-name"><?= htmlspecialchars($metricName) ?></span>
                                             <div class="category-bar">
-                                                <div class="category-fill" style="width: <?= $score ?>%"></div>
+                                                <div class="category-fill" style="width: <?= is_numeric($score) ? min(100, max(0, $score)) : 100 ?>%"></div>
                                             </div>
-                                            <span class="category-score"><?= $score ?>%</span>
+                                            <span class="category-score"><?= is_numeric($score) ? $score . '%' : htmlspecialchars($score) ?></span>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -229,9 +255,11 @@ $aiAnalysis = !empty($studentProfile['ai_analysis']) ? json_decode($studentProfi
 
     .ai-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 12px;
         margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
     }
 
     .ai-icon {
@@ -535,6 +563,38 @@ $aiAnalysis = !empty($studentProfile['ai_analysis']) ? json_decode($studentProfi
         background: var(--md-sys-color-secondary-container, #e8f5e9);
         color: var(--md-sys-color-on-secondary-container, #2e7d32);
         border: 1px solid var(--md-sys-color-secondary, #4caf50);
+    }
+    
+    .alert-error {
+        background: var(--md-sys-color-error-container, #ffebee);
+        color: var(--md-sys-color-error, #d32f2f);
+        border: 1px solid var(--md-sys-color-error, #f44336);
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: 0.2s;
+    }
+    
+    .btn-primary {
+        background: var(--md-sys-color-primary, #0066cc);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: var(--md-sys-color-on-primary, #0052a3);
+    }
+    
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 14px;
     }
 
     @media (max-width: 768px) {

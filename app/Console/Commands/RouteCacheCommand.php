@@ -18,6 +18,15 @@ class RouteCacheCommand implements CommandInterface
     return 'Membuat cache routing untuk performa tinggi';
   }
 
+  /**
+   * Menangani eksekusi command route:cache
+   *
+   * Method ini akan mengumpulkan semua route yang terdaftar,
+   * memvalidasi bahwa tidak ada closure, dan menyimpannya ke file cache.
+   *
+   * @param array $arguments Array argumen command (tidak digunakan)
+   * @return int 0 jika berhasil, 1 jika gagal
+   */
   public function handle(array $arguments): int
   {
     echo color("Membangun cache rute...\n", "yellow");
@@ -45,14 +54,12 @@ class RouteCacheCommand implements CommandInterface
     // 4. Ambil rute dari router
     $router = $app->getRouter();
 
-    // Pastikan rute sistem disertakan dalam cache
-    $router->get('/build/assets/(.*)', 'App\Core\Controllers\AssetController@serve');
-    $router->get('/build/js/(.*)', 'App\Core\Controllers\AssetController@serve');
-
+    // Route sistem sudah ditambahkan otomatis oleh Application.php saat boot()
+    // Tidak perlu ditambahkan manual di sini
     $routes = $router->getRoutes();
 
-    // 5. Validasi: Cek apakah ada Closure (fungsi anonim) dalam rute
-    $closureRoutes = [];
+    // 5. Validasi: Cek apakah ada Closure atau objek yang tidak bisa di-cache
+    $invalidRoutes = [];
 
     foreach ($routes as $method => $methodRoutes) {
       if (!is_array($methodRoutes)) continue;
@@ -64,26 +71,36 @@ class RouteCacheCommand implements CommandInterface
 
         // Cek jika handler adalah Closure
         if ($handler instanceof \Closure) {
-          $closureRoutes[] = [
+          $invalidRoutes[] = [
             'method' => $method,
             'uri' => $uri,
+            'reason' => 'Closure (fungsi anonim)',
+          ];
+        }
+        // Cek jika handler adalah objek yang tidak bisa di-serialize
+        elseif (is_object($handler) && !is_callable($handler)) {
+          $invalidRoutes[] = [
+            'method' => $method,
+            'uri' => $uri,
+            'reason' => 'Object tidak valid',
           ];
         }
       }
     }
 
-    if (!empty($closureRoutes)) {
+    if (!empty($invalidRoutes)) {
       // Hapus file cache parsial jika ada
       if (file_exists($cacheFile)) unlink($cacheFile);
 
       echo "\n\033[31m[ERROR] Route Cache Failed!\033[0m\n\n";
-      echo "Ditemukan " . count($closureRoutes) . " rute dengan Closure (fungsi anonim):\n\n";
+      echo "Ditemukan " . count($invalidRoutes) . " rute dengan handler tidak valid:\n\n";
 
-      foreach ($closureRoutes as $route) {
+      foreach ($invalidRoutes as $route) {
         echo "  \033[33m{$route['method']}\033[0m  /{$route['uri']}\n";
+        echo "    Alasan: {$route['reason']}\n";
       }
 
-      echo "\n\033[31mSolusi:\033[0m Route handler harus menggunakan Controller Class, bukan Closure.\n";
+      echo "\n\033[31mSolusi:\033[0m Route handler harus menggunakan Controller Class.\n";
       echo "Contoh: \033[90m\$router->get('/settings', [SettingsController::class, 'index']);\033[0m\n\n";
 
       exit(1);
@@ -93,8 +110,16 @@ class RouteCacheCommand implements CommandInterface
     $content = "<?php\n\nreturn " . var_export($routes, true) . ";\n";
     file_put_contents($cacheFile, $content);
 
+    // Hitung total routes dari semua HTTP methods
+    $totalRoutes = 0;
+    foreach ($routes as $method => $methodRoutes) {
+      if (is_array($methodRoutes)) {
+        $totalRoutes += count($methodRoutes);
+      }
+    }
+
     echo "Route cache generated successfully at:\n{$cacheFile}\n";
-    echo "Total Routes Cached: " . (count($routes['GET'] ?? []) + count($routes['POST'] ?? [])) . "\n";
+    echo "Total Routes Cached: {$totalRoutes}\n";
 
     return 0;
   }

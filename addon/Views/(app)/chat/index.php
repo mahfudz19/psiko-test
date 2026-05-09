@@ -5,7 +5,7 @@
     </div>
 
     <div class="chat-history-actions">
-        <a href="/profile/chat/create" class="btn btn-primary" data-spa>
+        <a href="/chat/create" class="btn btn-primary" data-spa>
             <span class="btn-icon">✨</span>
             <span>Chat Baru</span>
         </a>
@@ -16,7 +16,7 @@
             <div class="empty-icon">💭</div>
             <h3>Belum Ada Riwayat Chat</h3>
             <p>Mulai konsultasi pertama Anda dengan AI untuk membahas potensi, minat, dan bakat Anda.</p>
-            <a href="/profile/chat/create" class="btn btn-primary" data-spa>
+            <a href="/chat/create" class="btn btn-primary" data-spa>
                 <span class="btn-icon">✨</span>
                 <span>Mulai Chat Sekarang</span>
             </a>
@@ -56,7 +56,7 @@
                     <div class="chat-item-footer">
                         <span class="chat-item-time"><?= date('H:i', strtotime($chat['created_at'])) ?></span>
                         <div class="chat-item-actions">
-                            <a href="/profile/chat/<?= htmlspecialchars($chat['session_id']) ?>" class="btn btn-sm btn-outline" data-spa>
+                            <a href="/chat/<?= htmlspecialchars($chat['session_id']) ?>" class="btn btn-sm btn-outline" data-spa>
                                 <span class="btn-icon">👁️</span>
                                 <span>Lihat</span>
                             </a>
@@ -83,7 +83,7 @@
             const sessionId = this.dataset.sessionId;
 
             try {
-                const response = await fetch('/profile/chat/delete', {
+                const response = await fetch('/chat/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -94,7 +94,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    window.location.href = result.redirect || '/profile/chat';
+                    window.location.href = result.redirect || '/chat';
                 } else {
                     alert('Gagal menghapus chat: ' + (result.error || 'Unknown error'));
                 }

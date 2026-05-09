@@ -9,7 +9,7 @@
 
 <div class="chat-create-container">
     <div class="chat-create-header">
-        <a href="/profile/chat" class="back-button" data-spa>
+        <a href="/chat" class="back-button" data-spa>
             <span class="back-icon">←</span>
             <span>Kembali</span>
         </a>
@@ -97,7 +97,7 @@
         const formData = new FormData(this);
 
         try {
-            const response = await fetch('/profile/chat', {
+            const response = await fetch('/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

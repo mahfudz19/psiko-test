@@ -52,7 +52,6 @@ class ChatController
       ];
 
       return $response->renderPage($data, [
-        'path' => '(app)/profile/chat/index',
         'meta' => ['title' => 'Riwayat Chat Konsultasi']
       ]);
     } catch (\Exception $e) {
@@ -71,13 +70,13 @@ class ChatController
       $sessionId = $request->param('session_id');
 
       if (!$sessionId) {
-        return $response->redirect('/profile/chat?error=400&message=' . urlencode('Session ID tidak valid'));
+        return $response->redirect('/chat?error=400&message=' . urlencode('Session ID tidak valid'));
       }
 
       $chatConsultation = $this->chatConsultationModel->findBySessionId($sessionId);
 
       if (!$chatConsultation) {
-        return $response->redirect('/profile/chat?error=404&message=' . urlencode('Sesi chat tidak ditemukan'));
+        return $response->redirect('/chat?error=404&message=' . urlencode('Sesi chat tidak ditemukan'));
       }
 
       // Validasi ownership
@@ -97,7 +96,7 @@ class ChatController
         'meta' => ['title' => 'Chat Konsultasi']
       ]);
     } catch (\Exception $e) {
-      return $response->redirect('/profile/chat?error=500&message=' . urlencode($e->getMessage()));
+      return $response->redirect('/chat?error=500&message=' . urlencode($e->getMessage()));
     }
   }
 
@@ -120,12 +119,9 @@ class ChatController
         'studentProfile' => $studentProfile,
       ];
 
-      return $response->renderPage($data, [
-        'path' => '(app)/profile/chat/create',
-        'meta' => ['title' => 'Chat Konsultasi Baru']
-      ]);
+      return $response->renderPage($data, ['meta' => ['title' => 'Chat Konsultasi Baru']]);
     } catch (\Exception $e) {
-      return $response->redirect('/profile/chat?error=500&message=' . urlencode($e->getMessage()));
+      return $response->redirect('/chat?error=500&message=' . urlencode($e->getMessage()));
     }
   }
 
@@ -173,7 +169,7 @@ class ChatController
       return $response->json([
         'success' => true,
         'session_id' => $sessionId,
-        'redirect' => '/profile/chat/' . $sessionId,
+        'redirect' => '/chat/' . $sessionId,
       ]);
     } catch (\Exception $e) {
       return $response->json(['error' => $e->getMessage()], 500);
@@ -267,7 +263,7 @@ class ChatController
 
       return $response->json([
         'success' => true,
-        'redirect' => '/profile/chat',
+        'redirect' => '/chat',
       ]);
     } catch (\Exception $e) {
       return $response->json(['error' => $e->getMessage()], 500);

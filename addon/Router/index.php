@@ -77,12 +77,12 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
     $router->post('/profile/permissions', [ProfileController::class, 'updatePermissions'], ['csrf']);
 
     // Chat Consultation routes (untuk siswa)
-    $router->get('/profile/chat', [ChatController::class, 'index']);
-    $router->get('/profile/chat/create', [ChatController::class, 'create']);
-    $router->post('/profile/chat', [ChatController::class, 'store']);
-    $router->get('/profile/chat/:session_id', [ChatController::class, 'show']);
-    $router->post('/profile/chat/send', [ChatController::class, 'sendMessage']);
-    $router->post('/profile/chat/delete', [ChatController::class, 'delete']);
+    $router->get('/chat', [ChatController::class, 'index']);
+    $router->get('/chat/create', [ChatController::class, 'create']);
+    $router->post('/chat', [ChatController::class, 'store']);
+    $router->get('/chat/:session_id', [ChatController::class, 'show']);
+    $router->post('/chat/send', [ChatController::class, 'sendMessage']);
+    $router->post('/chat/delete', [ChatController::class, 'delete']);
 });
 
 // PMB routes (require login, role: user/siswa)

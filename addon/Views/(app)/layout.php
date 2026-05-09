@@ -65,7 +65,7 @@
 
                 <!-- Chat Consultation Menu (untuk siswa) -->
                 <?php
-                $isChatPage = str_starts_with($currentPath, '/profile/chat');
+                $isChatPage = str_starts_with($currentPath, '/chat');
                 ?>
                 <div class="sidebar-nav-group">
                     <div class="sidebar-nav-group-header <?= $isChatPage ? 'active' : '' ?>">
@@ -75,10 +75,10 @@
                         <span class="sidebar-link-text">💬 Konsultasi AI</span>
                     </div>
                     <div class="sidebar-nav-group-content">
-                        <a data-spa href="/profile/chat" class="sidebar-link sidebar-link-sub <?= $currentPath === '/profile/chat' ? 'active' : '' ?>">
+                        <a data-spa href="/chat" class="sidebar-link sidebar-link-sub <?= $currentPath === '/chat' ? 'active' : '' ?>">
                             <span class="sidebar-link-text">📋 Riwayat Chat</span>
                         </a>
-                        <a data-spa href="/profile/chat/create" class="sidebar-link sidebar-link-sub <?= $currentPath === '/profile/chat/create' ? 'active' : '' ?>">
+                        <a data-spa href="/chat/create" class="sidebar-link sidebar-link-sub <?= $currentPath === '/chat/create' ? 'active' : '' ?>">
                             <span class="sidebar-link-text">✨ Chat Baru</span>
                         </a>
                     </div>

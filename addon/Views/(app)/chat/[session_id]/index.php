@@ -12,7 +12,7 @@
 <div class="chat-detail-container">
     <div class="chat-detail-header">
         <div class="chat-header-left">
-            <a href="/profile/chat" class="back-button" data-spa>
+            <a href="/chat" class="back-button" data-spa>
                 <span class="back-icon">←</span>
                 <span>Kembali</span>
             </a>
@@ -41,7 +41,7 @@
             </div>
         </div>
         <div class="chat-header-actions">
-            <button class="btn btn-outline btn-new-chat" onclick="window.location.href='/profile/chat/create'" data-spa>
+            <button class="btn btn-outline btn-new-chat" onclick="window.location.href='/chat/create'" data-spa>
                 <span class="btn-icon">✨</span>
                 <span>Chat Baru</span>
             </button>
@@ -174,7 +174,7 @@
             };
             console.log('Payload to be sent:', payload);
 
-            const response = await fetch('/profile/chat/send', {
+            const response = await fetch('/chat/send', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

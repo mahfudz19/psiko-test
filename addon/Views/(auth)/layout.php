@@ -6,7 +6,5 @@
  */
 ?>
 <div class="auth-container">
-    <div class="auth-card" data-layout="(auth)/layout.php">
-        <?= $children; ?>
-    </div>
+    <?= $children; ?>
 </div>

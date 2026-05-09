@@ -217,6 +217,40 @@ View: addon/Views/(app)/users/[userId]/posts/[postId].php
 ]
 ```
 
+## 🎨 Styling Standards & Design Tokens
+
+Mazu Framework menggunakan sistem variabel CSS terpusat untuk menjaga konsistensi UI.
+
+### 1. Global Design Tokens (Variables)
+
+Selalu gunakan variabel dari `addon/Views/style.css` daripada menulis nilai hardcoded.
+
+| Kategori   | Variabel Utama                                     | Kegunaan                        |
+| :--------- | :------------------------------------------------- | :------------------------------ |
+| **Warna**  | `--primary-main`, `--secondary-main`               | Warna brand utama               |
+| **Status** | `--success-main`, `--error-main`, `--warning-main` | Warna feedback/status           |
+| **Latar**  | `--bg-default`, `--bg-paper`                       | Background halaman & komponen   |
+| **Teks**   | `--text-primary`, `--text-secondary`               | Tipografi utama & pendukung     |
+| **Border** | `--border-light`, `--divider`                      | Garis pemisah & border komponen |
+| **Shadow** | `--shadow-sm`, `--shadow-md`, `--shadow-lg`        | Elevasi/bayangan komponen       |
+| **RGB**    | `--primary-main-rgb`                               | Untuk alpha-blending (rgba)     |
+
+### 2. Scoped Styling Workflow
+
+Gunakan sistem **Auto-Discovery** untuk menulis CSS yang spesifik per view tanpa mengotori global scope.
+
+1. Letakkan file `.css` dengan nama yang sama dengan file `.php` di folder yang sama.
+2. Gunakan variabel global untuk nilai warna/spacing.
+3. Gunakan class yang deskriptif (misal: `.login-container` bukan hanya `.container`).
+
+### 3. Responsive Breakpoints
+
+Mazu merekomendasikan pendekatan **Mobile-First**. Gunakan breakpoint standar berikut:
+
+- **Mobile:** Default style
+- **Tablet:** `@media (max-width: 768px)`
+- **Desktop:** `@media (min-width: 1200px)`
+
 ## 📚 Related Skills
 
 - [`mazu-core`](../mazu-core/SKILL.md) - Core reference & CLI

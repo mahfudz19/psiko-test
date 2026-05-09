@@ -154,7 +154,16 @@ class AuthController
             return $response->redirect('/dashboard');
         }
 
-        return $response->renderPage([], ['path' => '/login', 'meta' => ['title' => 'Login | ' . env('APP_NAME')]]);
+        return $response->renderPage([
+            'infoPanel' => [
+                'title' => 'Selamat Datang Kembali! 👋',
+                'description' => 'Masuk ke akun Anda untuk melanjutkan perjalanan eksplorasi potensi diri dan konsultasi AI.',
+                'features' => [
+                    ['icon' => '🔐', 'title' => 'Akses Aman', 'description' => 'Data hasil tes dan riwayat konsultasi Anda tersimpan dengan aman.'],
+                    ['icon' => '🚀', 'title' => 'Lanjutkan Progres', 'description' => 'Lihat perkembangan terbaru dari analisis minat dan bakat Anda.'],
+                ]
+            ]
+        ], ['path' => '/login', 'meta' => ['title' => 'Login | ' . env('APP_NAME')]]);
     }
 
     /**
@@ -215,7 +224,16 @@ class AuthController
             return $response->redirect('/dashboard');
         }
 
-        return $response->renderPage([], ['path' => '/register', 'meta' => ['title' => 'Register | ' . env('APP_NAME')]]);
+        return $response->renderPage([
+            'infoPanel' => [
+                'title' => 'Mulai Perjalananmu Sekarang! ✨',
+                'description' => 'Daftar akun Psyco-Test untuk membuka akses ke berbagai tes psikologi dan bimbingan karir berbasis AI.',
+                'features' => [
+                    ['icon' => '🧠', 'title' => 'Tes Psikologi Gratis', 'description' => 'Akses tes IQ, Kepribadian, dan Gaya Belajar secara instan.'],
+                    ['icon' => '🤖', 'title' => 'Konselor AI 24/7', 'description' => 'Dapatkan jawaban atas keraguan karirmu kapan saja dengan Gemini AI.'],
+                ]
+            ]
+        ], ['path' => '/register', 'meta' => ['title' => 'Register | ' . env('APP_NAME')]]);
     }
 
     /**
@@ -318,6 +336,14 @@ class AuthController
         return $response->renderPage([
             'email' => $email,
             'info' => $info,
+            'infoPanel' => [
+                'title' => 'Verifikasi Akun Anda 🛡️',
+                'description' => 'Satu langkah lagi untuk mengamankan akun Anda. Masukkan kode OTP yang kami kirimkan ke email Anda.',
+                'features' => [
+                    ['icon' => '📧', 'title' => 'Cek Inbox', 'description' => 'Kode OTP dikirimkan ke ' . $email],
+                    ['icon' => '⏳', 'title' => 'Batas Waktu', 'description' => 'Kode berlaku selama 15 menit sejak dikirimkan.'],
+                ]
+            ]
         ], ['path' => '/verify-otp', 'meta' => ['title' => 'Verifikasi Email | ' . env('APP_NAME')]]);
     }
 
@@ -407,6 +433,14 @@ class AuthController
         return $response->renderPage([
             'email' => $email,
             'success' => $success,
+            'infoPanel' => [
+                'title' => 'Email Verifikasi Terkirim! ✉️',
+                'description' => 'Kami telah mengirimkan instruksi verifikasi ke alamat email Anda.',
+                'features' => [
+                    ['icon' => '📬', 'title' => 'Periksa Email', 'description' => 'Jangan lupa cek folder Spam jika tidak menemukannya di Inbox.'],
+                    ['icon' => '🔄', 'title' => 'Belum Terima?', 'description' => 'Anda dapat meminta pengiriman ulang kode setelah beberapa saat.'],
+                ]
+            ]
         ], ['path' => '/otp-sent', 'meta' => ['title' => 'Email Terkirim | ' . env('APP_NAME')]]);
     }
 
@@ -541,7 +575,16 @@ class AuthController
      */
     public function showForgotPassword(Request $request, Response $response): View | RedirectResponse
     {
-        return $response->renderPage([], ['path' => '/password/forgot', 'meta' => ['title' => 'Lupa Password | ' . env('APP_NAME')]]);
+        return $response->renderPage([
+            'infoPanel' => [
+                'title' => 'Lupa Password? 🔑',
+                'description' => 'Jangan khawatir, kami akan membantu Anda memulihkan akses ke akun Psyco-Test Anda.',
+                'features' => [
+                    ['icon' => '📧', 'title' => 'Reset via Email', 'description' => 'Kami akan mengirimkan link aman untuk mengatur ulang password Anda.'],
+                    ['icon' => '🛡️', 'title' => 'Keamanan Akun', 'description' => 'Pastikan Anda menggunakan password yang kuat dan unik.'],
+                ]
+            ]
+        ], ['path' => '/password/forgot', 'meta' => ['title' => 'Lupa Password | ' . env('APP_NAME')]]);
     }
 
     /**
@@ -610,7 +653,18 @@ class AuthController
         }
 
         return $response->renderPage(
-            ['token' => $token, 'email' => $email,],
+            [
+                'token' => $token,
+                'email' => $email,
+                'infoPanel' => [
+                    'title' => 'Atur Ulang Password 🛠️',
+                    'description' => 'Silakan buat password baru yang aman untuk akun Anda.',
+                    'features' => [
+                        ['icon' => '🔒', 'title' => 'Password Baru', 'description' => 'Gunakan minimal 8 karakter dengan kombinasi huruf dan angka.'],
+                        ['icon' => '✅', 'title' => 'Konfirmasi', 'description' => 'Pastikan konfirmasi password sama dengan password baru Anda.'],
+                    ]
+                ]
+            ],
             ['meta' => ['title' => 'Reset Password | ' . env('APP_NAME')]]
         );
     }

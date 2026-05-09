@@ -21,6 +21,7 @@ class PmbJourneyModel extends Model
         // Data hasil analisis AI untuk PMB
         'top_matches' => ['type' => 'json', 'nullable' => true],
         'scholarships' => ['type' => 'json', 'nullable' => true],
+        'prompt' => ['type' => 'text', 'nullable' => true], // Prompt yang digunakan untuk generate AI
 
         // Tracking status simulasi pendaftaran
         'simulation_status' => [
@@ -104,7 +105,7 @@ class PmbJourneyModel extends Model
     /**
      * Update PMB journey matches (AI generated)
      */
-    public function updateMatches(int $studentProfileId, array $matches, string $hash): bool
+    public function updateMatches(int $studentProfileId, array $matches, string $hash, ?string $prompt = null): bool
     {
         $journey = $this->findByStudentId($studentProfileId);
 
@@ -112,6 +113,10 @@ class PmbJourneyModel extends Model
             'top_matches' => json_encode($matches),
             'last_data_hash' => $hash
         ];
+
+        if ($prompt !== null) {
+            $data['prompt'] = $prompt;
+        }
 
         if ($journey) {
             return $this->updateById($journey['id'], $data);

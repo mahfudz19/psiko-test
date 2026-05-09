@@ -14,6 +14,7 @@ class GeminiService
     private string $apiKey;
     private string $apiUrl;
     private string $modelName;
+    private ?string $lastPrompt = null; // Menyimpan prompt terakhir yang digunakan
 
     /**
      * Data hardcoded Universitas Univeral - Phase 1 (MVP)
@@ -351,6 +352,7 @@ class GeminiService
     public function generateProfileAnalysis(array $studentData): string
     {
         $prompt = $this->buildProfileAnalysisPrompt($studentData);
+        $this->lastPrompt = $prompt; // Simpan prompt untuk referensi nanti
         $response = $this->chatSimple($prompt);
 
         // Membersihkan markdown block json jika ada (```json ... ```)
@@ -420,6 +422,7 @@ class GeminiService
     public function generatePmbMatch(array $studentData): array
     {
         $prompt = $this->buildPmbMatchPrompt($studentData);
+        $this->lastPrompt = $prompt; // Simpan prompt untuk referensi nanti
         $payload = [
             'contents' => [
                 ['role' => 'user', 'parts' => [['text' => $prompt]]]
@@ -552,5 +555,14 @@ class GeminiService
         } catch (\Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * Mendapatkan prompt terakhir yang digunakan untuk generate AI
+     * Berguna untuk debugging dan audit trail
+     */
+    public function getLastPrompt(): ?string
+    {
+        return $this->lastPrompt;
     }
 }

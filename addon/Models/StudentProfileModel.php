@@ -41,6 +41,7 @@ class StudentProfileModel extends Model
         'achievements' => ['type' => 'json', 'nullable' => true], // [{title, level, year, certificate_url}]
         'psychological_tests' => ['type' => 'json', 'nullable' => true], // {test_id, scores, timestamps}
         'ai_analysis' => ['type' => 'json', 'nullable' => true], // {potentials, interests, talents, recommendations}
+        'ai_prompt' => ['type' => 'text', 'nullable' => true], // Prompt yang digunakan untuk generate AI analysis
         'parent_name' => ['type' => 'string', 'nullable' => true],
         'parent_phone' => ['type' => 'string', 'nullable' => true],
         'parent_email' => ['type' => 'string', 'nullable' => true]
@@ -58,6 +59,7 @@ class StudentProfileModel extends Model
             'achievements' => '[{"title": "Juara 1 Lomba Olahraga", "level": "Sekolah", "year": "2022", "certificate_url": "https://example.com/certificate.jpg"}]',
             'psychological_tests' => '[{"test_name": "Tes IQ Standar", "date": "2023-10-01", "result": "Diatas Rata-rata", "score": 115, "metrics": {"verbal": 110, "performance": 120}}, {"test_name": "Tes MBTI", "date": "2023-10-05", "result": "INTJ"}]',
             'ai_analysis' => null,
+            'ai_prompt' => null,
             'parent_name' => 'John Doe',
             'parent_phone' => '1234567890',
             'parent_email' => 'parent1@example.com',
@@ -73,6 +75,7 @@ class StudentProfileModel extends Model
             'achievements' => '[{"title": "Juara Harapan 1 Debat", "level": "Kota", "year": "2023", "certificate_url": "https://example.com/cert.jpg"}]',
             'psychological_tests' => '[{"test_name": "Tes Gaya Belajar", "date": "2023-11-01", "result": "Visual"}]',
             'ai_analysis' => null,
+            'ai_prompt' => null,
             'parent_name' => 'Jane Doe',
             'parent_phone' => '0987654321',
             'parent_email' => 'parent2@example.com',
@@ -324,9 +327,13 @@ class StudentProfileModel extends Model
     /**
      * Update AI analysis for student
      */
-    public function updateAiAnalysis(int $profileId, array $aiAnalysis): bool
+    public function updateAiAnalysis(int $profileId, array $aiAnalysis, ?string $prompt = null): bool
     {
-        return $this->updateByProfileId($profileId, ['ai_analysis' => json_encode($aiAnalysis)]);
+        $data = ['ai_analysis' => json_encode($aiAnalysis)];
+        if ($prompt !== null) {
+            $data['ai_prompt'] = $prompt;
+        }
+        return $this->updateByProfileId($profileId, $data);
     }
 
     /**
@@ -361,6 +368,7 @@ class StudentProfileModel extends Model
             'achievements' => null,
             'psychological_tests' => null,
             'ai_analysis' => null,
+            'ai_prompt' => null,
             'parent_name' => null,
             'parent_phone' => null,
             'parent_email' => null
@@ -569,7 +577,7 @@ class StudentProfileModel extends Model
             throw new \InvalidArgumentException('ai_analysis harus berupa object');
         }
 
-        $allowedKeys = ['summary', 'potential', 'interests', 'talents', 'recommendations', 'career_suggestions', 'generated_at', 'last_data_hash'];
+        $allowedKeys = ['summary', 'potential', 'interests', 'talents', 'recommendations', 'career_suggestions', 'generated_at', 'last_data_hash', 'prompt'];
 
         foreach ($data as $key => $value) {
             if (!in_array($key, $allowedKeys)) {

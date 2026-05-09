@@ -423,6 +423,9 @@ class ProfileController
             return $response->redirect('/profile/results?success=' . urlencode('Analisis AI Anda sudah paling mutakhir berdasarkan data terbaru.'));
         }
 
+        if (empty($studentData) || (!isset($studentData['academic_scores']) && !isset($studentData['psychological_tests']) && !isset($studentData['achievements']))) {
+            return $response->redirect('/profile/results?error=' . urlencode('Data siswa tidak lengkap untuk analisis AI. Pastikan data akademik, psikologi, dan prestasi sudah diisi.'));
+        }
         // Gather data for Gemini
         $studentData = [
             'academic_scores' => !empty($academic) ? json_decode($academic, true) : [],
@@ -433,7 +436,7 @@ class ProfileController
         try {
             $gemini = new \Addon\Services\GeminiService();
             $aiResponseJson = $gemini->generateProfileAnalysis($studentData);
-            
+
             $newAiAnalysis = json_decode($aiResponseJson, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception('Respons dari AI bukan JSON yang valid');
@@ -443,10 +446,20 @@ class ProfileController
             $newAiAnalysis['last_data_hash'] = $currentHash;
             $newAiAnalysis['generated_at'] = date('Y-m-d H:i:s');
 
+            // Ambil prompt yang digunakan untuk generate AI
+            $aiPrompt = null;
+            if (method_exists($gemini, 'getLastPrompt')) {
+                $aiPrompt = $gemini->getLastPrompt();
+            }
+
             // Simpan ke database
-            $this->studentModel->updateByProfileId($userProfile['id'], [
+            $updateData = [
                 'ai_analysis' => json_encode($newAiAnalysis)
-            ]);
+            ];
+            if ($aiPrompt !== null) {
+                $updateData['ai_prompt'] = $aiPrompt;
+            }
+            $this->studentModel->updateByProfileId($userProfile['id'], $updateData);
 
             return $response->redirect('/profile/results?success=' . urlencode('Analisis AI berhasil diperbarui!'));
         } catch (\Exception $e) {

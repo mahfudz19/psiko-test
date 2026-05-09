@@ -271,8 +271,8 @@ class PmbController
         $journey = null;
         $error = null;
 
-        if (!$studentProfile) {
-            return ['data' => $data, 'journey' => $journey, 'error' => $error];
+        if (empty($studentProfile) || (empty($studentProfile['academic_scores']) && empty($studentProfile['psychological_tests']) && empty($studentData['achievements']) && empty($studentData['ai_analysis']))) {
+            return ['data' => $data, 'journey' => $journey, 'error' => "Data siswa tidak lengkap untuk analisis PMB. Pastikan setidaknya ada data akademik, psikologi, prestasi, atau analisis AI sebelumnya."];
         }
 
         // Hitung hash dari data siswa
@@ -301,7 +301,14 @@ class PmbController
             try {
                 // Call AI untuk generate data
                 $generatedData = $this->geminiService->$aiMethod($studentProfile);
-                $this->pmbJourneyModel->$updateMethod($studentProfileId, $generatedData, $currentHash);
+
+                // Ambil prompt dari GeminiService (jika tersedia)
+                $prompt = null;
+                if (method_exists($this->geminiService, 'getLastPrompt')) {
+                    $prompt = $this->geminiService->getLastPrompt();
+                }
+
+                $this->pmbJourneyModel->$updateMethod($studentProfileId, $generatedData, $currentHash, $prompt);
                 $data = $generatedData;
             } catch (\Exception $e) {
                 // Fallback to existing if AI fails temporarily

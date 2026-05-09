@@ -97,6 +97,9 @@ class StaffProfileModel extends Model
                 }
             }
 
+            // Validate JSON fields
+            $this->validateJsonData($validData);
+
             // Build columns and placeholders
             $columns = implode(', ', array_keys($validData));
             $placeholders = ':' . implode(', :', array_keys($validData));
@@ -133,6 +136,9 @@ class StaffProfileModel extends Model
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
 
+        // Validate JSON fields
+        $this->validateJsonData($data);
+
         $setParts = [];
         foreach ($data as $column => $value) {
             $setParts[] = "{$column} = :{$column}";
@@ -157,6 +163,9 @@ class StaffProfileModel extends Model
         if (!isset($data['updated_at'])) {
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
+
+        // Validate JSON fields
+        $this->validateJsonData($data);
 
         $setParts = [];
         foreach ($data as $column => $value) {
@@ -271,5 +280,40 @@ class StaffProfileModel extends Model
         ];
 
         return $this->create($data);
+    }
+
+    /**
+     * Validasi data JSON sebelum insert/update
+     */
+    protected function validateJsonData(array $data): void
+    {
+        if (isset($data['permissions']) && $data['permissions'] !== null) {
+            $this->validatePermissions($data['permissions']);
+        }
+    }
+
+    protected function validatePermissions(string|array $json): void
+    {
+        $data = is_string($json) ? json_decode($json, true) : $json;
+        if (is_string($json) && json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('permissions harus berupa JSON valid');
+        }
+        if (!is_array($data) || (!empty($data) && array_is_list($data))) {
+            throw new \InvalidArgumentException('permissions harus berupa object (key-value)');
+        }
+        
+        $allowedKeys = ['can_manage_users', 'can_manage_schools', 'can_view_analytics', 'can_manage_settings'];
+        
+        foreach ($data as $key => $value) {
+            // 1. Validasi Key (Tolak jika tidak ada di skema)
+            if (!in_array($key, $allowedKeys)) {
+                throw new \InvalidArgumentException("Key permission '{$key}' tidak terdaftar dalam skema.");
+            }
+            
+            // 2. Validasi Value Type
+            if (!is_bool($value)) {
+                throw new \InvalidArgumentException("Nilai permission untuk '{$key}' harus berupa boolean.");
+            }
+        }
     }
 }

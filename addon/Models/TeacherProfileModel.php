@@ -124,6 +124,9 @@ class TeacherProfileModel extends Model
                 }
             }
 
+            // Validate JSON fields
+            $this->validateJsonData($validData);
+
             // Build columns and placeholders
             $columns = implode(', ', array_keys($validData));
             $placeholders = ':' . implode(', :', array_keys($validData));
@@ -160,6 +163,9 @@ class TeacherProfileModel extends Model
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
 
+        // Validate JSON fields
+        $this->validateJsonData($data);
+
         $setParts = [];
         foreach ($data as $column => $value) {
             $setParts[] = "{$column} = :{$column}";
@@ -184,6 +190,9 @@ class TeacherProfileModel extends Model
         if (!isset($data['updated_at'])) {
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
+
+        // Validate JSON fields
+        $this->validateJsonData($data);
 
         $setParts = [];
         foreach ($data as $column => $value) {
@@ -344,5 +353,74 @@ class TeacherProfileModel extends Model
     {
         $teacher = $this->findByProfileId($profileId);
         return $teacher && $teacher['school_id'] === $schoolId;
+    }
+
+    /**
+     * Validasi data JSON sebelum insert/update
+     */
+    protected function validateJsonData(array $data): void
+    {
+        if (isset($data['managed_students']) && $data['managed_students'] !== null) {
+            $this->validateManagedStudents($data['managed_students']);
+        }
+        if (isset($data['counseling_schedule']) && $data['counseling_schedule'] !== null) {
+            $this->validateCounselingSchedule($data['counseling_schedule']);
+        }
+    }
+
+    protected function validateManagedStudents(string|array $json): void
+    {
+        $data = is_string($json) ? json_decode($json, true) : $json;
+        if (is_string($json) && json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('managed_students harus berupa JSON valid');
+        }
+        if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
+            throw new \InvalidArgumentException('managed_students harus berupa array');
+        }
+        foreach ($data as $item) {
+            if (!is_numeric($item) || $item <= 0) {
+                throw new \InvalidArgumentException('Item managed_students harus berupa angka positif (ID profil siswa)');
+            }
+        }
+    }
+
+    protected function validateCounselingSchedule(string|array $json): void
+    {
+        $data = is_string($json) ? json_decode($json, true) : $json;
+        if (is_string($json) && json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('counseling_schedule harus berupa JSON valid');
+        }
+        if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
+            throw new \InvalidArgumentException('counseling_schedule harus berupa array of objects');
+        }
+        
+        $allowedKeys = ['date', 'time', 'student_profile_id', 'topic', 'status', 'meeting_link', 'student_notes', 'teacher_notes'];
+        $allowedStatuses = ['pending', 'approved', 'completed', 'cancelled'];
+        
+        foreach ($data as $index => $item) {
+            if (!is_array($item)) {
+                throw new \InvalidArgumentException("Item counseling_schedule index {$index} harus berupa object");
+            }
+            
+            // Check required keys
+            if (!isset($item['date']) || !isset($item['time']) || !isset($item['student_profile_id'])) {
+                throw new \InvalidArgumentException("Item counseling_schedule index {$index} kehilangan key wajib (date, time, student_profile_id)");
+            }
+            
+            // Validate keys
+            foreach ($item as $key => $value) {
+                if (!in_array($key, $allowedKeys)) {
+                    throw new \InvalidArgumentException("Key '{$key}' pada counseling_schedule index {$index} tidak diizinkan.");
+                }
+            }
+            
+            // Validate specific types
+            if (!is_numeric($item['student_profile_id'])) {
+                throw new \InvalidArgumentException("student_profile_id pada counseling_schedule index {$index} harus berupa angka.");
+            }
+            if (isset($item['status']) && !in_array($item['status'], $allowedStatuses)) {
+                throw new \InvalidArgumentException("status '{$item['status']}' pada counseling_schedule index {$index} tidak valid.");
+            }
+        }
     }
 }

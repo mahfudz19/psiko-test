@@ -50,32 +50,32 @@ class StudentProfileModel extends Model
         [
             'profile_id' => 3,
             'school_id' => 1,
-            'student_id' => 4,
+            'student_id' => '0051234567',
             'grade_level' => '11',
             'major' => 'IPA',
-            'academic_scores' => '{"math": 85, "indonesian": 90}',
-            'extracurricular' => '[{"name": "Bulu Tangkis", "role": "Pemain", "year": "2022"}]',
-            'achievements' => '[{"title": "Juara Lomba Olahraga", "level": "Sekolah", "year": "2022", "certificate_url": "https://example.com/certificate.jpg"}]',
-            'psychological_tests' => '{"test_id": 1, "scores": [80, 75, 90], "timestamps": ["2022-01-01", "2022-02-01", "2022-03-01"]}',
-            'ai_analysis' => '{"potentials": ["Math", "Science"], "interests": ["Sports", "Music"], "talents": ["Leadership", "Problem Solving"], "recommendations": ["Math", "Science"]}',
+            'academic_scores' => '[{"semester": "Semester 1 Kelas 10", "subjects": [{"name": "Matematika", "final_score": 85, "sub_scores": {"pengetahuan": 80, "keterampilan": 90}}, {"name": "Bahasa Indonesia", "final_score": 90}]}]',
+            'extracurricular' => '[{"name": "Bulu Tangkis", "role": "Pemain", "year": "2022"}, {"name": "Pramuka", "role": "Anggota", "year": "2022"}]',
+            'achievements' => '[{"title": "Juara 1 Lomba Olahraga", "level": "Sekolah", "year": "2022", "certificate_url": "https://example.com/certificate.jpg"}]',
+            'psychological_tests' => '[{"test_name": "Tes IQ Standar", "date": "2023-10-01", "result": "Diatas Rata-rata", "score": 115, "metrics": {"verbal": 110, "performance": 120}}, {"test_name": "Tes MBTI", "date": "2023-10-05", "result": "INTJ"}]',
+            'ai_analysis' => '{"potentials": ["Logika Matematika", "Sains"], "interests": ["Olahraga", "Musik"], "talents": ["Problem Solving"], "recommendations": ["Teknik Informatika", "Sistem Informasi"]}',
             'parent_name' => 'John Doe',
             'parent_phone' => '1234567890',
-            'parent_email' => '5CtZ0@example.com',
+            'parent_email' => 'parent1@example.com',
         ],
         [
             'profile_id' => 4,
             'school_id' => 2,
-            'student_id' => 5,
+            'student_id' => '0059876543',
             'grade_level' => '12',
             'major' => 'IPS',
-            'academic_scores' => '{"math": 80, "indonesian": 85}',
-            'extracurricular' => '[{"name": "Bulu Tangkis", "role": "Pemain", "year": "2022"}]',
-            'achievements' => '[{"title": "Juara Lomba Olahraga", "level": "Sekolah", "year": "2022", "certificate_url": "https://example.com/certificate.jpg"}]',
-            'psychological_tests' => '{"test_id": 1, "scores": [80, 75, 90], "timestamps": ["2022-01-01", "2022-02-01", "2022-03-01"]}',
-            'ai_analysis' => '{"potentials": ["Math", "Science"], "interests": ["Sports", "Music"], "talents": ["Leadership", "Problem Solving"], "recommendations": ["Math", "Science"]}',
+            'academic_scores' => '[{"semester": "Semester 3 Kelas 11", "subjects": [{"name": "Ekonomi", "final_score": 88}, {"name": "Sosiologi", "final_score": 92}]}]',
+            'extracurricular' => '[{"name": "PMR", "role": "Ketua", "year": "2023"}]',
+            'achievements' => '[{"title": "Juara Harapan 1 Debat", "level": "Kota", "year": "2023", "certificate_url": "https://example.com/cert.jpg"}]',
+            'psychological_tests' => '[{"test_name": "Tes Gaya Belajar", "date": "2023-11-01", "result": "Visual"}]',
+            'ai_analysis' => '{"potentials": ["Komunikasi", "Negosiasi"], "interests": ["Sastra", "Sosial"], "talents": ["Public Speaking"], "recommendations": ["Ilmu Komunikasi", "Hubungan Internasional"]}',
             'parent_name' => 'Jane Doe',
-            'parent_phone' => '9876543210',
-            'parent_email' => '5CtZ0@example.com',
+            'parent_phone' => '0987654321',
+            'parent_email' => 'parent2@example.com',
         ],
     ];
 
@@ -146,6 +146,9 @@ class StudentProfileModel extends Model
                 }
             }
 
+            // Validate JSON fields
+            $this->validateJsonData($validData);
+
             // Build columns and placeholders
             $columns = implode(', ', array_keys($validData));
             $placeholders = ':' . implode(', :', array_keys($validData));
@@ -182,6 +185,9 @@ class StudentProfileModel extends Model
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
 
+        // Validate JSON fields
+        $this->validateJsonData($data);
+
         $setParts = [];
         foreach ($data as $column => $value) {
             $setParts[] = "{$column} = :{$column}";
@@ -206,6 +212,9 @@ class StudentProfileModel extends Model
         if (!isset($data['updated_at'])) {
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
+
+        // Validate JSON fields
+        $this->validateJsonData($data);
 
         $setParts = [];
         foreach ($data as $column => $value) {
@@ -356,5 +365,196 @@ class StudentProfileModel extends Model
     {
         $student = $this->findByProfileId($profileId);
         return $student && $student['school_id'] === $schoolId;
+    }
+
+    /**
+     * Validasi data JSON sebelum insert/update
+     */
+    protected function validateJsonData(array $data): void
+    {
+        if (isset($data['academic_scores']) && $data['academic_scores'] !== null) {
+            $this->validateAcademicScores($data['academic_scores']);
+        }
+        if (isset($data['extracurricular']) && $data['extracurricular'] !== null) {
+            $this->validateExtracurricular($data['extracurricular']);
+        }
+        if (isset($data['achievements']) && $data['achievements'] !== null) {
+            $this->validateAchievements($data['achievements']);
+        }
+        if (isset($data['psychological_tests']) && $data['psychological_tests'] !== null) {
+            $this->validatePsychologicalTests($data['psychological_tests']);
+        }
+        if (isset($data['ai_analysis']) && $data['ai_analysis'] !== null) {
+            $this->validateAiAnalysis($data['ai_analysis']);
+        }
+    }
+
+    protected function validateAcademicScores(string|array $json): void
+    {
+        $data = is_string($json) ? json_decode($json, true) : $json;
+        if (is_string($json) && json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('academic_scores harus berupa JSON valid');
+        }
+        if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
+            throw new \InvalidArgumentException('academic_scores harus berupa array of objects (multi-semester)');
+        }
+        
+        foreach ($data as $semesterIndex => $semesterData) {
+            if (!is_array($semesterData) || !isset($semesterData['semester']) || !isset($semesterData['subjects'])) {
+                throw new \InvalidArgumentException("Data akademik index {$semesterIndex} harus memiliki 'semester' dan 'subjects'");
+            }
+            if (!is_array($semesterData['subjects']) || (!empty($semesterData['subjects']) && !array_is_list($semesterData['subjects']))) {
+                throw new \InvalidArgumentException("'subjects' pada semester '{$semesterData['semester']}' harus berupa array");
+            }
+            
+            foreach ($semesterData['subjects'] as $subjectIndex => $subject) {
+                if (!is_array($subject) || !isset($subject['name'])) {
+                    throw new \InvalidArgumentException("Item subject index {$subjectIndex} pada semester '{$semesterData['semester']}' harus berupa object dengan 'name'");
+                }
+                
+                if (isset($subject['final_score']) && !is_numeric($subject['final_score'])) {
+                    throw new \InvalidArgumentException("final_score untuk '{$subject['name']}' harus berupa angka");
+                }
+                
+                if (isset($subject['sub_scores'])) {
+                    if (!is_array($subject['sub_scores']) || array_is_list($subject['sub_scores'])) {
+                        throw new \InvalidArgumentException("sub_scores untuk '{$subject['name']}' harus berupa object (key-value)");
+                    }
+                    foreach ($subject['sub_scores'] as $subKey => $subVal) {
+                        if (!is_numeric($subVal)) {
+                            throw new \InvalidArgumentException("Nilai sub_scores '{$subKey}' pada '{$subject['name']}' harus berupa angka");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    protected function validateExtracurricular(string|array $json): void
+    {
+        $data = is_string($json) ? json_decode($json, true) : $json;
+        if (is_string($json) && json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('extracurricular harus berupa JSON valid');
+        }
+        if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
+            throw new \InvalidArgumentException('extracurricular harus berupa array of objects');
+        }
+        
+        $allowedKeys = ['name', 'role', 'year'];
+        
+        foreach ($data as $index => $item) {
+            if (!is_array($item)) throw new \InvalidArgumentException("Item extracurricular index {$index} harus berupa object");
+            
+            foreach ($allowedKeys as $req) {
+                if (!array_key_exists($req, $item)) {
+                    throw new \InvalidArgumentException("Item extracurricular index {$index} harus memiliki '{$req}'");
+                }
+            }
+            
+            foreach ($item as $key => $value) {
+                if (!in_array($key, $allowedKeys)) {
+                    throw new \InvalidArgumentException("Key '{$key}' pada extracurricular index {$index} tidak diizinkan");
+                }
+                if (!is_string($value) && !is_numeric($value)) {
+                    throw new \InvalidArgumentException("Nilai untuk '{$key}' pada extracurricular index {$index} harus string/angka");
+                }
+            }
+        }
+    }
+
+    protected function validateAchievements(string|array $json): void
+    {
+        $data = is_string($json) ? json_decode($json, true) : $json;
+        if (is_string($json) && json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('achievements harus berupa JSON valid');
+        }
+        if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
+            throw new \InvalidArgumentException('achievements harus berupa array of objects');
+        }
+        
+        $allowedKeys = ['title', 'level', 'year', 'certificate_url'];
+        
+        foreach ($data as $index => $item) {
+            if (!is_array($item)) throw new \InvalidArgumentException("Item achievements index {$index} harus berupa object");
+            
+            if (!isset($item['title']) || !isset($item['level']) || !isset($item['year'])) {
+                throw new \InvalidArgumentException("Item achievements index {$index} harus memiliki title, level, dan year");
+            }
+            
+            foreach ($item as $key => $value) {
+                if (!in_array($key, $allowedKeys)) {
+                    throw new \InvalidArgumentException("Key '{$key}' pada achievements index {$index} tidak diizinkan");
+                }
+            }
+        }
+    }
+
+    protected function validatePsychologicalTests(string|array $json): void
+    {
+        $data = is_string($json) ? json_decode($json, true) : $json;
+        if (is_string($json) && json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('psychological_tests harus berupa JSON valid');
+        }
+        if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
+            throw new \InvalidArgumentException('psychological_tests harus berupa array of objects');
+        }
+        
+        $allowedKeys = ['test_name', 'date', 'result', 'score', 'metrics', 'report_url'];
+        
+        foreach ($data as $index => $item) {
+            if (!is_array($item)) throw new \InvalidArgumentException("Item psychological_tests index {$index} harus berupa object");
+            
+            if (!isset($item['test_name']) || !isset($item['date'])) {
+                throw new \InvalidArgumentException("Item psychological_tests index {$index} harus memiliki test_name dan date");
+            }
+            
+            foreach ($item as $key => $value) {
+                if (!in_array($key, $allowedKeys)) {
+                    throw new \InvalidArgumentException("Key '{$key}' pada psychological_tests index {$index} tidak diizinkan");
+                }
+            }
+            
+            if (isset($item['score']) && $item['score'] !== null && !is_numeric($item['score'])) {
+                throw new \InvalidArgumentException("Nilai score pada psychological_tests index {$index} harus berupa angka atau null");
+            }
+            
+            if (isset($item['metrics'])) {
+                if (!is_array($item['metrics']) || array_is_list($item['metrics'])) {
+                    throw new \InvalidArgumentException("metrics pada psychological_tests index {$index} harus berupa object (key-value)");
+                }
+                foreach ($item['metrics'] as $metKey => $metVal) {
+                    if (!is_numeric($metVal) && !is_string($metVal)) {
+                        throw new \InvalidArgumentException("Nilai metric '{$metKey}' pada psychological_tests index {$index} harus berupa angka atau string");
+                    }
+                }
+            }
+        }
+    }
+
+    protected function validateAiAnalysis(string|array $json): void
+    {
+        $data = is_string($json) ? json_decode($json, true) : $json;
+        if (is_string($json) && json_last_error() !== JSON_ERROR_NONE) {
+            throw new \InvalidArgumentException('ai_analysis harus berupa JSON valid');
+        }
+        if (!is_array($data) || (!empty($data) && array_is_list($data))) {
+            throw new \InvalidArgumentException('ai_analysis harus berupa object');
+        }
+        
+        $allowedKeys = ['potentials', 'interests', 'talents', 'recommendations'];
+        
+        foreach ($data as $key => $value) {
+            if (!in_array($key, $allowedKeys)) {
+                throw new \InvalidArgumentException("Key '{$key}' pada ai_analysis tidak diizinkan");
+            }
+            if (!is_array($value) || (!empty($value) && !array_is_list($value))) {
+                throw new \InvalidArgumentException("Nilai '{$key}' pada ai_analysis harus berupa array berurutan (list)");
+            }
+            foreach ($value as $item) {
+                if (!is_string($item)) {
+                    throw new \InvalidArgumentException("Item di dalam array '{$key}' ai_analysis harus berupa string");
+                }
+            }
+        }
     }
 }

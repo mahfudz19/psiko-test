@@ -9,8 +9,8 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img src="/logo_app/mazu-icon.svg" alt="Mazu Logo" class="sidebar-logo">
-            <span class="sidebar-app-name">Mazu App</span>
+            <img src="/logo_app/mazu-icon.svg" alt="<?= env('APP_NAME') ?> Logo" class="sidebar-logo">
+            <span class="sidebar-app-name"><?= env('APP_NAME') ?></span>
         </div>
         <nav class="sidebar-nav">
             <?php

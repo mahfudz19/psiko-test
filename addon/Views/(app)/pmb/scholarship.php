@@ -55,12 +55,18 @@ $aiErrorMessage = $ai_error_message ?? null;
                             </span>
                         </div>
                         <p class="eligibility-reason"><?= htmlspecialchars($scholarship['reason']) ?></p>
+                        <p class="scholarship-description"><?= htmlspecialchars($scholarship['description'] ?? '') ?></p>
                         <div class="scholarship-meta">
                             <span class="meta-item">📚 Tipe: <?= htmlspecialchars($scholarship['type']) ?></span>
+                            <span class="meta-item">📊 Kuota: <?= $scholarship['quota'] ?? '-' ?> slot</span>
+                            <span class="meta-item">📅 Periode: <?= date('d M Y', strtotime($scholarship['start_date'] ?? 'today')) ?> - <?= date('d M Y', strtotime($scholarship['end_date'] ?? 'today')) ?></span>
                         </div>
-                        <button class="btn btn-primary btn-sm" onclick="applyScholarship('<?= htmlspecialchars($scholarship['name']) ?>')">
-                            Ajukan Beasiswa
-                        </button>
+                        <a href="<?= htmlspecialchars($scholarship['url'] ?? '/pmb/simulation') ?>"
+                            class="btn btn-primary btn-sm"
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            Ajukan Beasiswa ↗
+                        </a>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -84,6 +90,12 @@ $aiErrorMessage = $ai_error_message ?? null;
                                 </span>
                             </div>
                             <p class="eligibility-reason"><?= htmlspecialchars($scholarship['reason']) ?></p>
+                            <p class="scholarship-description"><?= htmlspecialchars($scholarship['description'] ?? '') ?></p>
+                            <div class="scholarship-meta">
+                                <span class="meta-item">📚 Tipe: <?= htmlspecialchars($scholarship['type']) ?></span>
+                                <span class="meta-item">📊 Kuota: <?= $scholarship['quota'] ?? '-' ?> slot</span>
+                                <span class="meta-item">📅 Periode: <?= date('d M Y', strtotime($scholarship['start_date'] ?? 'today')) ?> - <?= date('d M Y', strtotime($scholarship['end_date'] ?? 'today')) ?></span>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -197,6 +209,33 @@ $aiErrorMessage = $ai_error_message ?? null;
 </div>
 
 <style>
+    .scholarship-description {
+        font-size: 13px;
+        color: var(--md-sys-color-on-surface-variant, #666);
+        margin: 8px 0 12px 0;
+        line-height: 1.5;
+        font-style: italic;
+    }
+
+    .scholarship-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 16px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .meta-item {
+        font-size: 12px;
+        color: var(--md-sys-color-on-surface-variant, #666);
+    }
+
+    .eligibility-card .btn {
+        text-decoration: none;
+        text-align: center;
+    }
+
     /* Container */
     .pmb-scholarship-container {
         max-width: 1200px;
@@ -346,16 +385,6 @@ $aiErrorMessage = $ai_error_message ?? null;
         line-height: 1.5;
     }
 
-    .scholarship-meta {
-        margin-bottom: 16px;
-        padding-top: 8px;
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    .meta-item {
-        font-size: 13px;
-        color: var(--md-sys-color-on-surface-variant, #666);
-    }
 
     /* Not Eligible Section */
     .not-eligible-section {

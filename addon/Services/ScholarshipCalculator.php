@@ -16,34 +16,55 @@ class ScholarshipCalculator
     private array $universitasUniveral = [
         'id' => 'universal-001',
         'name' => 'Universitas Univeral',
+        'academic_year' => '2026/2027',
         'scholarships' => [
             [
                 'id' => 'unggul-001',
                 'name' => 'Beasiswa Unggulan',
                 'discount' => 100,
                 'type' => 'Akademik',
-                'requirements' => ['Rata-rata nilai ≥ 90']
+                'requirements' => ['Rata-rata nilai ≥ 90'],
+                'url' => 'https://beasiswaunggulan.kemdikbud.go.id/',
+                'start_date' => '2026-06-01',
+                'end_date' => '2026-08-31',
+                'quota' => 10,
+                'description' => 'Beasiswa penuh 100% untuk siswa berprestasi dengan rata-rata nilai minimal 90. Dikelola oleh Kemdikbudristek.'
             ],
             [
                 'id' => 'akademis-001',
                 'name' => 'Beasiswa Akademis',
                 'discount' => 25,
                 'type' => 'Akademik',
-                'requirements' => ['Rata-rata nilai ≥ 85']
+                'requirements' => ['Rata-rata nilai ≥ 85'],
+                'url' => 'https://www.lpdp.kemenkeu.go.id/',
+                'start_date' => '2026-06-01',
+                'end_date' => '2026-08-31',
+                'quota' => 50,
+                'description' => 'Beasiswa 25% untuk siswa dengan prestasi akademik yang baik. Terhubung dengan program LPDP.'
             ],
             [
                 'id' => 'prestasi-001',
                 'name' => 'Beasiswa Prestasi',
                 'discount' => 50,
                 'type' => 'Prestasi',
-                'requirements' => ['Prestasi tingkat Nasional atau Internasional']
+                'requirements' => ['Prestasi tingkat Nasional atau Internasional'],
+                'url' => 'https://prestasi.kemdikbud.go.id/',
+                'start_date' => '2026-06-01',
+                'end_date' => '2026-07-31',
+                'quota' => 20,
+                'description' => 'Beasiswa 50% untuk siswa dengan prestasi tingkat nasional atau internasional. Program dari Kemdikbudristek.'
             ],
             [
                 'id' => 'teknologi-001',
                 'name' => 'Beasiswa Teknologi',
                 'discount' => 25,
                 'type' => 'Minat',
-                'requirements' => ['Minat di bidang teknologi']
+                'requirements' => ['Minat di bidang teknologi'],
+                'url' => 'https://www.dicoding.com/',
+                'start_date' => '2026-06-01',
+                'end_date' => '2026-08-31',
+                'quota' => 30,
+                'description' => 'Beasiswa 25% untuk siswa dengan minat dan bakat di bidang teknologi. Kerjasama dengan Dicoding Indonesia.'
             ],
         ]
     ];
@@ -249,55 +270,86 @@ class ScholarshipCalculator
         $hasNasional = $metrics['has_national_achievement'];
         $techInterest = $metrics['technology_interest_level'];
 
+        // Get scholarship definitions
+        $scholarships = $this->universitasUniveral['scholarships'];
+        $scholarshipMap = [];
+        foreach ($scholarships as $scholarship) {
+            $scholarshipMap[$scholarship['id']] = $scholarship;
+        }
+
         // Rule 1: Beasiswa Unggulan (avg >= 90)
         if ($avgScore >= 90) {
+            $scholarship = $scholarshipMap['unggul-001'];
             $eligible[] = [
-                'id' => 'unggul-001',
-                'name' => 'Beasiswa Unggulan',
-                'discount' => 100,
-                'type' => 'Akademik',
+                'id' => $scholarship['id'],
+                'name' => $scholarship['name'],
+                'discount' => $scholarship['discount'],
+                'type' => $scholarship['type'],
                 'reason' => "Selamat! Rata-rata nilai kamu {$avgScore} sangat memuaskan.",
-                'requirements' => ['Rata-rata nilai ≥ 90'],
+                'requirements' => $scholarship['requirements'],
                 'match_score' => 100,
+                'url' => $scholarship['url'],
+                'start_date' => $scholarship['start_date'],
+                'end_date' => $scholarship['end_date'],
+                'quota' => $scholarship['quota'],
+                'description' => $scholarship['description'],
             ];
         }
 
         // Rule 2: Beasiswa Akademis (avg >= 85)
         if ($avgScore >= 85 && $avgScore < 90) {
+            $scholarship = $scholarshipMap['akademis-001'];
             $eligible[] = [
-                'id' => 'akademis-001',
-                'name' => 'Beasiswa Akademis',
-                'discount' => 25,
-                'type' => 'Akademik',
+                'id' => $scholarship['id'],
+                'name' => $scholarship['name'],
+                'discount' => $scholarship['discount'],
+                'type' => $scholarship['type'],
                 'reason' => "Bagus! Rata-rata nilai kamu {$avgScore} memenuhi syarat.",
-                'requirements' => ['Rata-rata nilai ≥ 85'],
+                'requirements' => $scholarship['requirements'],
                 'match_score' => 100,
+                'url' => $scholarship['url'],
+                'start_date' => $scholarship['start_date'],
+                'end_date' => $scholarship['end_date'],
+                'quota' => $scholarship['quota'],
+                'description' => $scholarship['description'],
             ];
         }
 
         // Rule 3: Beasiswa Prestasi
         if ($hasNasional) {
+            $scholarship = $scholarshipMap['prestasi-001'];
             $eligible[] = [
-                'id' => 'prestasi-001',
-                'name' => 'Beasiswa Prestasi',
-                'discount' => 50,
-                'type' => 'Prestasi',
+                'id' => $scholarship['id'],
+                'name' => $scholarship['name'],
+                'discount' => $scholarship['discount'],
+                'type' => $scholarship['type'],
                 'reason' => "Keren! Prestasi tingkat nasional/internasional kamu sangat mengesankan.",
-                'requirements' => ['Prestasi tingkat Nasional atau Internasional'],
+                'requirements' => $scholarship['requirements'],
                 'match_score' => 100,
+                'url' => $scholarship['url'],
+                'start_date' => $scholarship['start_date'],
+                'end_date' => $scholarship['end_date'],
+                'quota' => $scholarship['quota'],
+                'description' => $scholarship['description'],
             ];
         }
 
         // Rule 4: Beasiswa Teknologi
         if ($techInterest === 'high') {
+            $scholarship = $scholarshipMap['teknologi-001'];
             $eligible[] = [
-                'id' => 'teknologi-001',
-                'name' => 'Beasiswa Teknologi',
-                'discount' => 25,
-                'type' => 'Minat',
+                'id' => $scholarship['id'],
+                'name' => $scholarship['name'],
+                'discount' => $scholarship['discount'],
+                'type' => $scholarship['type'],
                 'reason' => "Minat kamu di bidang teknologi sangat tinggi.",
-                'requirements' => ['Minat di bidang teknologi'],
+                'requirements' => $scholarship['requirements'],
                 'match_score' => 100,
+                'url' => $scholarship['url'],
+                'start_date' => $scholarship['start_date'],
+                'end_date' => $scholarship['end_date'],
+                'quota' => $scholarship['quota'],
+                'description' => $scholarship['description'],
             ];
         }
 
@@ -324,6 +376,11 @@ class ScholarshipCalculator
                     'type' => $scholarship['type'],
                     'reason' => $this->getNotEligibleReason($scholarship),
                     'requirements' => $scholarship['requirements'],
+                    'url' => $scholarship['url'],
+                    'start_date' => $scholarship['start_date'],
+                    'end_date' => $scholarship['end_date'],
+                    'quota' => $scholarship['quota'],
+                    'description' => $scholarship['description'],
                 ];
             }
         }

@@ -78,19 +78,100 @@
   font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
-  background-color: var(--primary-bg);
   color: var(--primary-dark);
   transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.sidebar-nav-group-header:hover {
+  background-color: var(--bg-default);
 }
 
 .sidebar-nav-group-header.active {
   background-color: var(--primary-main);
   color: var(--primary-contrast);
+  box-shadow: 0 4px 12px rgba(var(--primary-main-rgb), 0.3);
+}
+
+.sidebar-nav-group-header.active:hover {
+  background-color: var(--primary-main);
+}
+
+.sidebar-nav-group-header.active .chevron {
+  color: var(--primary-contrast);
+}
+
+/* State ketika salah satu submenu aktif */
+.sidebar-nav-group-header.active-group {
+  background-color: var(--primary-bg);
+  color: var(--primary-dark);
+  border: 1px solid var(--primary-light);
+}
+
+.sidebar-nav-group-header.active-group .chevron {
+  color: var(--primary-dark);
 }
 
 .sidebar-nav-group-header .sidebar-icon {
   width: 20px;
   height: 20px;
+  flex-shrink: 0;
+}
+
+/* Chevron icon untuk collapse indicator */
+.sidebar-nav-group-header .chevron {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.sidebar-nav-group-header .chevron:hover {
+  background-color: var(--bg-default);
+}
+
+.sidebar-nav-group-header.collapsed .chevron {
+  transform: rotate(-90deg);
+}
+
+/* Styling untuk header yang merupakan link <a> */
+a.sidebar-nav-group-header {
+  text-decoration: none;
+  color: inherit;
+}
+
+a.sidebar-nav-group-header:hover {
+  background-color: var(--bg-default);
+}
+
+a.sidebar-nav-group-header.active {
+  background-color: var(--primary-main);
+  color: var(--primary-contrast);
+  box-shadow: 0 4px 12px rgba(var(--primary-main-rgb), 0.3);
+}
+
+a.sidebar-nav-group-header.active:hover {
+  background-color: var(--primary-main);
+}
+
+a.sidebar-nav-group-header.active .chevron {
+  color: var(--primary-contrast);
+}
+
+a.sidebar-nav-group-header.active-group {
+  background-color: var(--primary-bg);
+  color: var(--primary-dark);
+  border: 1px solid var(--primary-light);
+}
+
+a.sidebar-nav-group-header.active-group .chevron {
+  color: var(--primary-dark);
 }
 
 .sidebar-nav-group-content {
@@ -98,30 +179,33 @@
   flex-direction: column;
   gap: 4px;
   padding: 8px 0 8px 12px;
+  max-height: 500px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+  opacity: 1;
+}
+
+.sidebar-nav-group-content.collapsed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
 }
 
 .sidebar-link-sub {
-  padding: 8px 16px;
+  padding: 8px 16px 8px 20px;
   font-size: 13px;
   border-radius: 8px;
 }
 
-.sidebar-link-sub::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  background-color: var(--text-secondary);
-  border-radius: 50%;
-  margin-right: 8px;
+.sidebar-link-sub .sidebar-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .sidebar-link-sub.active {
   background-color: var(--primary-main);
   color: var(--primary-contrast);
-}
-
-.sidebar-link-sub.active::before {
-  background-color: var(--primary-contrast);
 }
 
 .sidebar-link {
@@ -189,7 +273,8 @@
 }
 
 .sidebar.minimized .sidebar-app-name,
-.sidebar.minimized .sidebar-link-text {
+.sidebar.minimized .sidebar-link-text,
+.sidebar.minimized .sidebar-nav-group-header .chevron {
   opacity: 0;
   pointer-events: none;
 }
@@ -200,6 +285,16 @@
 }
 
 .sidebar.minimized .sidebar-link {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+/* Saat minimized, sembunyikan navigation group content */
+.sidebar.minimized .sidebar-nav-group-content {
+  display: none;
+}
+
+.sidebar.minimized .sidebar-nav-group-header {
   justify-content: center;
   padding: 12px 0;
 }

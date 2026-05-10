@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Profile Edit View
+ * Profile Edit View - Radical Redesign
  * 
  * @var array $profile Profile data
  * @var string $role User role
@@ -9,41 +9,44 @@
 ?>
 
 <div class="profile-edit-container">
+    <!-- Header & Breadcrumb -->
     <div class="profile-edit-header">
-        <div class="breadcrumb">
-            <a href="/profile">Profile</a>
-            <span class="separator">/</span>
-            <span class="current">Edit Profile</span>
-        </div>
-        <h1>Edit Profile</h1>
+        <nav class="breadcrumb">
+            <a href="/profile" data-spa>Profil</a>
+            <span class="separator"><i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i></span>
+            <span class="current">Edit Profil</span>
+        </nav>
+        <h1>Edit Profil</h1>
     </div>
 
     <?php if (isset($_GET['error'])): ?>
         <div class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
             <?= htmlspecialchars($_GET['error']) ?>
         </div>
     <?php endif; ?>
 
-    <form id="profile-edit-form" action="<?= getBaseUrl("/profile/update") ?>" class="profile-edit-form" method="POST">
+    <form action="<?= getBaseUrl("/profile/update") ?>" class="profile-edit-form" method="POST">
+        <?= csrf_field() ?>
         <!-- Personal Information Section -->
-        <div class="edit-section">
-            <h2>Informasi Pribadi</h2>
+        <section class="edit-section">
+            <h2><i class="fas fa-user-edit"></i> Informasi Pribadi</h2>
 
             <div class="form-grid">
                 <div class="form-group">
                     <label for="name">Nama Lengkap <span class="required">*</span></label>
-                    <input type="text" id="name" name="name" value="<?= htmlspecialchars($profile['user_name'] ?? '') ?>" required>
+                    <input type="text" id="name" name="name" value="<?= htmlspecialchars($profile['user_name'] ?? '') ?>" required placeholder="Masukkan nama lengkap">
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" value="<?= htmlspecialchars($profile['email'] ?? '') ?>" disabled class="disabled-input">
-                    <small class="form-text">Email tidak dapat diubah</small>
+                    <small class="form-text"><i class="fas fa-info-circle"></i> Email tidak dapat diubah untuk keamanan akun</small>
                 </div>
 
                 <div class="form-group">
                     <label for="phone">No. Telepon</label>
-                    <input type="tel" id="phone" name="phone" value="<?= htmlspecialchars($profile['phone'] ?? '') ?>" placeholder="08xxxxxxxxxx">
+                    <input type="tel" id="phone" name="phone" value="<?= htmlspecialchars($profile['phone'] ?? '') ?>" placeholder="Contoh: 081234567890">
                 </div>
 
                 <div class="form-group">
@@ -67,34 +70,33 @@
 
                 <div class="form-group full-width">
                     <label for="address">Alamat Lengkap</label>
-                    <textarea id="address" name="address" rows="3" placeholder="Masukkan alamat lengkap"><?= htmlspecialchars($profile['address'] ?? '') ?></textarea>
+                    <textarea id="address" name="address" rows="3" placeholder="Masukkan alamat lengkap tempat tinggal saat ini"><?= htmlspecialchars($profile['address'] ?? '') ?></textarea>
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="social_media">Social Media (Opsional)</label>
+                    <label>Media Sosial (Opsional)</label>
                     <div class="social-media-inputs">
                         <div class="social-input">
-                            <span class="social-prefix">Instagram</span>
+                            <div class="social-icon-box"><i class="fab fa-instagram"></i></div>
                             <input type="url" name="social_media[instagram]" value="<?= htmlspecialchars($profile['social_media']['instagram'] ?? '') ?>" placeholder="https://instagram.com/username">
                         </div>
                         <div class="social-input">
-                            <span class="social-prefix">LinkedIn</span>
+                            <div class="social-icon-box"><i class="fab fa-linkedin"></i></div>
                             <input type="url" name="social_media[linkedin]" value="<?= htmlspecialchars($profile['social_media']['linkedin'] ?? '') ?>" placeholder="https://linkedin.com/in/username">
                         </div>
                         <div class="social-input">
-                            <span class="social-prefix">Twitter</span>
+                            <div class="social-icon-box"><i class="fab fa-twitter"></i></div>
                             <input type="url" name="social_media[twitter]" value="<?= htmlspecialchars($profile['social_media']['twitter'] ?? '') ?>" placeholder="https://twitter.com/username">
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Role-Specific Fields -->
         <?php if ($role === 'user'): ?>
-            <!-- Student Specific Fields -->
-            <div class="edit-section">
-                <h2>Informasi Siswa</h2>
+            <section class="edit-section">
+                <h2><i class="fas fa-graduation-cap"></i> Informasi Siswa</h2>
 
                 <div class="form-grid">
                     <div class="form-group">
@@ -103,13 +105,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="grade_level">Jenjang</label>
+                        <label for="grade_level">Kelas</label>
                         <select id="grade_level" name="grade_level">
-                            <option value="">Pilih Jenjang</option>
-                            <option value="sd" <?= ($profile['role_data']['grade_level'] ?? '') === 'sd' ? 'selected' : '' ?>>SD</option>
-                            <option value="smp" <?= ($profile['role_data']['grade_level'] ?? '') === 'smp' ? 'selected' : '' ?>>SMP</option>
-                            <option value="sma" <?= ($profile['role_data']['grade_level'] ?? '') === 'sma' ? 'selected' : '' ?>>SMA</option>
-                            <option value="smk" <?= ($profile['role_data']['grade_level'] ?? '') === 'smk' ? 'selected' : '' ?>>SMK</option>
+                            <option value="">Pilih Kelas</option>
+                            <option value="10" <?= ($profile['role_data']['grade_level'] ?? '') === '10' ? 'selected' : '' ?>>10</option>
+                            <option value="11" <?= ($profile['role_data']['grade_level'] ?? '') === '11' ? 'selected' : '' ?>>11</option>
+                            <option value="12" <?= ($profile['role_data']['grade_level'] ?? '') === '12' ? 'selected' : '' ?>>12</option>
                         </select>
                     </div>
 
@@ -133,12 +134,11 @@
                         <input type="email" id="parent_email" name="parent_email" value="<?= htmlspecialchars($profile['role_data']['parent_email'] ?? '') ?>" placeholder="email@example.com">
                     </div>
                 </div>
-            </div>
+            </section>
 
         <?php elseif ($role === 'admin'): ?>
-            <!-- Teacher Specific Fields -->
-            <div class="edit-section">
-                <h2>Informasi Guru BK</h2>
+            <section class="edit-section">
+                <h2><i class="fas fa-chalkboard-teacher"></i> Informasi Guru BK</h2>
 
                 <div class="form-grid">
                     <div class="form-group">
@@ -156,16 +156,15 @@
                         <input type="text" id="certification" name="certification" value="<?= htmlspecialchars($profile['role_data']['certification'] ?? '') ?>" placeholder="Contoh: Guru BK Bersertifikat">
                     </div>
                 </div>
-            </div>
+            </section>
 
         <?php elseif ($role === 'super-admin'): ?>
-            <!-- Staff Specific Fields -->
-            <div class="edit-section">
-                <h2>Informasi Staff</h2>
+            <section class="edit-section">
+                <h2><i class="fas fa-user-shield"></i> Informasi Staff</h2>
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="employee_id">NIP</label>
+                        <label for="employee_id">NIP / ID Pegawai</label>
                         <input type="text" id="employee_id" name="employee_id" value="<?= htmlspecialchars($profile['role_data']['employee_id'] ?? '') ?>" placeholder="Masukkan NIP">
                     </div>
 
@@ -179,275 +178,15 @@
                         <input type="text" id="position" name="position" value="<?= htmlspecialchars($profile['role_data']['position'] ?? '') ?>" placeholder="Contoh: Administrator">
                     </div>
                 </div>
-            </div>
+            </section>
         <?php endif; ?>
 
         <!-- Form Actions -->
         <div class="form-actions">
-            <a href="/profile" class="btn btn-secondary">Batal</a>
-            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+            <a href="/profile" class="btn-cancel" data-spa>Batal</a>
+            <button type="submit" class="btn-save" id="submit-btn">
+                <i class="fas fa-save"></i> Simpan Perubahan
+            </button>
         </div>
     </form>
 </div>
-
-<style>
-    .profile-edit-container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 24px;
-    }
-
-    .profile-edit-header {
-        margin-bottom: 24px;
-    }
-
-    .breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
-        color: var(--md-sys-color-on-surface-variant, #666);
-        margin-bottom: 8px;
-    }
-
-    .breadcrumb a {
-        color: var(--md-sys-color-primary, #0066cc);
-        text-decoration: none;
-    }
-
-    .breadcrumb a:hover {
-        text-decoration: underline;
-    }
-
-    .breadcrumb .separator {
-        color: var(--md-sys-color-on-surface-variant, #999);
-    }
-
-    .breadcrumb .current {
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-    }
-
-    .profile-edit-header h1 {
-        margin: 0;
-        font-size: 28px;
-        font-weight: 600;
-    }
-
-    .edit-section {
-        background: var(--md-sys-color-surface-container-lowest, #ffffff);
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .edit-section h2 {
-        margin: 0 0 20px 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
-    }
-
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .form-group.full-width {
-        grid-column: 1 / -1;
-    }
-
-    .form-group label {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-    }
-
-    .form-group .required {
-        color: var(--md-sys-color-error, #dc3545);
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        padding: 12px 16px;
-        border: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
-        border-radius: 8px;
-        font-size: 15px;
-        font-family: inherit;
-        transition: all 0.2s;
-        background: var(--md-sys-color-surface, #ffffff);
-        color: var(--md-sys-color-on-surface, #1a1a1a);
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        outline: none;
-        border-color: var(--md-sys-color-primary, #0066cc);
-        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
-    }
-
-    .form-group input::placeholder,
-    .form-group textarea::placeholder {
-        color: var(--md-sys-color-on-surface-variant, #999);
-    }
-
-    .form-group .disabled-input {
-        background: var(--md-sys-color-surface-container-highest, #f5f5f5);
-        color: var(--md-sys-color-on-surface-variant, #666);
-        cursor: not-allowed;
-    }
-
-    .form-text {
-        font-size: 12px;
-        color: var(--md-sys-color-on-surface-variant, #666);
-    }
-
-    .social-media-inputs {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .social-input {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .social-prefix {
-        min-width: 100px;
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--md-sys-color-on-surface-variant, #666);
-    }
-
-    .social-input input {
-        flex: 1;
-    }
-
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        padding-top: 24px;
-        border-top: 1px solid var(--md-sys-color-outline-variant, #e0e0e0);
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 500;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .btn-primary {
-        background: var(--md-sys-color-primary, #0066cc);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--md-sys-color-on-primary, #0052a3);
-    }
-
-    .btn-secondary {
-        background: var(--md-sys-color-secondary-container, #e6f0ff);
-        color: var(--md-sys-color-on-secondary-container, #004c99);
-    }
-
-    .btn-secondary:hover {
-        background: var(--md-sys-color-secondary, #0066cc);
-        color: white;
-    }
-
-    .alert {
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-
-    .alert-error {
-        background: var(--md-sys-color-error-container, #ffebee);
-        color: var(--md-sys-color-on-error-container, #c62828);
-        border: 1px solid var(--md-sys-color-error, #dc3545);
-    }
-
-    @media (max-width: 768px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .social-input {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .social-prefix {
-            min-width: auto;
-        }
-
-        .form-actions {
-            flex-direction: column;
-        }
-
-        .form-actions .btn {
-            width: 100%;
-        }
-    }
-</style>
-
-<script>
-    // Form submission handler
-    document.getElementById('profile-edit-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const form = this;
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-
-        // Disable submit button
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Menyimpan...';
-
-        const formData = new FormData(form);
-
-        try {
-            const response = await fetch(form.action || window.location.href, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else if (response.ok) {
-                window.location.href = '/profile';
-            } else {
-                const error = await response.text();
-                alert('Gagal menyimpan: ' + error);
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            }
-        } catch (error) {
-            alert('Terjadi kesalahan: ' + error.message);
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        }
-    });
-</script>

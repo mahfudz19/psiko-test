@@ -83,7 +83,7 @@ class ProfileController
 
         $userProfile = $this->profileModel->findByUserId($currentUser);
         if (!$userProfile) {
-            return $response->redirect('/profile?error=Profile+not+found');
+            return $response->redirect('/profile?error=404&message=' . urlencode('Profile not found'));
         }
 
         if (!$profileId) {
@@ -95,10 +95,10 @@ class ProfileController
 
         $profile = $this->getProfileData($profileId, $currentRole);
 
-        return $response->renderPage([
-            'profile' => $profile,
-            'role' => $currentRole
-        ], ['path' => '/profile/edit', 'meta' => ['title' => 'Edit Profile | ' . env('APP_NAME')]]);
+        return $response->renderPage(
+            ['profile' => $profile, 'role' => $currentRole],
+            ['meta' => ['title' => 'Edit Profile | ' . env('APP_NAME')]]
+        );
     }
 
     /**
@@ -112,7 +112,7 @@ class ProfileController
 
         $userProfile = $this->profileModel->findByUserId($currentUser);
         if (!$userProfile) {
-            return $response->redirect('/profile');
+            return $response->redirect('/profile/edit?error=404&message=' . urlencode('Profile not found'));
         }
 
         if (!$profileId) {
@@ -124,13 +124,16 @@ class ProfileController
 
         $data = $request->getBody();
 
+        // Helper function untuk convert empty string ke null
+        $clean = fn($value) => $value === '' ? null : $value;
+
         // Update base profile data
         $baseData = [
-            'phone' => $data['phone'] ?? null,
-            'address' => $data['address'] ?? null,
-            'birth_place' => $data['birth_place'] ?? null,
-            'birth_date' => $data['birth_date'] ?? null,
-            'gender' => $data['gender'] ?? null,
+            'phone' => $clean($data['phone'] ?? null),
+            'address' => $clean($data['address'] ?? null),
+            'birth_place' => $clean($data['birth_place'] ?? null),
+            'birth_date' => $clean($data['birth_date'] ?? null),
+            'gender' => $clean($data['gender'] ?? null),
             'social_media' => !empty($data['social_media']) ? json_encode($data['social_media']) : null
         ];
 
@@ -142,7 +145,8 @@ class ProfileController
         // Update user name if provided
         if (!empty($data['name'])) {
             $this->userModel->updateById($currentUser, ['name' => $data['name']]);
-            $this->session->set('user', ['id' => $currentUser, 'name' => $data['name'], 'email' => $currentUser['email'], 'role' => $currentRole]);
+            $userEmail = $this->session->get('auth.user_email');
+            $this->session->set('user', ['id' => $currentUser, 'name' => $data['name'], 'email' => $userEmail, 'role' => $currentRole]);
         }
 
         return $response->redirect('/profile?success=' . urlencode('Profile berhasil diperbarui'));
@@ -682,33 +686,36 @@ class ProfileController
      */
     private function updateRoleSpecificData(int $profileId, string $currentRole, array $data): void
     {
+        // Helper function untuk convert empty string ke null
+        $clean = fn($value) => $value === '' ? null : $value;
+
         switch ($currentRole) {
             case 'user':
                 $studentData = [
-                    'school_id' => $data['school_id'] ?? null,
-                    'student_id' => $data['student_id'] ?? null,
-                    'grade_level' => $data['grade_level'] ?? null,
-                    'major' => $data['major'] ?? null,
-                    'parent_name' => $data['parent_name'] ?? null,
-                    'parent_phone' => $data['parent_phone'] ?? null,
-                    'parent_email' => $data['parent_email'] ?? null
+                    'school_id' => $clean($data['school_id'] ?? null),
+                    'student_id' => $clean($data['student_id'] ?? null),
+                    'grade_level' => $clean($data['grade_level'] ?? null),
+                    'major' => $clean($data['major'] ?? null),
+                    'parent_name' => $clean($data['parent_name'] ?? null),
+                    'parent_phone' => $clean($data['parent_phone'] ?? null),
+                    'parent_email' => $clean($data['parent_email'] ?? null)
                 ];
                 $this->studentModel->updateByProfileId($profileId, $studentData);
                 break;
             case 'admin':
                 $teacherData = [
-                    'school_id' => $data['school_id'] ?? null,
-                    'teacher_id' => $data['teacher_id'] ?? null,
-                    'subject_specialty' => $data['subject_specialty'] ?? null,
-                    'certification' => $data['certification'] ?? null
+                    'school_id' => $clean($data['school_id'] ?? null),
+                    'teacher_id' => $clean($data['teacher_id'] ?? null),
+                    'subject_specialty' => $clean($data['subject_specialty'] ?? null),
+                    'certification' => $clean($data['certification'] ?? null)
                 ];
                 $this->teacherModel->updateByProfileId($profileId, $teacherData);
                 break;
             case 'super-admin':
                 $staffData = [
-                    'employee_id' => $data['employee_id'] ?? null,
-                    'department' => $data['department'] ?? null,
-                    'position' => $data['position'] ?? null
+                    'employee_id' => $clean($data['employee_id'] ?? null),
+                    'department' => $clean($data['department'] ?? null),
+                    'position' => $clean($data['position'] ?? null)
                 ];
                 $this->staffModel->updateByProfileId($profileId, $staffData);
                 break;

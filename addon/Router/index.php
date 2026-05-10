@@ -1,16 +1,13 @@
 <?php
 
-use App\Core\Http\Request;
-use App\Core\Http\Response;
 use Addon\Controllers\AuthController;
+use Addon\Controllers\DashboardController;
 use Addon\Controllers\ProfileController;
 use Addon\Controllers\PmbController;
 use Addon\Controllers\SettingsController;
 use Addon\Controllers\AdminController;
 use Addon\Controllers\SchoolAdminController;
 use Addon\Controllers\ChatController;
-use Addon\Models\UserModel;
-use App\Services\SessionService;
 
 /** @var \App\Core\Routing\Router $router */
 
@@ -44,7 +41,7 @@ $router->group(['middleware' => ['guest']], function () use ($router) {
 // Auth routes (require login)
 $router->group(['middleware' => ['auth']], function () use ($router) {
     // Dashboard
-    $router->get('/dashboard', [AuthController::class, 'index']);
+    $router->get('/dashboard', [DashboardController::class, 'index']);
 
     // Logout
     $router->post('/logout', [AuthController::class, 'logout']);

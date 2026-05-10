@@ -1,0 +1,333 @@
+/* ===== Admin Dashboard Styles (Scoped) ===== */
+.admin-dashboard-container {
+    min-height: 100vh;
+}
+
+.admin-dashboard-container .dashboard-main {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ===== Welcome Section ===== */
+.admin-dashboard-container .dashboard-welcome {
+    margin-bottom: 2rem;
+}
+
+.admin-dashboard-container .welcome-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-dashboard-container .welcome-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.admin-dashboard-container .welcome-subtitle {
+    color: #64748b;
+}
+
+.admin-dashboard-container .accreditation-badge {
+    background: #eef2ff;
+    color: #6366f1;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* ===== Stats Grid ===== */
+.admin-dashboard-container .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.admin-dashboard-container .stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-dashboard-container .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.admin-dashboard-container .stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-dashboard-container .stat-content {
+    flex: 1;
+}
+
+.admin-dashboard-container .stat-label {
+    display: block;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.admin-dashboard-container .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.admin-dashboard-container .stat-progress {
+    height: 0.5rem;
+    background: #f1f5f9;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.admin-dashboard-container .stat-progress-bar {
+    height: 100%;
+    border-radius: 9999px;
+}
+
+.admin-dashboard-container .stat-link {
+    font-size: 0.875rem;
+    color: #6366f1;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* ===== Dashboard Grid Layout ===== */
+.admin-dashboard-container .dashboard-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.admin-dashboard-container .dashboard-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-dashboard-container .card-header {
+    margin-bottom: 1.5rem;
+}
+
+.admin-dashboard-container .card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.admin-dashboard-container .card-subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* Major List */
+.admin-dashboard-container .major-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.admin-dashboard-container .major-item {
+    margin-bottom: 0.5rem;
+}
+
+.admin-dashboard-container .major-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.admin-dashboard-container .major-name {
+    font-weight: 500;
+    color: #334155;
+}
+
+.admin-dashboard-container .major-count {
+    color: #64748b;
+}
+
+.admin-dashboard-container .major-bar-container {
+    height: 0.5rem;
+    background: #f1f5f9;
+    border-radius: 9999px;
+}
+
+.admin-dashboard-container .major-bar-fill {
+    height: 100%;
+    background: #6366f1;
+    border-radius: 9999px;
+}
+
+/* Student List */
+.admin-dashboard-container .student-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.admin-dashboard-container .student-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    transition: background 0.2s;
+}
+
+.admin-dashboard-container .student-item:hover {
+    background: #f8fafc;
+}
+
+.admin-dashboard-container .student-avatar img {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.admin-dashboard-container .student-info {
+    flex: 1;
+}
+
+.admin-dashboard-container .student-name {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.875rem;
+}
+
+.admin-dashboard-container .student-meta {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.admin-dashboard-container .btn-view {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.admin-dashboard-container .btn-view:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.admin-dashboard-container .card-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+    text-align: center;
+}
+
+.admin-dashboard-container .view-all-link {
+    font-size: 0.875rem;
+    color: #6366f1;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* ===== Quick Actions Section ===== */
+.admin-dashboard-container .quick-actions-section {
+    margin-top: 2rem;
+}
+
+.admin-dashboard-container .section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.admin-dashboard-container .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.admin-dashboard-container .action-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: #1e293b;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-dashboard-container .action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.admin-dashboard-container .action-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Empty State */
+.admin-dashboard-container .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 1024px) {
+    .admin-dashboard-container .dashboard-grid-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard-container {
+        padding: 1rem;
+    }
+
+    .admin-dashboard-container .welcome-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .admin-dashboard-container .welcome-title {
+        font-size: 1.5rem;
+    }
+
+    .admin-dashboard-container .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -4,338 +4,285 @@
  * Dashboard Siswa - Main View
  * Menampilkan overview profil, match score, quick actions, dan next steps
  * 
- * @var \App\Core\View\PageMeta $meta
+ * @var mixed $userName
+ * @var mixed $role
+ * @var int $profileProgress
+ * @var mixed $matchScore
+ * @var mixed $topMajor
+ * @var array|null $aiRecommendations
+ * @var mixed $pmbStatus
+ * @var int $eligibleScholarshipsCount
+ * @var array|null $studentProfile
+ * @var array|null $profile
  */
-
-// Dummy data untuk presentasi
-$studentName = $_SESSION['auth.user_name'] ?? 'Siswa';
-$profileProgress = 85;
-$pmbStatus = 'draft'; // draft, submitted, accepted, rejected
-$matchScore = 92;
-$topMajor = 'Teknik Informatika';
-$scholarshipPotential = 50;
-$completedTasks = 3;
-$totalTasks = 5;
-
-// Next steps dengan dummy data
-$nextSteps = [
-  [
-    'title' => 'Lengkapi dokumen akademik',
-    'description' => 'Upload transkrip nilai semester terakhir',
-    'icon' => '📄',
-    'priority' => 'high',
-    'completed' => false,
-    'link' => '/profile/academic'
-  ],
-  [
-    'title' => 'Upload sertifikat prestasi',
-    'description' => 'Tambahkan sertifikat lomba atau pencapaian',
-    'icon' => '🏆',
-    'priority' => 'medium',
-    'completed' => false,
-    'link' => '/profile/achievements'
-  ],
-  [
-    'title' => 'Ikuti simulasi tes potensi',
-    'description' => 'Tes untuk mengukur potensi akademik',
-    'icon' => '📝',
-    'priority' => 'medium',
-    'completed' => true,
-    'link' => '/pmb/simulation'
-  ],
-  [
-    'title' => 'Review hasil analisis AI',
-    'description' => 'Lihat rekomendasi jurusan dari AI',
-    'icon' => '🤖',
-    'priority' => 'low',
-    'completed' => true,
-    'link' => '/profile/results'
-  ],
-  [
-    'title' => 'Lengkapi data diri',
-    'description' => 'Pastikan semua informasi pribadi akurat',
-    'icon' => '👤',
-    'priority' => 'high',
-    'completed' => true,
-    'link' => '/profile/edit'
-  ]
-];
-
-// AI Recommendations
-$aiRecommendations = [
-  [
-    'area' => 'Logical Reasoning',
-    'current' => 75,
-    'target' => 90,
-    'improvement' => '+15%',
-    'description' => 'Latihan soal logika dan penalaran analitis'
-  ],
-  [
-    'area' => 'Mathematical Ability',
-    'current' => 82,
-    'target' => 90,
-    'improvement' => '+8%',
-    'description' => 'Perbanyak latihan matematika dasar dan aljabar'
-  ],
-  [
-    'area' => 'Verbal Comprehension',
-    'current' => 88,
-    'target' => 90,
-    'improvement' => '+2%',
-    'description' => 'Baca artikel teknis dan buat ringkasan'
-  ]
-];
-
-// Match score breakdown
-$matchScoreBreakdown = [
-  'logic' => ['label' => 'Logical Thinking', 'score' => 88],
-  'interest' => ['label' => 'Minat & Passion', 'score' => 95],
-  'skills' => ['label' => 'Skills & Kompetensi', 'score' => 90],
-  'potential' => ['label' => 'Potensi Akademik', 'score' => 85]
-];
 ?>
-
-<main class="dashboard-main">
-  <!-- Welcome Section -->
-  <section class="dashboard-welcome">
-    <div class="welcome-header">
-      <div class="welcome-text">
-        <h1 class="welcome-title">Selamat Datang, <?= htmlspecialchars($studentName) ?>! 👋</h1>
-        <p class="welcome-subtitle">Profil kamu <strong><?= $profileProgress ?>% lengkap</strong>. Ayo lengkapi untuk hasil analisis yang lebih akurat!</p>
+<div class="student-dashboard-container">
+  <main class="dashboard-main">
+    <!-- Welcome Section -->
+    <section class="dashboard-welcome">
+      <div class="welcome-content">
+        <div class="welcome-text">
+          <h1 class="welcome-title">Halo, <?= htmlspecialchars($userName) ?>! 👋</h1>
+          <p class="welcome-subtitle">
+            <?php if ($profileProgress < 100): ?>
+              Profil kamu baru <strong><?= $profileProgress ?>%</strong> lengkap. Yuk, lengkapi data akademikmu untuk analisis yang lebih akurat!
+            <?php else: ?>
+              Profil kamu sudah lengkap! Kamu siap untuk mengeksplorasi rekomendasi kampus terbaik.
+            <?php endif; ?>
+          </p>
+        </div>
+        <div class="welcome-avatar">
+          <img src="<?= $profile['avatar'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($userName) . '&background=6366f1&color=fff' ?>" alt="Avatar" class="avatar-image">
+        </div>
       </div>
-      <div class="welcome-avatar">
-        <img src="<?= $_SESSION['auth.user_avatar'] ?? $_SESSION['auth.user_avatar_url'] ?? '/logo_app/mazu-icon.svg'; ?>" alt="Avatar" class="avatar-image">
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Match Score Hero Card -->
-  <?php if ($pmbStatus !== 'accepted'): ?>
-    <section class="match-score-section">
-      <div class="match-score-card">
-        <div class="match-score-content">
-          <div class="match-score-header">
-            <div class="match-score-badge">
+    <!-- Match Score Section (Hanya jika sudah ada analisis) -->
+    <?php if ($matchScore > 0): ?>
+      <section class="match-score-section">
+        <div class="match-score-card">
+          <div class="match-score-content">
+            <div class="match-score-header">
+              <span class="match-score-badge">Top Match</span>
               <div class="circular-progress">
                 <svg viewBox="0 0 36 36" class="circular-chart">
                   <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                   <path class="circle" stroke-dasharray="<?= $matchScore ?>, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <text x="18" y="20.35" class="score-number"><?= $matchScore ?>%</text>
                 </svg>
-                <span class="score-number"><?= $matchScore ?>%</span>
               </div>
             </div>
             <div class="match-score-info">
-              <h2 class="match-score-title">Match Score dengan <?= htmlspecialchars($topMajor) ?></h2>
-              <p class="match-score-desc">Berdasarkan analisis potensi, minat, dan kompetensimu</p>
+              <h2 class="match-score-title"><?= htmlspecialchars($topMajor) ?></h2>
+              <p class="match-score-desc">Berdasarkan minat, bakat, dan nilai akademikmu, jurusan ini memiliki kecocokan tertinggi.</p>
               <div class="match-score-actions">
-                <a data-spa href="/pmb/journey" class="btn btn-primary btn-sm">
-                  <span class="btn-icon">🎯</span> Lihat Detail
-                </a>
-                <a data-spa href="/pmb/simulation" class="btn btn-secondary btn-sm">
-                  <span class="btn-icon">📝</span> Simulasi PMB
-                </a>
+                <a href="/pmb/journey" class="btn btn-primary btn-sm">Lihat Detail Analisis</a>
               </div>
             </div>
           </div>
-          <div class="match-score-breakdown">
-            <?php foreach ($matchScoreBreakdown as $key => $item): ?>
-              <div class="breakdown-item">
-                <div class="breakdown-label"><?= htmlspecialchars($item['label']) ?></div>
-                <div class="breakdown-bar">
-                  <div class="breakdown-fill" style="width: <?= $item['score'] ?>%"></div>
-                </div>
-                <div class="breakdown-value"><?= $item['score'] ?>%</div>
-              </div>
-            <?php endforeach; ?>
+        </div>
+      </section>
+    <?php endif; ?>
+
+    <!-- Stats Grid -->
+    <section class="stats-grid">
+      <!-- Profile Progress -->
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Kelengkapan Profil</span>
+          <div class="stat-value"><?= $profileProgress ?>%</div>
+          <div class="stat-progress">
+            <div class="stat-progress-bar" style="width: <?= $profileProgress ?>%; background: #6366f1;"></div>
           </div>
+          <a href="/profile/edit" class="stat-link">Lengkapi Profil &rarr;</a>
+        </div>
+      </div>
+
+      <!-- PMB Journey Status -->
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Status PMB</span>
+          <div class="stat-value">
+            <?php
+            $statusLabels = [
+              'not_started' => 'Belum Mulai',
+              'in_progress' => 'Sedang Berjalan',
+              'completed' => 'Selesai Simulasi',
+              'converted' => 'Terdaftar'
+            ];
+            echo $statusLabels[$pmbStatus] ?? 'Unknown';
+            ?>
+          </div>
+          <div class="stat-status">
+            <span class="status-dot" style="background: <?= $pmbStatus === 'not_started' ? '#94a3b8' : '#10b981' ?>;"></span>
+            <span><?= $pmbStatus === 'not_started' ? 'Siap untuk simulasi' : 'Terus pantau progresmu' ?></span>
+          </div>
+          <a href="/pmb/journey" class="stat-link">Lihat Journey &rarr;</a>
+        </div>
+      </div>
+
+      <!-- Scholarship Eligibility -->
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Peluang Beasiswa</span>
+          <div class="stat-value"><?= $eligibleScholarshipsCount ?> Program</div>
+          <p class="stat-desc" style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Kamu memenuhi syarat untuk <?= $eligibleScholarshipsCount ?> beasiswa.</p>
+          <a href="/pmb/scholarship" class="stat-link">Cek Beasiswa &rarr;</a>
         </div>
       </div>
     </section>
-  <?php endif; ?>
 
-  <!-- Stats Cards -->
-  <section class="stats-grid">
-    <div class="stat-card stat-card--primary">
-      <div class="stat-icon">📊</div>
-      <div class="stat-content">
-        <div class="stat-label">Progress Profil</div>
-        <div class="stat-value"><?= $profileProgress ?>%</div>
+    <!-- Quick Actions -->
+    <section class="quick-actions-section">
+      <h3 class="section-title">Akses Cepat</h3>
+      <div class="quick-actions-grid">
+        <a href="/profile/results" class="quick-action-card">
+          <div class="quick-action-icon" style="background: #eef2ff; color: #6366f1;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div class="quick-action-info">
+            <span class="quick-action-label">Hasil Tes</span>
+            <span class="quick-action-desc">Lihat analisis psikologi</span>
+          </div>
+        </a>
+        <a href="/chat" class="quick-action-card">
+          <div class="quick-action-icon" style="background: #ecfdf5; color: #10b981;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <div class="quick-action-info">
+            <span class="quick-action-label">Konsultasi AI</span>
+            <span class="quick-action-desc">Tanya jawab karir</span>
+          </div>
+        </a>
+        <a href="/pmb/simulation" class="quick-action-card">
+          <div class="quick-action-icon" style="background: #fff7ed; color: #f59e0b;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <div class="quick-action-info">
+            <span class="quick-action-label">Simulasi PMB</span>
+            <span class="quick-action-desc">Coba daftar kampus</span>
+          </div>
+        </a>
       </div>
-      <div class="stat-progress">
-        <div class="stat-progress-bar" style="width: <?= $profileProgress ?>%"></div>
-      </div>
-      <a data-spa href="/profile" class="stat-link">Update →</a>
-    </div>
+    </section>
 
-    <div class="stat-card stat-card--success">
-      <div class="stat-icon">💰</div>
-      <div class="stat-content">
-        <div class="stat-label">Beasiswa Potensial</div>
-        <div class="stat-value"><?= $scholarshipPotential ?>%</div>
-      </div>
-      <div class="stat-progress">
-        <div class="stat-progress-bar" style="width: <?= $scholarshipPotential ?>%"></div>
-      </div>
-      <a data-spa href="/pmb/scholarship" class="stat-link">Cek Detail →</a>
-    </div>
-
-    <div class="stat-card stat-card--warning">
-      <div class="stat-icon">📋</div>
-      <div class="stat-content">
-        <div class="stat-label">Tugas Selesai</div>
-        <div class="stat-value"><?= $completedTasks ?>/<?= $totalTasks ?></div>
-      </div>
-      <div class="stat-progress">
-        <div class="stat-progress-bar" style="width: <?= ($completedTasks / $totalTasks) * 100 ?>%"></div>
-      </div>
-      <a data-spa href="#next-steps" class="stat-link">Lihat Tugas →</a>
-    </div>
-
-    <div class="stat-card stat-card--info">
-      <div class="stat-icon">🎓</div>
-      <div class="stat-content">
-        <div class="stat-label">Status PMB</div>
-        <div class="stat-value"><?= ucfirst($pmbStatus) ?></div>
-      </div>
-      <div class="stat-status stat-status--<?= $pmbStatus ?>">
-        <span class="status-dot"></span>
-        <span class="status-text"><?= $pmbStatus === 'draft' ? 'Belum dikirim' : $pmbStatus ?></span>
-      </div>
-      <a data-spa href="/pmb/simulation" class="stat-link">
-        <?= $pmbStatus === 'draft' ? 'Lanjutkan' : 'Lihat' ?> →
-      </a>
-    </div>
-  </section>
-
-  <!-- Quick Actions -->
-  <section class="quick-actions-section">
-    <h2 class="section-title">⚡ Quick Actions</h2>
-    <div class="quick-actions-grid">
-      <a data-spa href="/pmb/simulation" class="quick-action-card">
-        <div class="quick-action-icon">📝</div>
-        <div class="quick-action-label">Simulasi PMB</div>
-        <div class="quick-action-desc">Ikuti simulasi pendaftaran</div>
-      </a>
-      <a data-spa href="/profile/edit" class="quick-action-card">
-        <div class="quick-action-icon">✏️</div>
-        <div class="quick-action-label">Edit Profil</div>
-        <div class="quick-action-desc">Update data diri</div>
-      </a>
-      <a data-spa href="/profile/academic" class="quick-action-card">
-        <div class="quick-action-icon">📚</div>
-        <div class="quick-action-label">Data Akademik</div>
-        <div class="quick-action-desc">Kelola nilai & prestasi</div>
-      </a>
-      <a data-spa href="/pmb/scholarship" class="quick-action-card">
-        <div class="quick-action-icon">💰</div>
-        <div class="quick-action-label">Beasiswa</div>
-        <div class="quick-action-desc">Cek eligibility & apply</div>
-      </a>
-    </div>
-  </section>
-
-  <!-- Next Steps & AI Recommendations -->
-  <section class="dashboard-split-section">
-    <!-- Next Steps -->
-    <div class="split-card next-steps-card" id="next-steps">
-      <h2 class="card-title">📋 Next Steps</h2>
-      <div class="task-list">
-        <?php foreach ($nextSteps as $index => $task): ?>
-          <div class="task-item <?= $task['completed'] ? 'task-completed' : '' ?> task-priority-<?= $task['priority'] ?>">
+    <div class="dashboard-split-section">
+      <!-- Next Steps / Tasks -->
+      <section class="split-card next-steps-card">
+        <div class="card-header">
+          <h3 class="card-title">Langkah Selanjutnya</h3>
+          <p class="card-subtitle">Selesaikan tugas ini untuk progres maksimal</p>
+        </div>
+        <div class="task-list">
+          <div class="task-item <?= !empty($profile['phone']) ? 'task-completed' : '' ?>">
             <div class="task-checkbox">
-              <input type="checkbox" id="task-<?= $index ?>" <?= $task['completed'] ? 'checked' : '' ?>>
-              <label for="task-<?= $index ?>"></label>
+              <input type="checkbox" <?= !empty($profile['phone']) ? 'checked' : '' ?> disabled>
             </div>
-            <div class="task-icon"><?= $task['icon'] ?></div>
             <div class="task-content">
-              <h3 class="task-title"><?= htmlspecialchars($task['title']) ?></h3>
-              <p class="task-desc"><?= htmlspecialchars($task['description']) ?></p>
+              <span class="task-title">Lengkapi Data Diri</span>
+              <span class="task-desc">Nomor HP, Alamat, dan Tanggal Lahir</span>
             </div>
-            <a data-spa href="<?= $task['link'] ?>" class="task-action">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </a>
+            <?php if (empty($profile['phone'])): ?>
+              <a href="/profile/edit" class="task-action">Lengkapi</a>
+            <?php endif; ?>
           </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
-
-    <!-- AI Recommendations -->
-    <div class="split-card ai-recommendations-card">
-      <h2 class="card-title">🤖 AI Recommendations</h2>
-      <p class="card-subtitle">Area yang perlu ditingkatkan untuk optimalisasi match score</p>
-      <div class="recommendations-list">
-        <?php foreach ($aiRecommendations as $rec): ?>
-          <div class="recommendation-item">
-            <div class="rec-header">
-              <div class="rec-info">
-                <h3 class="rec-area"><?= htmlspecialchars($rec['area']) ?></h3>
-                <p class="rec-desc"><?= htmlspecialchars($rec['description']) ?></p>
-              </div>
-              <div class="rec-badge"><?= $rec['improvement'] ?></div>
+          <div class="task-item <?= !empty($studentProfile['academic_scores']) ? 'task-completed' : '' ?>">
+            <div class="task-checkbox">
+              <input type="checkbox" <?= !empty($studentProfile['academic_scores']) ? 'checked' : '' ?> disabled>
             </div>
-            <div class="rec-progress">
-              <div class="rec-progress-bar">
-                <div class="rec-progress-fill" style="width: <?= $rec['current'] ?>%"></div>
-              </div>
-              <div class="rec-progress-labels">
-                <span>Current: <?= $rec['current'] ?>%</span>
-                <span>Target: <?= $rec['target'] ?>%</span>
-              </div>
+            <div class="task-content">
+              <span class="task-title">Input Nilai Rapor</span>
+              <span class="task-desc">Minimal 3 semester terakhir</span>
             </div>
+            <?php if (empty($studentProfile['academic_scores'])): ?>
+              <a href="/profile/academic" class="task-action">Input</a>
+            <?php endif; ?>
           </div>
-        <?php endforeach; ?>
-      </div>
-      <a data-spa href="/profile/results" class="card-cta">
-        <span class="cta-icon">📊</span>
-        <span>Lihat Hasil Analisis Lengkap</span>
-      </a>
-    </div>
-  </section>
+          <div class="task-item <?= !empty($studentProfile['ai_analysis']) ? 'task-completed' : '' ?>">
+            <div class="task-checkbox">
+              <input type="checkbox" <?= !empty($studentProfile['ai_analysis']) ? 'checked' : '' ?> disabled>
+            </div>
+            <div class="task-content">
+              <span class="task-title">Generate Analisis AI</span>
+              <span class="task-desc">Dapatkan rekomendasi jurusan</span>
+            </div>
+            <?php if (empty($studentProfile['ai_analysis'])): ?>
+              <a href="/profile/results" class="task-action">Generate</a>
+            <?php endif; ?>
+          </div>
+        </div>
+      </section>
 
-  <!-- Partner Companies Preview -->
-  <section class="partners-section">
-    <h2 class="section-title">🏢 Partner Perusahaan untuk Magang & Karir</h2>
-    <div class="partners-grid">
-      <div class="partner-logo">
-        <div class="partner-placeholder">🏢</div>
-        <span>Google</span>
-      </div>
-      <div class="partner-logo">
-        <div class="partner-placeholder">💻</div>
-        <span>Microsoft</span>
-      </div>
-      <div class="partner-logo">
-        <div class="partner-placeholder">🚀</div>
-        <span>GoTo</span>
-      </div>
-      <div class="partner-logo">
-        <div class="partner-placeholder">🦄</div>
-        <span>Traveloka</span>
-      </div>
-      <div class="partner-logo">
-        <div class="partner-placeholder">🛍️</div>
-        <span>Shopee</span>
-      </div>
-      <div class="partner-logo">
-        <div class="partner-placeholder">📱</div>
-        <span>Telkomsel</span>
-      </div>
+      <!-- AI Recommendations -->
+      <section class="split-card ai-recs-card">
+        <div class="card-header">
+          <h3 class="card-title">Rekomendasi AI</h3>
+          <p class="card-subtitle">Berdasarkan profil unik kamu</p>
+        </div>
+        <div class="recommendations-list">
+          <?php if (!empty($aiRecommendations)): ?>
+            <?php foreach ($aiRecommendations as $rec): ?>
+              <div class="recommendation-item">
+                <div class="rec-header">
+                  <span class="rec-area"><?= htmlspecialchars($rec['field'] ?? 'Rekomendasi') ?></span>
+                  <span class="rec-badge">AI Suggestion</span>
+                </div>
+                <p class="rec-desc"><?= htmlspecialchars($rec['reason'] ?? $rec) ?></p>
+              </div>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <div class="empty-state">
+              <p>Belum ada rekomendasi. Lengkapi data rapor dan hasil tes kamu!</p>
+              <a href="/profile/results" class="btn btn-secondary btn-sm">Mulai Analisis</a>
+            </div>
+          <?php endif; ?>
+        </div>
+        <?php if (!empty($aiRecommendations)): ?>
+          <a href="/profile/results" class="card-cta">
+            <span>Lihat Analisis Lengkap</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cta-icon">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        <?php endif; ?>
+      </section>
     </div>
-  </section>
-</main>
 
-<script>
-  // Toggle task completion (dummy interaction)
-  document.querySelectorAll('.task-checkbox input').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-      const taskItem = this.closest('.task-item');
-      if (this.checked) {
-        taskItem.classList.add('task-completed');
-      } else {
-        taskItem.classList.remove('task-completed');
-      }
-    });
-  });
-</script>
+    <!-- Partners / Universities -->
+    <section class="partners-section">
+      <h3 class="section-title">Kampus Rekomendasi</h3>
+      <div class="partners-grid">
+        <div class="partner-logo">
+          <div class="partner-placeholder"><span>UI</span></div>
+        </div>
+        <div class="partner-logo">
+          <div class="partner-placeholder"><span>ITB</span></div>
+        </div>
+        <div class="partner-logo">
+          <div class="partner-placeholder"><span>UGM</span></div>
+        </div>
+        <div class="partner-logo">
+          <div class="partner-placeholder"><span>ITS</span></div>
+        </div>
+        <div class="partner-logo">
+          <div class="partner-placeholder"><span>UNAIR</span></div>
+        </div>
+        <div class="partner-logo">
+          <div class="partner-placeholder"><span>IPB</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

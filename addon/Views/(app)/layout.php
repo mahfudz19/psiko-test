@@ -280,9 +280,6 @@
           <line x1="3" x2="21" y1="18" y2="18" />
         </svg>
       </button>
-      <div class="header-title">
-        <h1><?= $meta->title ?? 'Dashboard'; ?></h1>
-      </div>
       <div class="header-actions">
         <!-- Avatar Dropdown using native <details> element - auto closes without JS -->
         <details class="avatar-dropdown">

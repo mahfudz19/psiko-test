@@ -1,0 +1,357 @@
+/* ===== Super Admin Dashboard Styles (Scoped) ===== */
+.super-admin-dashboard-container {
+    min-height: 100vh;
+}
+
+.super-admin-dashboard-container .dashboard-main {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ===== Welcome Section ===== */
+.super-admin-dashboard-container .dashboard-welcome {
+    margin-bottom: 2rem;
+}
+
+.super-admin-dashboard-container .welcome-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.super-admin-dashboard-container .welcome-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.super-admin-dashboard-container .welcome-subtitle {
+    color: #64748b;
+}
+
+.super-admin-dashboard-container .role-badge {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+}
+
+/* ===== Stats Grid ===== */
+.super-admin-dashboard-container .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.super-admin-dashboard-container .stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.super-admin-dashboard-container .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.super-admin-dashboard-container .stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.super-admin-dashboard-container .stat-content {
+    flex: 1;
+}
+
+.super-admin-dashboard-container .stat-label {
+    display: block;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.super-admin-dashboard-container .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.super-admin-dashboard-container .stat-sublabel {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* ===== Dashboard Grid Layout ===== */
+.super-admin-dashboard-container .dashboard-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.super-admin-dashboard-container .dashboard-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.super-admin-dashboard-container .card-header {
+    margin-bottom: 1.5rem;
+}
+
+.super-admin-dashboard-container .card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.super-admin-dashboard-container .card-subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* School List */
+.super-admin-dashboard-container .school-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.super-admin-dashboard-container .school-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    transition: background 0.2s;
+}
+
+.super-admin-dashboard-container .school-item:hover {
+    background: #f8fafc;
+}
+
+.super-admin-dashboard-container .school-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: #eef2ff;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6366f1;
+    flex-shrink: 0;
+}
+
+.super-admin-dashboard-container .school-info {
+    flex: 1;
+}
+
+.super-admin-dashboard-container .school-name {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.875rem;
+}
+
+.super-admin-dashboard-container .school-meta {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.super-admin-dashboard-container .btn-view {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.super-admin-dashboard-container .btn-view:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* User List */
+.super-admin-dashboard-container .user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.super-admin-dashboard-container .user-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    transition: background 0.2s;
+}
+
+.super-admin-dashboard-container .user-item:hover {
+    background: #f8fafc;
+}
+
+.super-admin-dashboard-container .user-avatar img {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.super-admin-dashboard-container .user-info {
+    flex: 1;
+}
+
+.super-admin-dashboard-container .user-name {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.875rem;
+}
+
+.super-admin-dashboard-container .user-email {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.super-admin-dashboard-container .role-badge-small {
+    font-size: 0.625rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.super-admin-dashboard-container .role-badge-small.role-user {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.super-admin-dashboard-container .role-badge-small.role-admin {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.super-admin-dashboard-container .role-badge-small.role-super-admin {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
+.super-admin-dashboard-container .role-badge-small.role-staff {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.super-admin-dashboard-container .card-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+    text-align: center;
+}
+
+.super-admin-dashboard-container .view-all-link {
+    font-size: 0.875rem;
+    color: #6366f1;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* ===== Quick Actions Section ===== */
+.super-admin-dashboard-container .quick-actions-section {
+    margin-top: 2rem;
+}
+
+.super-admin-dashboard-container .section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.super-admin-dashboard-container .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.super-admin-dashboard-container .action-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: #1e293b;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.super-admin-dashboard-container .action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.super-admin-dashboard-container .action-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Empty State */
+.super-admin-dashboard-container .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 1024px) {
+    .super-admin-dashboard-container .dashboard-grid-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .super-admin-dashboard-container {
+        padding: 1rem;
+    }
+
+    .super-admin-dashboard-container .welcome-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .super-admin-dashboard-container .welcome-title {
+        font-size: 1.5rem;
+    }
+
+    .super-admin-dashboard-container .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

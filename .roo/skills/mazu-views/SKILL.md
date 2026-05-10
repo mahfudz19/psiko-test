@@ -137,6 +137,30 @@ View::addScript('(app)/admin/custom.js');
 
 **ProgressBar:** ID `#global-progress-bar`
 
+### 🧠 SPA JavaScript Lifecycle
+
+Karena SPA hanya mengganti konten di dalam layout, event listener pada elemen yang diganti akan hilang. Gunakan pola berikut di `script.js`:
+
+```javascript
+function initMyFeature() {
+    const el = document.getElementById('my-element');
+    if (el) {
+        // Pasang listener atau manipulasi DOM di sini
+        el.addEventListener('click', () => { ... });
+    }
+}
+
+// 1. Jalankan saat load pertama kali
+document.addEventListener('DOMContentLoaded', initMyFeature);
+
+// 2. Jalankan ulang setiap kali navigasi SPA selesai
+window.addEventListener('spa:navigated', () => {
+    initMyFeature();
+});
+```
+
+**Tips:** Gunakan `cloneNode(true)` atau hapus listener lama jika perlu mencegah _double binding_ pada elemen yang berada di luar area yang di-update (seperti sidebar).
+
 ## 📄 View File Standards
 
 ```php

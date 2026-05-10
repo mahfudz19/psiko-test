@@ -6,7 +6,6 @@
  * @var array $profile Profile data
  * @var string $role User role
  */
-$currentRole = $_SESSION['auth.user_role'];
 ?>
 
 <div class="profile-container">

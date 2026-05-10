@@ -1,122 +1,273 @@
-/* Chat Create Container */
-.chat-create-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 24px;
+/* ========================================
+   CHAT CREATE - RADICAL REDESIGN
+   Menggunakan variabel global dari style.css
+   ======================================== */
+
+/* Main Container */
+.chat-create-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--bg-default) 0%, var(--bg-paper) 100%);
+    padding: 40px 24px;
 }
 
-/* Header */
-.chat-create-header {
-    margin-bottom: 32px;
+.chat-create-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Hero Header */
+.chat-create-hero {
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+}
+
+.chat-create-hero::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background: var(--primary-main);
+    filter: blur(80px);
+    opacity: 0.1;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.back-button-wrapper {
+    margin-bottom: 24px;
 }
 
 .back-button {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-paper);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius);
     color: var(--text-secondary);
     text-decoration: none;
     font-size: 14px;
-    margin-bottom: 16px;
-    transition: all 0.2s ease;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .back-button:hover {
-    color: var(--primary-color);
+    background: var(--primary-bg);
+    border-color: var(--primary-main);
+    color: var(--primary-main);
+    transform: translateX(-4px);
 }
 
 .back-icon {
     font-size: 18px;
+    transition: transform 0.3s ease;
 }
 
-.chat-create-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 8px;
+.back-button:hover .back-icon {
+    transform: translateX(-2px);
 }
 
-.chat-create-subtitle {
-    font-size: 15px;
+.chat-create-hero h1 {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--primary-main);
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+}
+
+.chat-create-hero p {
+    font-size: 18px;
     color: var(--text-secondary);
+    max-width: 500px;
+    margin: 0 auto;
 }
 
-/* Content */
+/* Main Content Grid */
 .chat-create-content {
     display: grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 1fr 380px;
     gap: 32px;
+    align-items: start;
 }
 
-/* Form */
-.chat-create-form {
-    background: var(--surface-1);
-    padding: 32px;
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
+/* Form Card */
+.chat-create-form-card {
+    background: var(--bg-paper);
+    border-radius: var(--border-radius-lg);
+    padding: 40px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
 }
 
+.chat-create-form-card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-create-form-card h2::before {
+    content: '';
+    width: 4px;
+    height: 28px;
+    background: var(--primary-main);
+    border-radius: 2px;
+}
+
+/* Form Group */
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 28px;
+}
+
+.form-group:last-of-type {
+    margin-bottom: 32px;
 }
 
 .form-label {
     display: block;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.form-label-required::after {
+    content: ' *';
+    color: var(--error-main);
 }
 
 .form-select,
 .form-textarea {
     width: 100%;
-    padding: 12px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    font-size: 14px;
+    padding: 16px 20px;
+    border: 2px solid var(--border-light);
+    border-radius: var(--border-radius);
+    font-size: 15px;
     font-family: inherit;
-    background: var(--surface-2);
+    background: var(--bg-paper);
     color: var(--text-primary);
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
 }
 
 .form-select:focus,
 .form-textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 4px var(--primary-bg);
+}
+
+.form-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 20px;
+    padding-right: 52px;
+}
+
+.form-select option {
+    padding: 12px;
 }
 
 .form-textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 140px;
+    line-height: 1.6;
 }
 
 .form-help {
     font-size: 13px;
     color: var(--text-secondary);
-    margin-top: 6px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
+.form-help::before {
+    content: '💡';
+    font-size: 12px;
+}
+
+/* Form Actions */
 .form-actions {
     margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border-light);
 }
 
-/* Tips */
-.chat-tips {
-    background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
-    padding: 24px;
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    height: fit-content;
-}
-
-.chat-tips h3 {
-    font-size: 18px;
+.btn-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 18px 32px;
+    background: var(--primary-main);
+    color: var(--primary-contrast);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 16px;
     font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(var(--primary-main-rgb), 0.3);
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(var(--primary-main-rgb), 0.4);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-icon {
+    font-size: 20px;
+}
+
+/* Tips Card */
+.chat-tips-card {
+    background: var(--bg-paper);
+    border-radius: var(--border-radius-lg);
+    padding: 32px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 24px;
+}
+
+.chat-tips-card h3 {
+    font-size: 18px;
+    font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-tips-card h3::before {
+    content: '';
+    width: 4px;
+    height: 24px;
+    background: var(--secondary-main);
+    border-radius: 2px;
 }
 
 .tips-list {
@@ -127,93 +278,219 @@
 
 .tips-list li {
     display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .tips-list li:last-child {
-    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.tips-list li:first-child {
+    padding-top: 0;
 }
 
 .tip-icon {
-    font-size: 24px;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface-2);
-    border-radius: 10px;
+    font-size: 24px;
+    background: var(--bg-default);
+    border-radius: var(--border-radius);
     flex-shrink: 0;
+    transition: transform 0.3s ease;
 }
 
-.tips-list li strong {
+.tips-list li:hover .tip-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.tip-content {
+    flex: 1;
+}
+
+.tip-content strong {
     display: block;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
-.tips-list li p {
-    font-size: 13px;
+.tip-content p {
+    font-size: 14px;
     color: var(--text-secondary);
     margin: 0;
     line-height: 1.5;
 }
 
-/* Buttons */
-.btn {
-    display: inline-flex;
+/* Topic Preview Card */
+.topic-preview {
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--bg-default);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+}
+
+.topic-preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.topic-preview-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.topic-preview-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius);
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border-radius: 10px;
+    font-size: 20px;
+    background: var(--bg-paper);
+    box-shadow: var(--shadow-sm);
+}
+
+.topic-preview-text {
     font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
+    color: var(--text-primary);
 }
 
-.btn-primary {
-    background: var(--primary-color);
-    color: white;
-    width: 100%;
+/* Topic-specific colors */
+.topic-preview-icon[data-topic="potential_analysis"] {
+    background: var(--warning-bg);
 }
 
-.btn-primary:hover {
-    background: var(--primary-color-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.topic-preview-icon[data-topic="career_guidance"] {
+    background: var(--info-bg);
 }
 
-.btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
+.topic-preview-icon[data-topic="study_tips"] {
+    background: var(--success-bg);
 }
 
-.btn-icon {
-    font-size: 18px;
+.topic-preview-icon[data-topic="personal_development"] {
+    background: var(--secondary-bg);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .chat-create-container {
-        padding: 16px;
-    }
+/* Loading State */
+.btn-submit.loading {
+    pointer-events: none;
+}
 
+.btn-submit.loading::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive - Tablet */
+@media (max-width: 1024px) {
     .chat-create-content {
         grid-template-columns: 1fr;
     }
 
-    .chat-create-title {
-        font-size: 22px;
-    }
-
-    .chat-tips {
+    .chat-tips-card {
+        position: static;
         order: -1;
     }
 }
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+    .chat-create-wrapper {
+        padding: 24px 16px;
+    }
+
+    .chat-create-form-card {
+        padding: 28px 20px;
+    }
+
+    .chat-create-hero h1 {
+        font-size: 32px;
+    }
+
+    .chat-create-hero p {
+        font-size: 16px;
+    }
+
+    .chat-tips-card {
+        padding: 24px 20px;
+    }
+
+    .tips-list li {
+        gap: 12px;
+    }
+
+    .tip-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .btn-submit {
+        padding: 16px 24px;
+        font-size: 15px;
+    }
+}
+
+/* Focus Visible for Accessibility */
+.form-select:focus-visible,
+.form-textarea:focus-visible,
+.btn-submit:focus-visible,
+.back-button:focus-visible {
+    outline: 2px solid var(--primary-main);
+    outline-offset: 2px;
+}
+
+/* Animation - Fade In */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-create-form-card,
+.chat-tips-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.chat-tips-card {
+    animation-delay: 0.1s;
+}
+
+.tips-list li {
+    animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.tips-list li:nth-child(1) { animation-delay: 0.15s; }
+.tips-list li:nth-child(2) { animation-delay: 0.2s; }
+.tips-list li:nth-child(3) { animation-delay: 0.25s; }
+.tips-list li:nth-child(4) { animation-delay: 0.3s; }

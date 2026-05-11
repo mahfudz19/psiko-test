@@ -283,7 +283,11 @@ class SchoolAdminController
     {
         try {
             $studentId = $request->param('id');
-            $student = $this->studentModel->find($studentId);
+            $profile = $this->profileModel->findByUserId($studentId);
+            if (!$profile) {
+                return $response->redirect('/admin/students?error=404&message=' . urlencode('Profile siswa tidak ditemukan'));
+            }
+            $student = $this->studentModel->findByProfileId($profile['id']);
 
             if (!$student) {
                 return $response->redirect('/admin/students?error=404&message=' . urlencode('Siswa tidak ditemukan'));
@@ -296,7 +300,6 @@ class SchoolAdminController
             }
 
             $data = $request->input();
-
             // Validasi field yang diperlukan
             $required = ['student_id', 'grade_level', 'parent_name', 'parent_phone'];
             foreach ($required as $field) {
@@ -305,7 +308,22 @@ class SchoolAdminController
                 }
             }
 
-            $this->studentModel->updateById($studentId, $data);
+            $profileData = [
+                'phone' => $data['phone'] ?? '',
+                'address' => $data['address'] ?? '',
+            ];
+
+            $this->profileModel->updateById($profile['id'], $profileData);
+
+            $studentData = [
+                'student_id' => $data['student_id'],
+                'grade_level' => $data['grade_level'],
+                'major' => $data['major'] ?? '',
+                'parent_name' => $data['parent_name'],
+                'parent_phone' => $data['parent_phone'],
+                'parent_email' => $data['parent_email'] ?? '',
+            ];
+            $this->studentModel->updateById($student['id'], $studentData);
 
             return $response->redirect('/admin/students/' . $studentId);
         } catch (\Exception $e) {
@@ -320,8 +338,15 @@ class SchoolAdminController
     {
         try {
             $studentId = $request->param('id');
-            $student = $this->studentModel->find($studentId);
-
+            $user = $this->userModel->find($studentId);
+            if (!$user) {
+                return $response->redirect('/admin/students?error=404&message=' . urlencode('Siswa tidak ditemukan'));
+            }
+            $profile = $this->profileModel->findByUserId($studentId);
+            if (!$profile) {
+                return $response->redirect('/admin/students?error=404&message=' . urlencode('Profile siswa tidak ditemukan'));
+            }
+            $student = $this->studentModel->findByProfileId($profile['id']);
             if (!$student) {
                 return $response->redirect('/admin/students?error=404&message=' . urlencode('Siswa tidak ditemukan'));
             }
@@ -332,7 +357,7 @@ class SchoolAdminController
                 return $response->redirect('/admin/students?error=403&message=' . urlencode('Anda tidak memiliki akses ke siswa ini'));
             }
 
-            $this->studentModel->deleteById($studentId);
+            $this->userModel->deleteById($user['id']);
 
             return $response->redirect('/admin/students');
         } catch (\Exception $e) {

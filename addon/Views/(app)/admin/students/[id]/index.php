@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Student Detail View
+ * 
  * @var array $student
  */
 ?>
@@ -9,99 +11,152 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-header-content">
-            <h1 class="page-title">Detail Siswa</h1>
+            <div class="header-breadcrumb">
+                <a data-spa href="/admin/students" class="breadcrumb-link">
+                    <span class="breadcrumb-icon">←</span>
+                    Daftar Siswa
+                </a>
+            </div>
+            <h1 class="page-title">🎓 Detail Siswa</h1>
             <p class="page-description">Informasi lengkap siswa</p>
         </div>
         <div class="page-header-actions">
-            <a data-spa href="/admin/students/<?= $student['id'] ?>/edit" class="btn btn-primary">
+            <a data-spa href="/admin/students/<?= $student['user_id'] ?>/edit" class="btn btn-primary">
                 <span class="btn-icon">✏️</span>
-                Edit
+                Edit Data
             </a>
             <a data-spa href="/admin/students" class="btn btn-secondary">
+                <span class="btn-icon">↩️</span>
                 Kembali
             </a>
         </div>
     </div>
 
-    <!-- Student Info Card -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">👨‍🎓 Informasi Siswa</h2>
-        </div>
-        <div class="card-body">
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="detail-label">NIS/NISN</span>
-                    <span class="detail-value text-mono"><?= e($student['student_id']) ?></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Nama Lengkap</span>
-                    <span class="detail-value"><?= e($student['user_name']) ?></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Email</span>
-                    <span class="detail-value"><?= e($student['email']) ?: '-' ?></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Kelas</span>
-                    <span class="detail-value"><?= e($student['grade_level']) ?></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Jurusan</span>
-                    <span class="detail-value"><?= e($student['major']) ?: '-' ?></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">No. Telepon</span>
-                    <span class="detail-value"><?= e($student['phone']) ?: '-' ?></span>
-                </div>
-                <div class="detail-item detail-item-full">
-                    <span class="detail-label">Alamat</span>
-                    <span class="detail-value"><?= e($student['address']) ?: '-' ?></span>
+    <!-- Student Profile Card -->
+    <div class="card profile-card">
+        <div class="profile-header">
+            <div class="student-avatar">
+                <?= strtoupper(substr($student['user_name'], 0, 2)) ?>
+            </div>
+            <div class="profile-info">
+                <h2 class="profile-name"><?= e($student['user_name']) ?></h2>
+                <p class="profile-email"><?= e($student['email']) ?></p>
+                <div class="profile-badges">
+                    <span class="badge badge-nis">
+                        <span class="badge-icon">🔢</span>
+                        NIS/NISN: <?= e($student['student_id']) ?>
+                    </span>
+                    <span class="badge badge-class">
+                        <span class="badge-icon">📚</span>
+                        Kelas <?= e($student['grade_level']) ?>
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Parent Info Card -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">👨‍👩‍👧 Informasi Orang Tua/Wali</h2>
+    <!-- Info Cards Grid -->
+    <div class="info-grid">
+        <!-- Student Info Card -->
+        <div class="card info-card">
+            <div class="card-header">
+                <span class="card-icon">👨‍🎓</span>
+                <div class="card-title-wrapper">
+                    <h3 class="card-title">Informasi Siswa</h3>
+                    <p class="card-subtitle">Data akademik dan kontak</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">
+                            <span class="info-icon">📚</span>
+                            Kelas
+                        </span>
+                        <span class="info-value">Kelas <?= e($student['grade_level']) ?></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">
+                            <span class="info-icon">🎯</span>
+                            Jurusan
+                        </span>
+                        <span class="info-value"><?= e($student['major']) ?: '-' ?></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">
+                            <span class="info-icon">📱</span>
+                            No. Telepon
+                        </span>
+                        <span class="info-value"><?= e($student['phone']) ?: '-' ?></span>
+                    </div>
+                    <div class="info-item info-item-full">
+                        <span class="info-label">
+                            <span class="info-icon">📍</span>
+                            Alamat
+                        </span>
+                        <span class="info-value"><?= nl2br(e($student['address'])) ?: '-' ?></span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="detail-label">Nama Orang Tua/Wali</span>
-                    <span class="detail-value"><?= e($student['parent_name']) ?></span>
+
+        <!-- Parent Info Card -->
+        <div class="card info-card">
+            <div class="card-header">
+                <span class="card-icon">👨‍👩‍👧</span>
+                <div class="card-title-wrapper">
+                    <h3 class="card-title">Informasi Orang Tua/Wali</h3>
+                    <p class="card-subtitle">Data kontak wali siswa</p>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">No. Telepon</span>
-                    <span class="detail-value"><?= e($student['parent_phone']) ?></span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Email</span>
-                    <span class="detail-value"><?= e($student['parent_email']) ?: '-' ?></span>
+            </div>
+            <div class="card-body">
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">
+                            <span class="info-icon">👤</span>
+                            Nama Lengkap
+                        </span>
+                        <span class="info-value"><?= e($student['parent_name']) ?></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">
+                            <span class="info-icon">📞</span>
+                            No. Telepon
+                        </span>
+                        <span class="info-value"><?= e($student['parent_phone']) ?></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">
+                            <span class="info-icon">📧</span>
+                            Email
+                        </span>
+                        <span class="info-value"><?= e($student['parent_email']) ?: '-' ?></span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Delete Section -->
-    <div class="card card-danger">
-        <div class="card-body">
-            <div class="danger-zone">
-                <div class="danger-zone-content">
-                    <h3 class="danger-zone-title">⚠️ Zona Bahaya</h3>
-                    <p class="danger-zone-description">
-                        Tindakan ini tidak dapat dibatalkan. Hati-hati saat menghapus siswa.
-                    </p>
-                </div>
-                <form data-spa action="/admin/students/<?= $student['id'] ?>/delete" method="POST" class="danger-zone-form">
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini? Tindakan ini tidak dapat dibatalkan.')">
-                        <span class="btn-icon">🗑️</span>
-                        Hapus Siswa
-                    </button>
-                </form>
+    <div class="card danger-card">
+        <div class="card-header">
+            <span class="card-icon card-icon-danger">⚠️</span>
+            <div class="card-title-wrapper">
+                <h3 class="card-title card-title-danger">Zona Bahaya</h3>
+                <p class="card-subtitle card-subtitle-danger">Tindakan ini tidak dapat dibatalkan</p>
             </div>
+        </div>
+        <div class="card-body">
+            <p class="danger-description">
+                Menghapus siswa akan menghapus semua data terkait termasuk nilai, pencapaian, dan riwayat konseling.
+                Pastikan Anda telah melakukan backup data sebelum melanjutkan.
+            </p>
+            <form data-spa action="/admin/students/<?= $student['user_id'] ?>/delete" method="POST" class="danger-form">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini? Tindakan ini tidak dapat dibatalkan.')">
+                    <span class="btn-icon">🗑️</span>
+                    Hapus Siswa
+                </button>
+            </form>
         </div>
     </div>
 </div>

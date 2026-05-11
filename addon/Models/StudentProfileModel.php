@@ -37,8 +37,8 @@ class StudentProfileModel extends Model
         'grade_level' => ['type' => 'enum', 'values' => ['10', '11', '12'], 'nullable' => true],
         'major' => ['type' => 'string', 'nullable' => true], // IPA, IPS, Bahasa, dll
         'academic_scores' => ['type' => 'json', 'nullable' => true], // {math: 85, indonesian: 90, ...}
-        'extracurricular' => ['type' => 'json', 'nullable' => true], // [{name, role, year}]
-        'achievements' => ['type' => 'json', 'nullable' => true], // [{title, level, year, certificate_url}]
+        'extracurricular' => ['type' => 'json', 'nullable' => true], // [{name, position, year_start, year_end, description}]
+        'achievements' => ['type' => 'json', 'nullable' => true], // [{name, rank, level, year, organizer, description}]
         'psychological_tests' => ['type' => 'json', 'nullable' => true], // {test_id, scores, timestamps}
         'ai_analysis' => ['type' => 'json', 'nullable' => true], // {potentials, interests, talents, recommendations}
         'ai_prompt' => ['type' => 'text', 'nullable' => true], // Prompt yang digunakan untuk generate AI analysis
@@ -177,6 +177,9 @@ class StudentProfileModel extends Model
                 }
             }
 
+            // Convert empty arrays to null for JSON fields
+            $validData = $this->convertEmptyJsonArraysToNull($validData);
+
             // Validate JSON fields
             $this->validateJsonData($validData);
 
@@ -216,6 +219,9 @@ class StudentProfileModel extends Model
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
 
+        // Convert empty arrays to null for JSON fields
+        $data = $this->convertEmptyJsonArraysToNull($data);
+
         // Validate JSON fields
         $this->validateJsonData($data);
 
@@ -243,6 +249,9 @@ class StudentProfileModel extends Model
         if (!isset($data['updated_at'])) {
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
+
+        // Convert empty arrays to null for JSON fields
+        $data = $this->convertEmptyJsonArraysToNull($data);
 
         // Validate JSON fields
         $this->validateJsonData($data);
@@ -406,6 +415,21 @@ class StudentProfileModel extends Model
     /**
      * Validasi data JSON sebelum insert/update
      */
+    /**
+     * Convert empty arrays to null for JSON fields
+     */
+    protected function convertEmptyJsonArraysToNull(array $data): array
+    {
+        $jsonFields = ['academic_scores', 'extracurricular', 'achievements', 'psychological_tests', 'ai_analysis'];
+
+        foreach ($jsonFields as $field) {
+            if (isset($data[$field]) && is_array($data[$field]) && empty($data[$field]) || (is_string($data[$field]) && $data[$field] === '[]')) {
+                $data[$field] = null;
+            }
+        }
+        return $data;
+    }
+
     protected function validateJsonData(array $data): void
     {
         if (isset($data['academic_scores']) && $data['academic_scores'] !== null) {
@@ -476,22 +500,22 @@ class StudentProfileModel extends Model
             throw new \InvalidArgumentException('extracurricular harus berupa array of objects');
         }
 
-        $allowedKeys = ['name', 'role', 'year'];
+        // Field yang diizinkan (semua optional)
+        $allowedKeys = ['name', 'position', 'role', 'year', 'year_start', 'year_end', 'description'];
 
         foreach ($data as $index => $item) {
             if (!is_array($item)) throw new \InvalidArgumentException("Item extracurricular index {$index} harus berupa object");
 
-            foreach ($allowedKeys as $req) {
-                if (!array_key_exists($req, $item)) {
-                    throw new \InvalidArgumentException("Item extracurricular index {$index} harus memiliki '{$req}'");
-                }
+            // Harus memiliki setidaknya name
+            if (!isset($item['name']) || $item['name'] === '') {
+                throw new \InvalidArgumentException("Item extracurricular index {$index} harus memiliki 'name'");
             }
 
             foreach ($item as $key => $value) {
                 if (!in_array($key, $allowedKeys)) {
                     throw new \InvalidArgumentException("Key '{$key}' pada extracurricular index {$index} tidak diizinkan");
                 }
-                if (!is_string($value) && !is_numeric($value)) {
+                if (!is_string($value) && !is_numeric($value) && $value !== null) {
                     throw new \InvalidArgumentException("Nilai untuk '{$key}' pada extracurricular index {$index} harus string/angka");
                 }
             }
@@ -508,18 +532,23 @@ class StudentProfileModel extends Model
             throw new \InvalidArgumentException('achievements harus berupa array of objects');
         }
 
-        $allowedKeys = ['title', 'level', 'year', 'certificate_url'];
+        // Field yang diizinkan (semua optional kecuali name)
+        $allowedKeys = ['name', 'title', 'rank', 'level', 'year', 'organizer', 'description', 'certificate_url'];
 
         foreach ($data as $index => $item) {
             if (!is_array($item)) throw new \InvalidArgumentException("Item achievements index {$index} harus berupa object");
 
-            if (!isset($item['title']) || !isset($item['level']) || !isset($item['year'])) {
-                throw new \InvalidArgumentException("Item achievements index {$index} harus memiliki title, level, dan year");
+            // Harus memiliki setidaknya name
+            if (!isset($item['name']) || $item['name'] === '') {
+                throw new \InvalidArgumentException("Item achievements index {$index} harus memiliki 'name'");
             }
 
             foreach ($item as $key => $value) {
                 if (!in_array($key, $allowedKeys)) {
                     throw new \InvalidArgumentException("Key '{$key}' pada achievements index {$index} tidak diizinkan");
+                }
+                if (!is_string($value) && !is_numeric($value) && $value !== null) {
+                    throw new \InvalidArgumentException("Nilai untuk '{$key}' pada achievements index {$index} harus string/angka");
                 }
             }
         }

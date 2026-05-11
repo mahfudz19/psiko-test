@@ -234,6 +234,7 @@ class ProfileController
      */
     public function updateAcademic(Request $request, Response $response)
     {
+        $data = $request->getBody();
         $currentUser = $this->session->get('auth.user_id');
         $currentRole = $this->session->get('auth.user_role');
 
@@ -243,7 +244,9 @@ class ProfileController
 
         $userProfile = $this->profileModel->findByUserId($currentUser);
 
-        $data = $request->getBody();
+
+        // Helper function untuk convert empty string ke null
+        $clean = fn($value) => $value === '' ? null : $value;
 
         // Handle academic scores dari input JSON hidden field
         $academicScoresJson = null;
@@ -267,14 +270,13 @@ class ProfileController
         }
 
         $academicData = [
-            'school_id' => $data['school_id'] ?? null,
-            'student_id' => $data['student_id'] ?? null,
-            'grade_level' => $data['grade_level'] ?? null,
-            'major' => $data['major'] ?? null,
+            'student_id' => $clean($data['student_id'] ?? null),
+            'grade_level' => $clean($data['grade_level'] ?? null),
+            'major' => $clean($data['major'] ?? null),
             'academic_scores' => $academicScoresJson,
-            'parent_name' => $data['parent_name'] ?? null,
-            'parent_phone' => $data['parent_phone'] ?? null,
-            'parent_email' => $data['parent_email'] ?? null
+            'parent_name' => $clean($data['parent_name'] ?? null),
+            'parent_phone' => $clean($data['parent_phone'] ?? null),
+            'parent_email' => $clean($data['parent_email'] ?? null)
         ];
 
         $studentProfile = $this->studentModel->findByProfileId($userProfile['id']);
@@ -326,6 +328,9 @@ class ProfileController
 
         $studentProfile = $this->studentModel->findByProfileId($userProfile['id']);
 
+        // Helper function to clean empty strings
+        $clean = fn($value) => $value === '' ? null : $value;
+
         $achievementData = [];
 
         // Update extracurricular (Map array of columns to array of objects)
@@ -335,10 +340,10 @@ class ProfileController
                 if (!empty($name)) {
                     $extra[] = [
                         'name' => $name,
-                        'position' => $data['extracurricular']['position'][$idx] ?? null,
-                        'year_start' => $data['extracurricular']['year_start'][$idx] ?? null,
-                        'year_end' => $data['extracurricular']['year_end'][$idx] ?? null,
-                        'description' => $data['extracurricular']['description'][$idx] ?? null,
+                        'position' => $clean($data['extracurricular']['position'][$idx] ?? null),
+                        'year_start' => $clean($data['extracurricular']['year_start'][$idx] ?? null),
+                        'year_end' => $clean($data['extracurricular']['year_end'][$idx] ?? null),
+                        'description' => $clean($data['extracurricular']['description'][$idx] ?? null),
                     ];
                 }
             }
@@ -354,11 +359,11 @@ class ProfileController
                 if (!empty($name)) {
                     $ach[] = [
                         'name' => $name,
-                        'rank' => $data['achievements']['rank'][$idx] ?? null,
-                        'level' => $data['achievements']['level'][$idx] ?? null,
-                        'year' => $data['achievements']['year'][$idx] ?? null,
-                        'organizer' => $data['achievements']['organizer'][$idx] ?? null,
-                        'description' => $data['achievements']['description'][$idx] ?? null,
+                        'rank' => $clean($data['achievements']['rank'][$idx] ?? null),
+                        'level' => $clean($data['achievements']['level'][$idx] ?? null),
+                        'year' => $clean($data['achievements']['year'][$idx] ?? null),
+                        'organizer' => $clean($data['achievements']['organizer'][$idx] ?? null),
+                        'description' => $clean($data['achievements']['description'][$idx] ?? null),
                     ];
                 }
             }

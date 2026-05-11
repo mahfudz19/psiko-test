@@ -49,8 +49,7 @@ $lastHash = $aiAnalysis['last_data_hash'] ?? null;
                     <h2>Analisis AI</h2>
                 </div>
                 <?php if ($currentHash !== $lastHash): ?>
-                    <form method="POST" action="/profile/results/generate" class="ai-generate-form" onsubmit="this.querySelector('button').textContent='Memproses...';">
-                        <input type="hidden" name="_token" value="<?= csrf_token() ?>">
+                    <form data-spa method="POST" action="/profile/results/generate" class="ai-generate-form" onsubmit="this.querySelector('button').textContent='Memproses...';">
                         <button type="submit" class="btn btn-primary btn-sm">✨ Update Analisis AI</button>
                     </form>
                 <?php else: ?>
@@ -144,8 +143,7 @@ $lastHash = $aiAnalysis['last_data_hash'] ?? null;
             <div class="no-analysis-icon">📊</div>
             <h3>Belum Ada Analisis AI</h3>
             <p style="margin-bottom: 20px;">Sistem AI belum menganalisis potensi dan bakatmu berdasarkan data akademik, psikologi, dan prestasimu.</p>
-            <form method="POST" action="/profile/results/generate" class="ai-generate-form" onsubmit="this.querySelector('button').textContent='Memproses...';">
-                <input type="hidden" name="_token" value="<?= csrf_token() ?>">
+            <form data-spa method="POST" action="/profile/results/generate" class="ai-generate-form" onsubmit="this.querySelector('button').textContent='Memproses...';">
                 <button type="submit" class="btn btn-primary" style="font-size: 16px; padding: 12px 24px;">✨ Generate Analisis Pertamamu</button>
             </form>
         </div>
@@ -564,13 +562,13 @@ $lastHash = $aiAnalysis['last_data_hash'] ?? null;
         color: var(--md-sys-color-on-secondary-container, #2e7d32);
         border: 1px solid var(--md-sys-color-secondary, #4caf50);
     }
-    
+
     .alert-error {
         background: var(--md-sys-color-error-container, #ffebee);
         color: var(--md-sys-color-error, #d32f2f);
         border: 1px solid var(--md-sys-color-error, #f44336);
     }
-    
+
     .btn {
         display: inline-flex;
         align-items: center;
@@ -582,16 +580,16 @@ $lastHash = $aiAnalysis['last_data_hash'] ?? null;
         border: none;
         transition: 0.2s;
     }
-    
+
     .btn-primary {
         background: var(--md-sys-color-primary, #0066cc);
         color: white;
     }
-    
+
     .btn-primary:hover {
         background: var(--md-sys-color-on-primary, #0052a3);
     }
-    
+
     .btn-sm {
         padding: 6px 12px;
         font-size: 14px;

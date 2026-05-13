@@ -74,7 +74,7 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 16px;">
-            <a href="/verify-otp?email=<?= urlencode($email ?? '') ?>" class="auth-button" data-spa style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+            <a data-spa href="/verify-otp?email=<?= urlencode($email ?? '') ?>" class="auth-button" data-spa style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
                 Buka Halaman Verifikasi
             </a>
 

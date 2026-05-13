@@ -2945,9 +2945,9 @@ CSS;
 
     <div class="otp-sent-actions">
         <a
+            data-spa
             href="/verify-otp?email=<?= urlencode($email ?? '') ?>"
             class="otp-sent-button primary"
-            data-spa
         >
             Buka Halaman Verifikasi
         </a>

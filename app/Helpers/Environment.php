@@ -654,6 +654,19 @@ if (!function_exists('logger')) {
       public function log($message, $context = [])
       {
         $msg = $message;
+
+        // Tambahkan context sebagai JSON
+        if (!empty($context)) {
+          // Hapus exception dari context agar tidak duplikat
+          $contextForLog = $context;
+          unset($contextForLog['exception']);
+
+          if (!empty($contextForLog)) {
+            $msg .= ' | context: ' . json_encode($contextForLog, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+          }
+        }
+
+        // Handle exception
         if (!empty($context['exception']) && $context['exception'] instanceof \Throwable) {
           $msg .= ' | exception: ' . $context['exception']->getMessage() . ' in ' . $context['exception']->getFile() . ':' . $context['exception']->getLine();
         }

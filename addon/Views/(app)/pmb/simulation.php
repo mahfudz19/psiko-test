@@ -388,7 +388,7 @@ $progressPercentage = $sim['progress_percentage'] ?? 0;
             <div class="no-data-content">
                 <h2>📝 Simulasi Belum Dimulai</h2>
                 <p>Mulai simulasi pendaftaran untuk merasakan pengalaman mendaftar di Universitas Univeral.</p>
-                <a href="/pmb/simulation?start=1" class="btn btn-primary">Mulai Simulasi →</a>
+                <a data-spa href="/pmb/simulation?start=1" class="btn btn-primary">Mulai Simulasi →</a>
             </div>
         </div>
     <?php endif; ?>

@@ -19,7 +19,7 @@
                 <option value="study_tips">📚 Tips Belajar</option>
                 <option value="personal_development">🌱 Pengembangan Diri</option>
             </select>
-            <a href="/chat/create" class="chat-new-btn" data-spa>
+            <a data-spa href="/chat/create" class="chat-new-btn" data-spa>
                 <span>✨</span>
                 <span>Chat Baru</span>
             </a>
@@ -31,7 +31,7 @@
                 <div class="empty-state-icon">💭</div>
                 <h3>Belum Ada Riwayat Chat</h3>
                 <p>Mulai konsultasi pertama Anda dengan AI untuk membahas potensi, minat, dan bakat Anda.</p>
-                <a href="/chat/create" class="chat-new-btn" data-spa>
+                <a data-spa href="/chat/create" class="chat-new-btn" data-spa>
                     <span>✨</span>
                     <span>Mulai Chat Sekarang</span>
                 </a>
@@ -82,7 +82,7 @@
                                 <span class="chat-card-date-time"><?= date('H:i', strtotime($chat['created_at'])) ?> WIB</span>
                             </div>
                             <div class="chat-card-actions">
-                                <a href="/chat/<?= htmlspecialchars($chat['session_id']) ?>" class="chat-card-btn chat-card-btn-view" data-spa title="Lihat">
+                                <a data-spa href="/chat/<?= htmlspecialchars($chat['session_id']) ?>" class="chat-card-btn chat-card-btn-view" data-spa title="Lihat">
                                     👁️
                                 </a>
                                 <button class="chat-card-btn chat-card-btn-delete btn-delete-chat" data-session-id="<?= htmlspecialchars($chat['session_id']) ?>" title="Hapus">

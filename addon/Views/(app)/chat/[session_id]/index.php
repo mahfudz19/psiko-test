@@ -13,7 +13,7 @@
     <!-- Header -->
     <header class="chat-room-header">
         <div class="chat-room-header-left">
-            <a href="/chat" class="back-button" data-spa>
+            <a data-spa href="/chat" class="back-button" data-spa>
                 <span class="back-icon">←</span>
                 <span>Kembali</span>
             </a>
@@ -43,10 +43,10 @@
             </div>
         </div>
         <div class="chat-room-header-right">
-            <button class="btn-new-chat" onclick="window.location.href='/chat/create'" data-spa>
+            <a data-spa href="/chat/create" class="btn-new-chat">
                 <span>✨</span>
                 <span>Chat Baru</span>
-            </button>
+            </a>
         </div>
     </header>
 

@@ -41,7 +41,7 @@
                 <div class="stat-content">
                     <span class="stat-label">Total Siswa</span>
                     <div class="stat-value"><?= $stats['totalStudents'] ?></div>
-                    <a href="/admin/students" class="stat-link">Kelola Siswa &rarr;</a>
+                    <a data-spa href="/admin/students" class="stat-link">Kelola Siswa &rarr;</a>
                 </div>
             </div>
 
@@ -142,7 +142,7 @@
                                     <span class="student-name"><?= htmlspecialchars($student['user_name']) ?></span>
                                     <span class="student-meta">Kelas <?= htmlspecialchars($student['grade_level']) ?> - <?= htmlspecialchars($student['major'] ?? 'Umum') ?></span>
                                 </div>
-                                <a href="/admin/students/<?= $student['user_id'] ?>" class="btn-view">Detail</a>
+                                <a data-spa href="/admin/students/<?= $student['user_id'] ?>" class="btn-view">Detail</a>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -152,7 +152,7 @@
                     <?php endif; ?>
                 </div>
                 <div class="card-footer">
-                    <a href="/admin/students" class="view-all-link">Lihat Semua Siswa &rarr;</a>
+                    <a data-spa href="/admin/students" class="view-all-link">Lihat Semua Siswa &rarr;</a>
                 </div>
             </section>
         </div>
@@ -161,7 +161,7 @@
         <section class="quick-actions-section">
             <h3 class="section-title">Aksi Cepat</h3>
             <div class="quick-actions-grid">
-                <a href="/admin/students/create" class="action-card">
+                <a data-spa href="/admin/students/create" class="action-card">
                     <div class="action-icon" style="background: #eef2ff; color: #6366f1;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -172,7 +172,7 @@
                     </div>
                     <span>Tambah Siswa</span>
                 </a>
-                <a href="/admin/schools/my/edit" class="action-card">
+                <a data-spa href="/admin/schools/my/edit" class="action-card">
                     <div class="action-icon" style="background: #f0fdf4; color: #10b981;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -181,7 +181,7 @@
                     </div>
                     <span>Profil Sekolah</span>
                 </a>
-                <a href="/profile/students" class="action-card">
+                <a data-spa href="/profile/students" class="action-card">
                     <div class="action-icon" style="background: #fff7ed; color: #f59e0b;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>

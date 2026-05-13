@@ -138,10 +138,10 @@ $aiErrorMessage = $ai_error_message ?? null;
 
             <?php if ($studentProfile): ?>
                 <div class="profile-actions">
-                    <a href="/profile/academic" class="btn btn-secondary">
+                    <a data-spa href="/profile/academic" class="btn btn-secondary">
                         📝 Update Nilai Akademik
                     </a>
-                    <a href="/profile/achievements" class="btn btn-secondary">
+                    <a data-spa href="/profile/achievements" class="btn btn-secondary">
                         🏆 Update Prestasi
                     </a>
                 </div>
@@ -185,7 +185,7 @@ $aiErrorMessage = $ai_error_message ?? null;
             </div>
 
             <div class="cost-actions">
-                <a href="/pmb/simulation" class="btn btn-primary btn-lg">
+                <a data-spa href="/pmb/simulation" class="btn btn-primary btn-lg">
                     Lanjut ke Pendaftaran →
                 </a>
             </div>
@@ -203,7 +203,7 @@ $aiErrorMessage = $ai_error_message ?? null;
                         🔄 Refresh Analisis
                     </button>
                 <?php else: ?>
-                    <a href="/profile/academic" class="btn btn-primary">Lengkapi Profil Akademik →</a>
+                    <a data-spa href="/profile/academic" class="btn btn-primary">Lengkapi Profil Akademik →</a>
                 <?php endif; ?>
             </div>
         </div>

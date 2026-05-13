@@ -106,7 +106,7 @@ $hasSearch = !empty($keyword);
                             value="<?= e($keyword) ?>"
                             autocomplete="off" />
                         <?php if ($hasSearch): ?>
-                            <a href="/admin/students" class="btn btn-clear-search">
+                            <a data-spa href="/admin/students" class="btn btn-clear-search">
                                 <span>✕</span>
                             </a>
                         <?php endif; ?>
@@ -134,7 +134,7 @@ $hasSearch = !empty($keyword);
                         <?php endif; ?>
                     </p>
                     <?php if ($hasSearch): ?>
-                        <a href="/admin/students" class="btn btn-secondary">
+                        <a data-spa href="/admin/students" class="btn btn-secondary">
                             Lihat Semua Siswa
                         </a>
                     <?php else: ?>

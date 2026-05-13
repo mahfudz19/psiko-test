@@ -75,7 +75,7 @@ $permissionGroups = [
 <div class="permissions-container">
     <div class="permissions-header">
         <div class="breadcrumb">
-            <a href="/profile">Profile</a>
+            <a data-spa href="/profile">Profile</a>
             <span class="separator">/</span>
             <span class="current">Permissions</span>
         </div>
@@ -127,7 +127,7 @@ $permissionGroups = [
         <?php endforeach; ?>
 
         <div class="form-actions">
-            <a href="/profile" class="btn btn-secondary">Kembali</a>
+            <a data-spa href="/profile" class="btn btn-secondary">Kembali</a>
             <button type="submit" class="btn btn-primary">Simpan Permissions</button>
         </div>
     </form>

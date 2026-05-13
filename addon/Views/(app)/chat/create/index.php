@@ -12,7 +12,7 @@
         <!-- Hero Header -->
         <div class="chat-create-hero">
             <div class="back-button-wrapper">
-                <a href="/chat" class="back-button" data-spa>
+                <a data-spa href="/chat" class="back-button" data-spa>
                     <span class="back-icon">←</span>
                     <span>Kembali</span>
                 </a>

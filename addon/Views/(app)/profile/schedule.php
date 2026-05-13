@@ -25,7 +25,7 @@ $daysOfWeek = [
 <div class="schedule-container">
     <div class="schedule-header">
         <div class="breadcrumb">
-            <a href="/profile">Profile</a>
+            <a data-spa href="/profile">Profile</a>
             <span class="separator">/</span>
             <span class="current">Jadwal Konseling</span>
         </div>

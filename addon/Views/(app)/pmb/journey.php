@@ -236,7 +236,7 @@ $userName = $profile['user_name'] ?? 'Siswa';
                     </div>
 
                     <div class="scholarship-cta">
-                        <a href="/pmb/scholarship" class="btn btn-primary">Hitung Beasiswa Lengkap →</a>
+                        <a data-spa href="/pmb/scholarship" class="btn btn-primary">Hitung Beasiswa Lengkap →</a>
                     </div>
                 </div>
             <?php endif; ?>
@@ -271,7 +271,7 @@ $userName = $profile['user_name'] ?? 'Siswa';
                         <?php endif; ?>
 
                         <div class="cta-actions">
-                            <a href="/pmb/simulation" class="btn btn-primary btn-lg">Lanjut ke Pendaftaran</a>
+                            <a data-spa href="/pmb/simulation" class="btn btn-primary btn-lg">Lanjut ke Pendaftaran</a>
                             <div class="special-offer">
                                 <span class="offer-icon">🎁</span>
                                 <span>Daftar minggu ini, <strong>gratis biaya pendaftaran!</strong></span>
@@ -287,7 +287,7 @@ $userName = $profile['user_name'] ?? 'Siswa';
                 <div class="no-data-content">
                     <h2>📊 Data Analisis Belum Tersedia</h2>
                     <p>Sebelum melihat match score, kamu perlu menyelesaikan analisis potensi dan minat terlebih dahulu.</p>
-                    <a href="/profile/results" class="btn btn-primary">Lengkapi Analisis AI →</a>
+                    <a data-spa href="/profile/results" class="btn btn-primary">Lengkapi Analisis AI →</a>
                 </div>
             </div>
         <?php endif; ?>

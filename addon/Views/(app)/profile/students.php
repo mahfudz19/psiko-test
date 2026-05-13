@@ -12,7 +12,7 @@
 <div class="students-container">
     <div class="students-header">
         <div class="breadcrumb">
-            <a href="/profile">Profile</a>
+            <a data-spa href="/profile">Profile</a>
             <span class="separator">/</span>
             <span class="current">Siswa Bimbingan</span>
         </div>
@@ -98,12 +98,12 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <a href="/profile/results?id=<?= $student['profile_id'] ?>"
+                                        <a data-spa href="/profile/results?id=<?= $student['profile_id'] ?>"
                                             class="btn btn-sm btn-secondary"
                                             title="Lihat Hasil">
                                             📊
                                         </a>
-                                        <a href="/profile?id=<?= $student['profile_id'] ?>"
+                                        <a data-spa href="/profile?id=<?= $student['profile_id'] ?>"
                                             class="btn btn-sm btn-secondary"
                                             title="Lihat Profile">
                                             👤

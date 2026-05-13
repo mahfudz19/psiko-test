@@ -14,7 +14,7 @@ $extracurricular = !empty($studentProfile['extracurricular']) ? json_decode($stu
 
 <div class="profile-container">
     <div class="breadcrumb">
-        <a href="<?= getBaseUrl('/profile') ?>">Profile</a>
+        <a data-spa href="<?= getBaseUrl('/profile') ?>">Profile</a>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
@@ -178,7 +178,7 @@ $extracurricular = !empty($studentProfile['extracurricular']) ? json_decode($stu
         </div>
 
         <div class="form-actions">
-            <a href="<?= getBaseUrl('/profile') ?>" class="btn-cancel">Kembali</a>
+            <a data-spa href="<?= getBaseUrl('/profile') ?>" class="btn-cancel">Kembali</a>
             <button type="submit" class="btn-save">Simpan Data</button>
         </div>
     </form>

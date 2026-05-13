@@ -16,7 +16,7 @@
             <p>Kelola informasi pribadi dan pantau progres akademik Anda</p>
         </div>
         <div class="header-actions">
-            <a href="/profile/edit" class="btn-white" style="border: 1px solid var(--border-light); color: var(--text-primary);">
+            <a data-spa href="/profile/edit" class="btn-white" style="border: 1px solid var(--border-light); color: var(--text-primary);">
                 <i class="fas fa-edit"></i> Edit Profil
             </a>
         </div>
@@ -134,7 +134,7 @@
                     <div class="card-header">
                         <h2><i class="fas fa-graduation-cap"></i> Informasi Akademik</h2>
                         <?php if (empty($profile['role_data'])): ?>
-                            <a href="/profile/academic" class="btn-white" style="font-size: 0.75rem; padding: 0.5rem 1rem; border: 1px solid var(--primary-main); color: var(--primary-main);">Lengkapi Data</a>
+                            <a data-spa href="/profile/academic" class="btn-white" style="font-size: 0.75rem; padding: 0.5rem 1rem; border: 1px solid var(--primary-main); color: var(--primary-main);">Lengkapi Data</a>
                         <?php endif; ?>
                     </div>
 
@@ -168,7 +168,7 @@
                     <?php else: ?>
                         <div style="text-align: center; padding: 2rem; background: var(--bg-default); border-radius: 16px; border: 1px dashed var(--border-light);">
                             <p style="color: var(--text-secondary); margin-bottom: 1rem;">Belum ada data akademik yang tercatat.</p>
-                            <a href="/profile/academic" class="btn-white" style="background: var(--primary-main); color: white;">Lengkapi Sekarang</a>
+                            <a data-spa href="/profile/academic" class="btn-white" style="background: var(--primary-main); color: white;">Lengkapi Sekarang</a>
                         </div>
                     <?php endif; ?>
                 </section>
@@ -179,15 +179,15 @@
                         <h2><i class="fas fa-bolt"></i> Akses Cepat</h2>
                     </div>
                     <div class="actions-grid">
-                        <a href="/profile/academic" class="action-btn" data-spa>
+                        <a data-spa href="/profile/academic" class="action-btn" data-spa>
                             <div class="action-icon"><i class="fas fa-book"></i></div>
                             <span class="action-text">Data Akademik</span>
                         </a>
-                        <a href="/profile/achievements" class="action-btn" data-spa>
+                        <a data-spa href="/profile/achievements" class="action-btn" data-spa>
                             <div class="action-icon"><i class="fas fa-trophy"></i></div>
                             <span class="action-text">Prestasi</span>
                         </a>
-                        <a href="/profile/results" class="action-btn" data-spa>
+                        <a data-spa href="/profile/results" class="action-btn" data-spa>
                             <div class="action-icon"><i class="fas fa-chart-bar"></i></div>
                             <span class="action-text">Hasil Tes</span>
                         </a>
@@ -200,8 +200,8 @@
                         <h3>🎯 Journey ke Univeral</h3>
                         <p>Berdasarkan analisis potensi kamu, Teknik Informatika sangat cocok untuk masa depanmu!</p>
                         <div class="pmb-actions">
-                            <a href="/pmb/journey" class="btn-white" data-spa>Lihat Journey</a>
-                            <a href="/pmb/simulation" class="btn-outline-white" data-spa>Simulasi PMB</a>
+                            <a data-spa href="/pmb/journey" class="btn-white" data-spa>Lihat Journey</a>
+                            <a data-spa href="/pmb/simulation" class="btn-outline-white" data-spa>Simulasi PMB</a>
                         </div>
                     </div>
                     <div class="pmb-score-circle">
@@ -245,11 +245,11 @@
                         <h2><i class="fas fa-bolt"></i> Akses Cepat</h2>
                     </div>
                     <div class="actions-grid">
-                        <a href="/profile/students" class="action-btn" data-spa>
+                        <a data-spa href="/profile/students" class="action-btn" data-spa>
                             <div class="action-icon"><i class="fas fa-users"></i></div>
                             <span class="action-text">Siswa Bimbingan</span>
                         </a>
-                        <a href="/profile/schedule" class="action-btn" data-spa>
+                        <a data-spa href="/profile/schedule" class="action-btn" data-spa>
                             <div class="action-icon"><i class="fas fa-calendar-alt"></i></div>
                             <span class="action-text">Jadwal Konseling</span>
                         </a>
@@ -287,7 +287,7 @@
                         <h2><i class="fas fa-bolt"></i> Akses Cepat</h2>
                     </div>
                     <div class="actions-grid">
-                        <a href="/profile/permissions" class="action-btn" data-spa>
+                        <a data-spa href="/profile/permissions" class="action-btn" data-spa>
                             <div class="action-icon"><i class="fas fa-key"></i></div>
                             <span class="action-text">Permissions</span>
                         </a>

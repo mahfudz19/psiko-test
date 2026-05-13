@@ -13,8 +13,12 @@
     <!-- Header & Breadcrumb -->
     <div class="academic-header">
         <nav class="breadcrumb">
-            <a href="/profile" data-spa>Profil</a>
-            <span class="separator"><i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i></span>
+            <a data-spa href="/profile" data-spa>Profil</a>
+            <span class="separator">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </span>
             <span class="current">Data Akademik</span>
         </nav>
         <h1>Data Akademik</h1>
@@ -22,22 +26,37 @@
 
     <?php if (isset($_GET['success'])): ?>
         <div class="alert alert-success">
-            <i class="fas fa-check-circle"></i>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
             <?= htmlspecialchars($_GET['success']) ?>
         </div>
     <?php endif; ?>
 
     <?php if (isset($_GET['error'])): ?>
         <div class="alert alert-error">
-            <i class="fas fa-exclamation-circle"></i>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
             <?= htmlspecialchars($_GET['error']) ?>
         </div>
     <?php endif; ?>
 
-    <form dta-spa action="<?= getBaseUrl("/profile/academic") ?>" class="academic-form" method="POST">
+    <form data-spa action="<?= getBaseUrl("/profile/academic") ?>" class="academic-form" method="POST">
         <!-- Section 1: Informasi Sekolah -->
         <section class="edit-section">
-            <h2><i class="fas fa-school"></i> Informasi Sekolah</h2>
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18"></path>
+                    <path d="M5 21V7l8-4v18"></path>
+                    <path d="M19 10V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"></path>
+                    <path d="M13 21v-9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v9"></path>
+                </svg>
+                Informasi Sekolah
+            </h2>
 
             <div class="form-grid">
                 <div class="form-group">
@@ -62,14 +81,29 @@
                     <input type="text" id="major" name="major"
                         value="<?= htmlspecialchars($studentProfile['major'] ?? '') ?>"
                         placeholder="Contoh: IPA, IPS, RPL, TKJ">
-                    <small class="form-text"><i class="fas fa-info-circle"></i> Kosongkan jika tidak ada jurusan (SD/SMP)</small>
+                    <small class="form-text">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        Kosongkan jika tidak ada jurusan (SD/SMP)
+                    </small>
                 </div>
             </div>
         </section>
 
         <!-- Section 2: Informasi Orang Tua/Wali -->
         <section class="edit-section">
-            <h2><i class="fas fa-users"></i> Informasi Orang Tua/Wali</h2>
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Informasi Orang Tua/Wali
+            </h2>
 
             <div class="form-grid">
                 <div class="form-group">
@@ -97,7 +131,13 @@
 
         <!-- Section 3: Nilai Akademik (Multi-Semester) -->
         <section class="edit-section">
-            <h2><i class="fas fa-book-open"></i> Nilai Akademik</h2>
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                Nilai Akademik
+            </h2>
             <p class="section-description">
                 Masukkan nilai rapor berdasarkan semester. Anda dapat menambahkan beberapa semester sekaligus.
             </p>
@@ -108,7 +148,11 @@
 
             <div class="semester-actions">
                 <button type="button" class="btn-add-semester" onclick="addSemester()">
-                    <i class="fas fa-plus"></i> Tambah Semester Baru
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Tambah Semester Baru
                 </button>
             </div>
 
@@ -117,9 +161,14 @@
 
         <!-- Form Actions -->
         <div class="form-actions">
-            <a href="/profile" class="btn-cancel" data-spa>Batal</a>
+            <a data-spa href="/profile" class="btn-cancel" data-spa>Batal</a>
             <button type="submit" class="btn-save">
-                <i class="fas fa-save"></i> Simpan Data Akademik
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Simpan Data Akademik
             </button>
         </div>
     </form>
@@ -257,7 +306,11 @@
                         ${subjectsHtml}
                     </div>
                     <button type="button" class="btn-add-semester" onclick="addSubject('${sem.id}')" style="margin-top: 12px; font-size: 13px; padding: 8px 12px;">
-                        <i class="fas fa-plus"></i> Tambah Mata Pelajaran
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Tambah Mata Pelajaran
                     </button>
                 </div>
             `;

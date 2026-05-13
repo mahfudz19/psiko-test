@@ -12,7 +12,7 @@
     <!-- Header & Breadcrumb -->
     <div class="profile-edit-header">
         <nav class="breadcrumb">
-            <a href="/profile" data-spa>Profil</a>
+            <a data-spa href="/profile" data-spa>Profil</a>
             <span class="separator"><i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i></span>
             <span class="current">Edit Profil</span>
         </nav>
@@ -26,8 +26,7 @@
         </div>
     <?php endif; ?>
 
-    <form action="<?= getBaseUrl("/profile/update") ?>" class="profile-edit-form" method="POST">
-        <?= csrf_field() ?>
+    <form data-spa action="<?= getBaseUrl("/profile/update") ?>" class="profile-edit-form" method="POST">
         <!-- Personal Information Section -->
         <section class="edit-section">
             <h2><i class="fas fa-user-edit"></i> Informasi Pribadi</h2>
@@ -183,7 +182,7 @@
 
         <!-- Form Actions -->
         <div class="form-actions">
-            <a href="/profile" class="btn-cancel" data-spa>Batal</a>
+            <a data-spa href="/profile" class="btn-cancel" data-spa>Batal</a>
             <button type="submit" class="btn-save" id="submit-btn">
                 <i class="fas fa-save"></i> Simpan Perubahan
             </button>

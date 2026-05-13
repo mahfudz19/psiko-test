@@ -108,7 +108,7 @@
                                     <span class="school-name"><?= htmlspecialchars($school['name'] ?? 'N/A') ?></span>
                                     <span class="school-meta">Akreditasi: <?= htmlspecialchars($school['accreditation'] ?? '-') ?></span>
                                 </div>
-                                <a href="/admin/schools/<?= $school['id'] ?>" class="btn-view">Detail</a>
+                                <a data-spa href="/admin/schools/<?= $school['id'] ?>" class="btn-view">Detail</a>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -118,7 +118,7 @@
                     <?php endif; ?>
                 </div>
                 <div class="card-footer">
-                    <a href="/admin/schools" class="view-all-link">Lihat Semua Sekolah &rarr;</a>
+                    <a data-spa href="/admin/schools" class="view-all-link">Lihat Semua Sekolah &rarr;</a>
                 </div>
             </section>
 
@@ -149,7 +149,7 @@
                     <?php endif; ?>
                 </div>
                 <div class="card-footer">
-                    <a href="/admin" class="view-all-link">Kelola Pengguna &rarr;</a>
+                    <a data-spa href="/admin" class="view-all-link">Kelola Pengguna &rarr;</a>
                 </div>
             </section>
         </div>
@@ -158,7 +158,7 @@
         <section class="quick-actions-section">
             <h3 class="section-title">Aksi Cepat</h3>
             <div class="quick-actions-grid">
-                <a href="/admin/schools" class="action-card">
+                <a data-spa href="/admin/schools" class="action-card">
                     <div class="action-icon" style="background: #eef2ff; color: #6366f1;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -167,7 +167,7 @@
                     </div>
                     <span>Kelola Sekolah</span>
                 </a>
-                <a href="/admin" class="action-card">
+                <a data-spa href="/admin" class="action-card">
                     <div class="action-icon" style="background: #f0fdf4; color: #10b981;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -178,7 +178,7 @@
                     </div>
                     <span>Kelola Pengguna</span>
                 </a>
-                <a href="/settings" class="action-card">
+                <a data-spa href="/settings" class="action-card">
                     <div class="action-icon" style="background: #fff7ed; color: #f59e0b;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3"></circle>
@@ -187,7 +187,7 @@
                     </div>
                     <span>Pengaturan Sistem</span>
                 </a>
-                <a href="/dashboard" class="action-card">
+                <a data-spa href="/dashboard" class="action-card">
                     <div class="action-icon" style="background: #fce7f3; color: #ec4899;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7"></rect>

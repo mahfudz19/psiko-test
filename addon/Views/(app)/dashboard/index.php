@@ -56,7 +56,7 @@
               <h2 class="match-score-title"><?= htmlspecialchars($topMajor) ?></h2>
               <p class="match-score-desc">Berdasarkan minat, bakat, dan nilai akademikmu, jurusan ini memiliki kecocokan tertinggi.</p>
               <div class="match-score-actions">
-                <a href="/pmb/journey" class="btn btn-primary btn-sm">Lihat Detail Analisis</a>
+                <a data-spa href="/pmb/journey" class="btn btn-primary btn-sm">Lihat Detail Analisis</a>
               </div>
             </div>
           </div>
@@ -80,7 +80,7 @@
           <div class="stat-progress">
             <div class="stat-progress-bar" style="width: <?= $profileProgress ?>%; background: #6366f1;"></div>
           </div>
-          <a href="/profile/edit" class="stat-link">Lengkapi Profil &rarr;</a>
+          <a data-spa href="/profile/edit" class="stat-link">Lengkapi Profil &rarr;</a>
         </div>
       </div>
 
@@ -109,7 +109,7 @@
             <span class="status-dot" style="background: <?= $pmbStatus === 'not_started' ? '#94a3b8' : '#10b981' ?>;"></span>
             <span><?= $pmbStatus === 'not_started' ? 'Siap untuk simulasi' : 'Terus pantau progresmu' ?></span>
           </div>
-          <a href="/pmb/journey" class="stat-link">Lihat Journey &rarr;</a>
+          <a data-spa href="/pmb/journey" class="stat-link">Lihat Journey &rarr;</a>
         </div>
       </div>
 
@@ -126,7 +126,7 @@
           <span class="stat-label">Peluang Beasiswa</span>
           <div class="stat-value"><?= $eligibleScholarshipsCount ?> Program</div>
           <p class="stat-desc" style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Kamu memenuhi syarat untuk <?= $eligibleScholarshipsCount ?> beasiswa.</p>
-          <a href="/pmb/scholarship" class="stat-link">Cek Beasiswa &rarr;</a>
+          <a data-spa href="/pmb/scholarship" class="stat-link">Cek Beasiswa &rarr;</a>
         </div>
       </div>
     </section>
@@ -135,7 +135,7 @@
     <section class="quick-actions-section">
       <h3 class="section-title">Akses Cepat</h3>
       <div class="quick-actions-grid">
-        <a href="/profile/results" class="quick-action-card">
+        <a data-spa href="/profile/results" class="quick-action-card">
           <div class="quick-action-icon" style="background: #eef2ff; color: #6366f1;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -150,7 +150,7 @@
             <span class="quick-action-desc">Lihat analisis psikologi</span>
           </div>
         </a>
-        <a href="/chat" class="quick-action-card">
+        <a data-spa href="/chat" class="quick-action-card">
           <div class="quick-action-icon" style="background: #ecfdf5; color: #10b981;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -161,7 +161,7 @@
             <span class="quick-action-desc">Tanya jawab karir</span>
           </div>
         </a>
-        <a href="/pmb/simulation" class="quick-action-card">
+        <a data-spa href="/pmb/simulation" class="quick-action-card">
           <div class="quick-action-icon" style="background: #fff7ed; color: #f59e0b;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -194,7 +194,7 @@
               <span class="task-desc">Nomor HP, Alamat, dan Tanggal Lahir</span>
             </div>
             <?php if (empty($profile['phone'])): ?>
-              <a href="/profile/edit" class="task-action">Lengkapi</a>
+              <a date-spa href="/profile/edit" class="task-action">Lengkapi</a>
             <?php endif; ?>
           </div>
           <div class="task-item <?= !empty($studentProfile['academic_scores']) ? 'task-completed' : '' ?>">
@@ -206,7 +206,7 @@
               <span class="task-desc">Minimal 3 semester terakhir</span>
             </div>
             <?php if (empty($studentProfile['academic_scores'])): ?>
-              <a href="/profile/academic" class="task-action">Input</a>
+              <a data-spa href="/profile/academic" class="task-action">Input</a>
             <?php endif; ?>
           </div>
           <div class="task-item <?= !empty($studentProfile['ai_analysis']) ? 'task-completed' : '' ?>">
@@ -218,7 +218,7 @@
               <span class="task-desc">Dapatkan rekomendasi jurusan</span>
             </div>
             <?php if (empty($studentProfile['ai_analysis'])): ?>
-              <a href="/profile/results" class="task-action">Generate</a>
+              <a data-spa href="/profile/results" class="task-action">Generate</a>
             <?php endif; ?>
           </div>
         </div>
@@ -244,12 +244,12 @@
           <?php else: ?>
             <div class="empty-state">
               <p>Belum ada rekomendasi. Lengkapi data rapor dan hasil tes kamu!</p>
-              <a href="/profile/results" class="btn btn-secondary btn-sm">Mulai Analisis</a>
+              <a data-spa href="/profile/results" class="btn btn-secondary btn-sm">Mulai Analisis</a>
             </div>
           <?php endif; ?>
         </div>
         <?php if (!empty($aiRecommendations)): ?>
-          <a href="/profile/results" class="card-cta">
+          <a data-spa href="/profile/results" class="card-cta">
             <span>Lihat Analisis Lengkap</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cta-icon">
               <line x1="5" y1="12" x2="19" y2="12"></line>

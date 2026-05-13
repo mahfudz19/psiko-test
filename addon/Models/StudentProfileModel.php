@@ -423,8 +423,30 @@ class StudentProfileModel extends Model
         $jsonFields = ['academic_scores', 'extracurricular', 'achievements', 'psychological_tests', 'ai_analysis'];
 
         foreach ($jsonFields as $field) {
-            if (isset($data[$field]) && is_array($data[$field]) && empty($data[$field]) || (is_string($data[$field]) && $data[$field] === '[]')) {
+            if (!isset($data[$field])) {
+                continue;
+            }
+
+            $value = $data[$field];
+
+            // Handle array kosong
+            if (is_array($value) && empty($value)) {
                 $data[$field] = null;
+                continue;
+            }
+
+            // Handle string '[]' (empty JSON array)
+            if (is_string($value) && $value === '[]') {
+                $data[$field] = null;
+                continue;
+            }
+
+            // Handle string JSON yang setelah decode adalah array kosong
+            if (is_string($value) && !empty($value)) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && empty($decoded)) {
+                    $data[$field] = null;
+                }
             }
         }
         return $data;

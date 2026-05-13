@@ -22,7 +22,7 @@ $lastHash = $aiAnalysis['last_data_hash'] ?? null;
 <div class="results-container">
     <div class="results-header">
         <div class="breadcrumb">
-            <a href="/profile">Profile</a>
+            <a data-spa href="/profile">Profile</a>
             <span class="separator">/</span>
             <span class="current">Hasil Psykotest</span>
         </div>

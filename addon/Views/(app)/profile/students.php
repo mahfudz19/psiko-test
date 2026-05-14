@@ -47,7 +47,7 @@
             <div class="stat-icon">📝</div>
             <div class="stat-content">
                 <span class="stat-value">
-                    <?= count(array_filter($students, fn($s) => !empty($s['psychological_tests']))) ?>
+                    <?= count(array_filter($students, fn($s) => !empty($s['has_riasec_test']))) ?>
                 </span>
                 <span class="stat-label">Sudah Test</span>
             </div>
@@ -90,7 +90,7 @@
                                 <td>
                                     <?php if (!empty($student['ai_analysis'])): ?>
                                         <span class="badge badge-success">Sudah Analisis</span>
-                                    <?php elseif (!empty($student['psychological_tests'])): ?>
+                                    <?php elseif (!empty($student['has_riasec_test'])): ?>
                                         <span class="badge badge-warning">Menunggu Analisis</span>
                                     <?php else: ?>
                                         <span class="badge badge-secondary">Belum Test</span>

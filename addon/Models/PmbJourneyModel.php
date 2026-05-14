@@ -127,15 +127,28 @@ class PmbJourneyModel extends Model
     }
 
     /**
-     * @deprecated Scholarship sekarang menggunakan rule-based calculation (tidak perlu simpan ke DB)
-     * Use ScholarshipCalculator::calculateEligibility() langsung di controller
+     * Update scholarship eligibility data (calculated using ScholarshipCalculator)
+     *
+     * @param int $studentProfileId Student profile ID
+     * @param array $scholarships Scholarship eligibility data from ScholarshipCalculator
+     * @param string $hash Data hash for change detection
+     * @return bool Success status
      */
     public function updateScholarships(int $studentProfileId, array $scholarships, string $hash): bool
     {
-        throw new \LogicException(
-            "updateScholarships() is deprecated. " .
-                "Scholarship sekarang menggunakan rule-based calculation langsung di controller."
-        );
+        $journey = $this->findByStudentId($studentProfileId);
+
+        $data = [
+            'scholarships' => json_encode($scholarships),
+            'last_data_hash' => $hash
+        ];
+
+        if ($journey) {
+            return $this->updateById($journey['id'], $data);
+        } else {
+            $data['student_profile_id'] = $studentProfileId;
+            return (bool) $this->create($data);
+        }
     }
 
     /**

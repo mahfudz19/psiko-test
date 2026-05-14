@@ -141,6 +141,42 @@
           </svg>
           <span class="sidebar-link-text">Konsultasi AI</span>
         </a>
+
+        <!-- Test Psychology Menu (untuk siswa) -->
+        <?php
+        $isTestPage = in_array($currentPath, ['/tests/riasec', '/tests/riasec/take', '/tests/riasec/results', '/tests/iq']);
+        ?>
+        <div class="sidebar-nav-group">
+          <a data-spa href="/tests/riasec" class="sidebar-nav-group-header <?= $currentPath === '/tests/riasec' ? 'active' : ($isTestPage ? 'active-group' : '') ?>">
+            <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+              <path d="m9 15 2 2 4-4" />
+            </svg>
+            <span class="sidebar-link-text">Tes Psikologi</span>
+            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-collapse-toggle>
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </a>
+          <div class="sidebar-nav-group-content">
+            <a data-spa href="/tests/riasec" class="sidebar-link sidebar-link-sub <?= $currentPath === '/tests/riasec' || $currentPath === '/tests/riasec/take' || $currentPath === '/tests/riasec/results' ? 'active' : '' ?>">
+              <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4" />
+                <path d="M12 8h.01" />
+              </svg>
+              <span class="sidebar-link-text">RIASEC</span>
+            </a>
+            <a data-spa href="/tests/iq" class="sidebar-link sidebar-link-sub <?= $currentPath === '/tests/iq' ? 'active' : '' ?>">
+              <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z" />
+                <path d="M12 12v8" />
+                <path d="m8 16 4 4 4-4" />
+              </svg>
+              <span class="sidebar-link-text">IQ Test</span>
+            </a>
+          </div>
+        </div>
       <?php endif; ?>
       <?php if (($_SESSION['auth.user_role'] ?? '') === 'admin'): ?>
         <!-- School Admin Menu (untuk Guru BK) -->

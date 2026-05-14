@@ -6,6 +6,7 @@ use Addon\Models\ProfileModel;
 use Addon\Models\StudentProfileModel;
 use Addon\Models\PmbJourneyModel;
 use Addon\Models\UserModel;
+use Addon\Models\TestResultModel;
 use Addon\Services\ScholarshipCalculator;
 use App\Core\Http\Request;
 use App\Core\Http\Response;
@@ -26,7 +27,8 @@ class DashboardController
         private ScholarshipCalculator $scholarshipCalculator,
         private \Addon\Models\SchoolModel $schoolModel,
         private \Addon\Models\TeacherProfileModel $teacherModel,
-        private \Addon\Models\ChatConsultationModel $chatModel
+        private \Addon\Models\ChatConsultationModel $chatModel,
+        private TestResultModel $testResultModel
     ) {}
 
     /**
@@ -162,7 +164,6 @@ class DashboardController
                 'grade_level' => $studentProfile['grade_level'],
                 'major' => $studentProfile['major'],
                 'academic_scores' => $studentProfile['academic_scores'],
-                'psychological_tests' => $studentProfile['psychological_tests'],
             ]);
         }
 
@@ -203,14 +204,19 @@ class DashboardController
         $majorDistribution = [];
 
         foreach ($students as $student) {
+            $studentProfileId = $student['id'] ?? $student['student_profile_id'] ?? null;
+
             // Cek kelengkapan profil (sederhana: jika ada phone & address)
             if (!empty($student['phone']) && !empty($student['address'])) {
                 $completedProfiles++;
             }
 
-            // Cek psikotes
-            if (!empty($student['psychological_tests']) && $student['psychological_tests'] !== '[]') {
-                $completedPsychotests++;
+            // Cek psikotes (RIASEC) dari TestResultModel
+            if ($studentProfileId) {
+                $riasecResult = $this->testResultModel->getLatestRiasecResult($studentProfileId);
+                if (!empty($riasecResult)) {
+                    $completedPsychotests++;
+                }
             }
 
             // Cek AI Analysis & Distribusi Jurusan

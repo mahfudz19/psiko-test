@@ -369,16 +369,17 @@ class GeminiService
     private function buildProfileAnalysisPrompt(array $studentData): string
     {
         $prompt = "Berperanlah sebagai psikolog pendidikan dan konselor karir ahli. ";
-        $prompt .= "Berdasarkan data siswa berikut (Akademik, Psikologi, Prestasi), berikan analisis potensi yang komprehensif.\n\n";
+        $prompt .= "Berdasarkan data siswa berikut (Akademik, RIASEC, Prestasi), berikan analisis potensi yang komprehensif.\n\n";
 
         if (!empty($studentData['academic_scores'])) {
             $prompt .= "=== DATA AKADEMIK (Nilai Rapor per Semester) ===\n";
             $prompt .= json_encode($studentData['academic_scores'], JSON_PRETTY_PRINT) . "\n\n";
         }
 
-        if (!empty($studentData['psychological_tests'])) {
-            $prompt .= "=== DATA TES PSIKOLOGI ===\n";
-            $prompt .= json_encode($studentData['psychological_tests'], JSON_PRETTY_PRINT) . "\n\n";
+        // Use riasec_result instead of psychological_tests
+        if (!empty($studentData['riasec_result'])) {
+            $prompt .= "=== HASIL TES RIASEC (Kode Holland) ===\n";
+            $prompt .= json_encode($studentData['riasec_result'], JSON_PRETTY_PRINT) . "\n\n";
         }
 
         if (!empty($studentData['achievements'])) {
@@ -416,8 +417,165 @@ class GeminiService
     }
 
     /**
+     * Generate analisis gabungan: Student Profile Analysis + PMB Match
+     * Single API call yang mengembalikan kedua data sekaligus
+     *
+     * @param array $studentData Data siswa lengkap
+     * @return array Combined response dengan student_profile dan pmb_match
+     */
+    public function generateCombinedAnalysis(array $studentData): array
+    {
+        $prompt = $this->buildCombinedAnalysisPrompt($studentData);
+        $this->lastPrompt = $prompt;
+
+        $payload = [
+            'contents' => [
+                ['role' => 'user', 'parts' => [['text' => $prompt]]]
+            ],
+            'generationConfig' => [
+                'temperature' => 0.4,
+                'responseMimeType' => 'application/json'
+            ]
+        ];
+
+        try {
+            $response = $this->sendRequest($payload);
+            $responseText = $response['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+            // Extract JSON
+            $jsonStart = strpos($responseText, '{');
+            $jsonEnd = strrpos($responseText, '}');
+            if ($jsonStart !== false && $jsonEnd !== false) {
+                $responseText = substr($responseText, $jsonStart, $jsonEnd - $jsonStart + 1);
+            }
+
+            $decoded = json_decode($responseText, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception("Invalid JSON format dari Gemini");
+            }
+            return $decoded;
+        } catch (\Exception $e) {
+            error_log("Gemini Combined Analysis Error: " . $e->getMessage());
+            throw new \Exception("Gagal menghubungi layanan AI: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Build prompt gabungan untuk Student Profile Analysis + PMB Match
+     * Output JSON dengan 2 section: student_profile dan pmb_match
+     */
+    private function buildCombinedAnalysisPrompt(array $studentData): string
+    {
+        $prompt = "Berperanlah sebagai psikolog pendidikan dan konselor karir ahli yang juga bertindak sebagai Konsultan Penerimaan Mahasiswa Baru.\n\n";
+        $prompt .= "Tugas Anda adalah memberikan 2 analisis sekaligus berdasarkan data siswa:\n";
+        $prompt .= "1. ANALISIS PROFIL SISWA: Analisis potensi, minat, bakat berdasarkan data akademik dan RIASEC\n";
+        $prompt .= "2. REKOMENDASI PMB: Rekomendasi Program Studi di Universitas Univeral yang sesuai dengan profil siswa\n\n";
+
+        // Data Akademik
+        if (!empty($studentData['academic_scores'])) {
+            $prompt .= "=== DATA AKADEMIK (Nilai Rapor per Semester) ===\n";
+            $prompt .= json_encode($studentData['academic_scores'], JSON_PRETTY_PRINT) . "\n\n";
+        }
+
+        // Data RIASEC
+        if (!empty($studentData['riasec_result'])) {
+            $prompt .= "=== HASIL TES RIASEC (Kode Holland) ===\n";
+            $prompt .= json_encode($studentData['riasec_result'], JSON_PRETTY_PRINT) . "\n\n";
+        }
+
+        // Data Prestasi
+        if (!empty($studentData['achievements'])) {
+            $prompt .= "=== DATA PRESTASI ===\n";
+            $prompt .= json_encode($studentData['achievements'], JSON_PRETTY_PRINT) . "\n\n";
+        }
+
+        // Informasi Universitas Univeral
+        $prompt .= "=== INFORMASI UNIVERSITAS UNIVERAL ===\n";
+        foreach ($this->universitasUniveral['faculties'] as $faculty) {
+            $prompt .= "\n{$faculty['name']}:\n";
+            foreach ($faculty['programs'] as $program) {
+                $prompt .= "  • {$program['name']} ({$program['degree_type']}, Akreditasi {$program['accreditation']})\n";
+            }
+        }
+
+        // Informasi Beasiswa
+        $prompt .= "\n=== BEASISWA YANG TERSEDIA ===\n";
+        foreach ($this->universitasUniveral['scholarships'] as $scholarship) {
+            $prompt .= "- {$scholarship['name']} ({$scholarship['discount']}% - {$scholarship['type']}): " .
+                implode(', ', $scholarship['requirements']) . "\n";
+        }
+        $prompt .= "\n";
+
+        // Instruksi Output JSON
+        $prompt .= "=== INSTRUKSI OUTPUT ===\n";
+        $prompt .= "Anda WAJIB memberikan respons HANYA dalam format JSON yang valid dengan struktur berikut:\n";
+        $prompt .= <<<JSON
+
+            {
+              "student_profile": {
+                "summary": "Ringkasan eksekutif tentang profil siswa (1 paragraf kuat)",
+                "potential": ["Potensi 1", "Potensi 2", "Potensi 3"],
+                "interests": [
+                  {"name": "Nama Minat 1", "level": 85},
+                  {"name": "Nama Minat 2", "level": 70}
+                ],
+                "talents": [
+                  {"name": "Bakat Utama", "icon": "⭐", "score": 90},
+                  {"name": "Bakat Tambahan", "icon": "🎨", "score": 80}
+                ],
+                "recommendations": [
+                  "Saran pengembangan diri 1",
+                  "Saran pengembangan diri 2"
+                ],
+                "career_suggestions": [
+                  "Profesi A", "Profesi B", "Profesi C"
+                ]
+              },
+              "pmb_match": {
+                "top_match": {
+                  "university": "Universitas Univeral",
+                  "study_program": "Nama Jurusan Terbaik di Universitas Univeral",
+                  "degree_type": "S1/D3",
+                  "accreditation": "Unggul/A/B",
+                  "match_percentage": 95,
+                  "reason": "Alasan spesifik kenapa sangat cocok berdasarkan RIASEC dan akademik"
+                },
+                "other_matches": [
+                  {
+                    "university": "Universitas Univeral",
+                    "study_program": "Nama Jurusan Alternatif",
+                    "match_percentage": 85,
+                    "reason": "Alasan kenapa menjadi alternatif"
+                  }
+                ],
+                "career_paths": [
+                  {"semester": "1-2", "title": "Fundamental", "description": "Deskripsi kegiatan semester awal"},
+                  {"semester": "3-4", "title": "Intermediate", "description": "Deskripsi kegiatan semester tengah"},
+                  {"semester": "5-6", "title": "Advanced", "description": "Deskripsi kegiatan semester lanjut"},
+                  {"semester": "Graduation", "title": "Profesi Impian", "description": "Profil profesi setelah lulus"}
+                ],
+                "partner_companies": [
+                  {"name": "Nama Perusahaan Top Terkait", "type": "Bidang Industri"}
+                ],
+                "scholarship_eligibility": [
+                  {
+                    "name": "Nama Beasiswa",
+                    "discount": 50,
+                    "eligible": true,
+                    "reason": "Alasan kelayakan berdasarkan data siswa"
+                  }
+                ]
+              }
+            }
+        JSON;
+
+        return $prompt;
+    }
+
+    /**
      * Generate rekomendasi Program Studi spesifik untuk PMB Universal
      * Memaksa respons JSON murni
+     * @deprecated Use generateCombinedAnalysis() instead
      */
     public function generatePmbMatch(array $studentData): array
     {
@@ -481,8 +639,9 @@ class GeminiService
         if (!empty($studentData['academic_scores'])) {
             $prompt .= "=== DATA AKADEMIK ===\n" . json_encode($studentData['academic_scores']) . "\n\n";
         }
-        if (!empty($studentData['psychological_tests'])) {
-            $prompt .= "=== DATA PSIKOLOGI ===\n" . json_encode($studentData['psychological_tests']) . "\n\n";
+        // Use riasec_result instead of psychological_tests
+        if (!empty($studentData['riasec_result'])) {
+            $prompt .= "=== HASIL TES RIASEC ===\n" . json_encode($studentData['riasec_result']) . "\n\n";
         }
         if (!empty($studentData['achievements'])) {
             $prompt .= "=== DATA PRESTASI ===\n" . json_encode($studentData['achievements']) . "\n\n";

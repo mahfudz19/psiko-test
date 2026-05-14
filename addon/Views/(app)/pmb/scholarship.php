@@ -1,9 +1,12 @@
 <?php
 
 /**
- * PMB Scholarship View - Scholarship Calculator
+ * PMB Scholarship View - Scholarship Eligibility
  *
- * @var array $scholarships Data dari AI dengan struktur:
+ * Data beasiswa dihitung menggunakan ScholarshipCalculator (Rule-Based)
+ * dan disimpan di pmb_journeys.scholarships oleh ProfileController::generateAiAnalysis()
+ *
+ * @var array $scholarships Data dari pmb_journeys.scholarships dengan struktur:
  *   - eligible_scholarships: array beasiswa yang eligible
  *   - not_eligible_scholarships: array beasiswa yang tidak eligible
  *   - average_score: rata-rata nilai siswa
@@ -11,7 +14,8 @@
  *   - technology_interest_level: string (low/medium/high)
  *
  * @var array|null $student_profile Data profil siswa
- * @var string|null $ai_error_message Error message jika AI gagal
+ * @var array|null $journey PMB journey data dari database
+ * @var string|null $ai_error_message Error message (tidak digunakan lagi, hanya untuk backward compatibility)
  */
 $scholarshipData = $scholarships ?? null;
 $studentProfile = $student_profile ?? null;
@@ -39,40 +43,42 @@ $aiErrorMessage = $ai_error_message ?? null;
         </div>
     <?php endif; ?>
 
-    <?php if ($scholarshipData && !empty($scholarshipData['eligible_scholarships'])): ?>
+    <?php if ($scholarshipData): ?>
         <!-- User Eligibility (AI Generated) -->
-        <div class="eligibility-section">
-            <div class="section-header">
-                <h2>🎯 Beasiswa yang Kamu Dapatkan</h2>
-                <p>Berdasarkan analisis profil akademik dan prestasi kamu</p>
-            </div>
+        <?php if (!empty($scholarshipData['eligible_scholarships'])): ?>
+            <div class="eligibility-section">
+                <div class="section-header">
+                    <h2>🎯 Beasiswa yang Kamu Dapatkan</h2>
+                    <p>Berdasarkan analisis profil akademik dan prestasi kamu</p>
+                </div>
 
-            <div class="eligibility-cards">
-                <?php foreach ($scholarshipData['eligible_scholarships'] as $scholarship): ?>
-                    <div class="eligibility-card eligible">
-                        <div class="eligibility-header">
-                            <h4><?= htmlspecialchars($scholarship['name']) ?></h4>
-                            <span class="status-badge status-eligible">
-                                ✅ <?= $scholarship['discount'] ?>% OFF
-                            </span>
+                <div class="eligibility-cards">
+                    <?php foreach ($scholarshipData['eligible_scholarships'] as $scholarship): ?>
+                        <div class="eligibility-card eligible">
+                            <div class="eligibility-header">
+                                <h4><?= htmlspecialchars($scholarship['name']) ?></h4>
+                                <span class="status-badge status-eligible">
+                                    ✅ <?= $scholarship['discount'] ?>% OFF
+                                </span>
+                            </div>
+                            <p class="eligibility-reason"><?= htmlspecialchars($scholarship['reason']) ?></p>
+                            <p class="scholarship-description"><?= htmlspecialchars($scholarship['description'] ?? '') ?></p>
+                            <div class="scholarship-meta">
+                                <span class="meta-item">📚 Tipe: <?= htmlspecialchars($scholarship['type']) ?></span>
+                                <span class="meta-item">📊 Kuota: <?= $scholarship['quota'] ?? '-' ?> slot</span>
+                                <span class="meta-item">📅 Periode: <?= date('d M Y', strtotime($scholarship['start_date'] ?? 'today')) ?> - <?= date('d M Y', strtotime($scholarship['end_date'] ?? 'today')) ?></span>
+                            </div>
+                            <a href="<?= htmlspecialchars($scholarship['url'] ?? '/pmb/simulation') ?>"
+                                class="btn btn-primary btn-sm"
+                                target="_blank"
+                                rel="noopener noreferrer">
+                                Ajukan Beasiswa ↗
+                            </a>
                         </div>
-                        <p class="eligibility-reason"><?= htmlspecialchars($scholarship['reason']) ?></p>
-                        <p class="scholarship-description"><?= htmlspecialchars($scholarship['description'] ?? '') ?></p>
-                        <div class="scholarship-meta">
-                            <span class="meta-item">📚 Tipe: <?= htmlspecialchars($scholarship['type']) ?></span>
-                            <span class="meta-item">📊 Kuota: <?= $scholarship['quota'] ?? '-' ?> slot</span>
-                            <span class="meta-item">📅 Periode: <?= date('d M Y', strtotime($scholarship['start_date'] ?? 'today')) ?> - <?= date('d M Y', strtotime($scholarship['end_date'] ?? 'today')) ?></span>
-                        </div>
-                        <a href="<?= htmlspecialchars($scholarship['url'] ?? '/pmb/simulation') ?>"
-                            class="btn btn-primary btn-sm"
-                            target="_blank"
-                            rel="noopener noreferrer">
-                            Ajukan Beasiswa ↗
-                        </a>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
 
         <!-- Not Eligible Scholarships -->
         <?php if (!empty($scholarshipData['not_eligible_scholarships'])): ?>
@@ -100,6 +106,14 @@ $aiErrorMessage = $ai_error_message ?? null;
                             </div>
                         </div>
                     <?php endforeach; ?>
+                </div>
+            </div>
+        <?php elseif (empty($scholarshipData['eligible_scholarships']) && empty($scholarshipData['not_eligible_scholarships'])): ?>
+            <!-- No scholarships at all (all criteria not met) -->
+            <div class="no-scholarships-section">
+                <div class="section-header">
+                    <h2>📋 Belum Ada Beasiswa yang Cocok</h2>
+                    <p>Tingkatkan prestasi akademik dan non-akademik kamu untuk mendapatkan rekomendasi beasiswa</p>
                 </div>
             </div>
         <?php endif; ?>
@@ -186,7 +200,7 @@ $aiErrorMessage = $ai_error_message ?? null;
 
             <div class="cost-actions">
                 <a data-spa href="/pmb/simulation" class="btn btn-primary btn-lg">
-                    Lanjut ke Pendaftaran →
+                    Lanjut ke Simulasi Pendaftaran →
                 </a>
             </div>
         </div>

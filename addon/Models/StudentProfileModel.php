@@ -17,8 +17,7 @@ use App\Core\Database\Model;
  * - academic_scores: JSON academic scores
  * - extracurricular: JSON extracurricular activities
  * - achievements: JSON achievements
- * - psychological_tests: JSON psychological test results
- * - ai_analysis: JSON AI analysis results
+ * - ai_analysis: JSON AI analysis results (refer to TestResultModel for test results)
  * - parent_name: Parent/guardian name
  * - parent_phone: Parent/guardian phone
  * - parent_email: Parent/guardian email
@@ -39,7 +38,6 @@ class StudentProfileModel extends Model
         'academic_scores' => ['type' => 'json', 'nullable' => true], // {math: 85, indonesian: 90, ...}
         'extracurricular' => ['type' => 'json', 'nullable' => true], // [{name, position, year_start, year_end, description}]
         'achievements' => ['type' => 'json', 'nullable' => true], // [{name, rank, level, year, organizer, description}]
-        'psychological_tests' => ['type' => 'json', 'nullable' => true], // {test_id, scores, timestamps}
         'ai_analysis' => ['type' => 'json', 'nullable' => true], // {potentials, interests, talents, recommendations}
         'ai_prompt' => ['type' => 'text', 'nullable' => true], // Prompt yang digunakan untuk generate AI analysis
         'parent_name' => ['type' => 'string', 'nullable' => true],
@@ -57,7 +55,6 @@ class StudentProfileModel extends Model
             'academic_scores' => '[{"semester": "Semester 1 Kelas 10", "subjects": [{"name": "Matematika", "final_score": 85, "sub_scores": {"pengetahuan": 80, "keterampilan": 90}}, {"name": "Bahasa Indonesia", "final_score": 90}]}]',
             'extracurricular' => '[{"name": "Bulu Tangkis", "role": "Pemain", "year": "2022"}, {"name": "Pramuka", "role": "Anggota", "year": "2022"}]',
             'achievements' => '[{"title": "Juara 1 Lomba Olahraga", "level": "Sekolah", "year": "2022", "certificate_url": "https://example.com/certificate.jpg"}]',
-            'psychological_tests' => '[{"test_name": "Tes IQ Standar", "date": "2023-10-01", "result": "Diatas Rata-rata", "score": 115, "metrics": {"verbal": 110, "performance": 120}}, {"test_name": "Tes MBTI", "date": "2023-10-05", "result": "INTJ"}]',
             'ai_analysis' => null,
             'ai_prompt' => null,
             'parent_name' => 'John Doe',
@@ -73,7 +70,6 @@ class StudentProfileModel extends Model
             'academic_scores' => '[{"semester": "Semester 3 Kelas 11", "subjects": [{"name": "Ekonomi", "final_score": 88}, {"name": "Sosiologi", "final_score": 92}]}]',
             'extracurricular' => '[{"name": "PMR", "role": "Ketua", "year": "2023"}]',
             'achievements' => '[{"title": "Juara Harapan 1 Debat", "level": "Kota", "year": "2023", "certificate_url": "https://example.com/cert.jpg"}]',
-            'psychological_tests' => '[{"test_name": "Tes Gaya Belajar", "date": "2023-11-01", "result": "Visual"}]',
             'ai_analysis' => null,
             'ai_prompt' => null,
             'parent_name' => 'Jane Doe',
@@ -126,6 +122,7 @@ class StudentProfileModel extends Model
         // sp.counseling_notes,
         // p.full_name,
         // p.date_of_birth,
+        // Note: psychological_tests removed - use TestResultModel::getLatestRiasecResult() instead
         $stmt = $this->getDb()->prepare("
             SELECT
                 sp.id as student_profile_id,
@@ -136,7 +133,6 @@ class StudentProfileModel extends Model
                 sp.major,
                 sp.academic_scores,
                 sp.achievements,
-                sp.psychological_tests,
                 sp.ai_analysis,
                 sp.parent_name,
                 sp.parent_phone,
@@ -346,22 +342,6 @@ class StudentProfileModel extends Model
     }
 
     /**
-     * Add psychological test result
-     */
-    public function addPsychologicalTest(int $profileId, array $testData): bool
-    {
-        $student = $this->findByProfileId($profileId);
-        if (!$student) {
-            return false;
-        }
-
-        $tests = json_decode($student['psychological_tests'] ?? '[]', true) ?? [];
-        $tests[] = array_merge($testData, ['created_at' => date('Y-m-d H:i:s')]);
-
-        return $this->updateByProfileId($profileId, ['psychological_tests' => json_encode($tests)]);
-    }
-
-    /**
      * Create student profile for new registration
      */
     public function createForProfile(int $profileId): int
@@ -375,7 +355,6 @@ class StudentProfileModel extends Model
             'academic_scores' => null,
             'extracurricular' => null,
             'achievements' => null,
-            'psychological_tests' => null,
             'ai_analysis' => null,
             'ai_prompt' => null,
             'parent_name' => null,
@@ -420,7 +399,7 @@ class StudentProfileModel extends Model
      */
     protected function convertEmptyJsonArraysToNull(array $data): array
     {
-        $jsonFields = ['academic_scores', 'extracurricular', 'achievements', 'psychological_tests', 'ai_analysis'];
+        $jsonFields = ['academic_scores', 'extracurricular', 'achievements', 'ai_analysis'];
 
         foreach ($jsonFields as $field) {
             if (!isset($data[$field])) {
@@ -462,9 +441,6 @@ class StudentProfileModel extends Model
         }
         if (isset($data['achievements']) && $data['achievements'] !== null) {
             $this->validateAchievements($data['achievements']);
-        }
-        if (isset($data['psychological_tests']) && $data['psychological_tests'] !== null) {
-            $this->validatePsychologicalTests($data['psychological_tests']);
         }
         if (isset($data['ai_analysis']) && $data['ai_analysis'] !== null) {
             $this->validateAiAnalysis($data['ai_analysis']);
@@ -576,48 +552,6 @@ class StudentProfileModel extends Model
         }
     }
 
-    protected function validatePsychologicalTests(string|array $json): void
-    {
-        $data = is_string($json) ? json_decode($json, true) : $json;
-        if (is_string($json) && json_last_error() !== JSON_ERROR_NONE) {
-            throw new \InvalidArgumentException('psychological_tests harus berupa JSON valid');
-        }
-        if (!is_array($data) || (!empty($data) && !array_is_list($data))) {
-            throw new \InvalidArgumentException('psychological_tests harus berupa array of objects');
-        }
-
-        $allowedKeys = ['test_name', 'date', 'result', 'score', 'metrics', 'report_url'];
-
-        foreach ($data as $index => $item) {
-            if (!is_array($item)) throw new \InvalidArgumentException("Item psychological_tests index {$index} harus berupa object");
-
-            if (!isset($item['test_name']) || !isset($item['date'])) {
-                throw new \InvalidArgumentException("Item psychological_tests index {$index} harus memiliki test_name dan date");
-            }
-
-            foreach ($item as $key => $value) {
-                if (!in_array($key, $allowedKeys)) {
-                    throw new \InvalidArgumentException("Key '{$key}' pada psychological_tests index {$index} tidak diizinkan");
-                }
-            }
-
-            if (isset($item['score']) && $item['score'] !== null && !is_numeric($item['score'])) {
-                throw new \InvalidArgumentException("Nilai score pada psychological_tests index {$index} harus berupa angka atau null");
-            }
-
-            if (isset($item['metrics'])) {
-                if (!is_array($item['metrics']) || array_is_list($item['metrics'])) {
-                    throw new \InvalidArgumentException("metrics pada psychological_tests index {$index} harus berupa object (key-value)");
-                }
-                foreach ($item['metrics'] as $metKey => $metVal) {
-                    if (!is_numeric($metVal) && !is_string($metVal)) {
-                        throw new \InvalidArgumentException("Nilai metric '{$metKey}' pada psychological_tests index {$index} harus berupa angka atau string");
-                    }
-                }
-            }
-        }
-    }
-
     protected function validateAiAnalysis(string|array $json): void
     {
         $data = is_string($json) ? json_decode($json, true) : $json;
@@ -628,7 +562,20 @@ class StudentProfileModel extends Model
             throw new \InvalidArgumentException('ai_analysis harus berupa object');
         }
 
-        $allowedKeys = ['summary', 'potential', 'interests', 'talents', 'recommendations', 'career_suggestions', 'generated_at', 'last_data_hash', 'prompt'];
+        $allowedKeys = [
+            'summary',
+            'potential',
+            'interests',
+            'talents',
+            'recommendations',
+            'career_suggestions',
+            'generated_at',
+            'last_data_hash',
+            'prompt',
+            'holland_code',
+            'riasec_scores',
+            'data_completeness'
+        ];
 
         foreach ($data as $key => $value) {
             if (!in_array($key, $allowedKeys)) {
@@ -636,16 +583,81 @@ class StudentProfileModel extends Model
             }
 
             // Validasi string keys
-            if (in_array($key, ['summary', 'generated_at', 'last_data_hash'])) {
+            if (in_array($key, ['summary', 'generated_at', 'last_data_hash', 'holland_code', 'prompt'])) {
                 if (!is_string($value)) {
                     throw new \InvalidArgumentException("Nilai '{$key}' pada ai_analysis harus berupa string");
                 }
+            } elseif ($key === 'riasec_scores') {
+                // Validasi riasec_scores harus object dengan key R,I,A,S,E,C
+                if (!is_array($value) || array_is_list($value)) {
+                    throw new \InvalidArgumentException("Nilai 'riasec_scores' pada ai_analysis harus berupa object (key-value)");
+                }
+                $allowedDimensions = ['R', 'I', 'A', 'S', 'E', 'C'];
+                foreach ($value as $dimKey => $dimVal) {
+                    if (!in_array($dimKey, $allowedDimensions)) {
+                        throw new \InvalidArgumentException("Dimensi '{$dimKey}' pada riasec_scores tidak valid");
+                    }
+                    if (!is_numeric($dimVal)) {
+                        throw new \InvalidArgumentException("Nilai skor untuk dimensi '{$dimKey}' harus berupa angka");
+                    }
+                }
             } else {
-                // Sisa keys harus array (bisa array of strings atau array of objects)
+                // Sisa keys harus array
                 if (!is_array($value)) {
                     throw new \InvalidArgumentException("Nilai '{$key}' pada ai_analysis harus berupa array");
                 }
             }
         }
+    }
+
+    /**
+     * Update RIASEC AI analysis
+     *
+     * @deprecated Use TestResultModel::getLatestRiasecResult() instead
+     * @param int $profileId Profile ID siswa
+     * @param array $analysis Data analisis AI
+     * @param string|null $prompt Prompt yang digunakan (optional)
+     * @return bool True jika berhasil
+     */
+    public function updateRiasecAiAnalysis(int $profileId, array $analysis, ?string $prompt = null): bool
+    {
+        $student = $this->findByProfileId($profileId);
+        if (!$student) {
+            return false;
+        }
+
+        $currentAnalysis = json_decode($student['ai_analysis'] ?? 'null', true) ?? [];
+
+        // Merge dengan data existing
+        $updatedAnalysis = array_merge($currentAnalysis, [
+            'holland_code' => $analysis['holland_code'],
+            'riasec_scores' => $analysis['scores'],
+            'summary' => $analysis['summary'] ?? '',
+            'potential' => $analysis['potential'] ?? [],
+            'interests' => $analysis['interests'] ?? [],
+            'recommendations' => $analysis['recommendations'] ?? [],
+            'generated_at' => date('Y-m-d H:i:s'),
+            'last_data_hash' => $this->generateDataHash($analysis)
+        ]);
+
+        if ($prompt !== null) {
+            $updatedAnalysis['prompt'] = $prompt;
+        }
+
+        return $this->updateByProfileId($profileId, [
+            'ai_analysis' => json_encode($updatedAnalysis)
+        ]);
+    }
+
+    /**
+     * Generate hash dari data untuk deteksi perubahan
+     *
+     * @param array $data Data untuk di-hash
+     * @return string Hash MD5
+     */
+    private function generateDataHash(array $data): string
+    {
+        // Sort keys untuk konsistensi hash (gunakan nilai numeric 1 = JSON_SORT_KEYS)
+        return md5(json_encode($data, 1));
     }
 }

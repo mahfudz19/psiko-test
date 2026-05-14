@@ -1,0 +1,529 @@
+
+<h2 class="sr-only">Instrumen Asesmen Minat dan Bakat RIASEC untuk SMA Kurikulum Merdeka</h2>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .page { display: none; }
+  .page.active { display: block; }
+  .header { background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 1.25rem 1.5rem; margin-bottom: 0; }
+  .header h1 { font-size: 17px; font-weight: 500; color: var(--color-text-primary); }
+  .header p { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px; margin-top: 6px; }
+  .badge-info { background: var(--color-background-info); color: var(--color-text-info); }
+  .section-block { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin: 1rem 1rem 0; overflow: hidden; }
+  .section-header { padding: 10px 14px; font-size: 13px; font-weight: 500; color: var(--color-text-primary); border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 8px; }
+  .section-label { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+  .item-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .item-row:last-child { border-bottom: none; }
+  .item-num { font-size: 12px; color: var(--color-text-tertiary); min-width: 22px; }
+  .item-text { font-size: 13px; color: var(--color-text-primary); flex: 1; line-height: 1.5; }
+  .radio-group { display: flex; gap: 6px; flex-shrink: 0; }
+  .radio-opt { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .radio-opt input[type=radio] { width: 16px; height: 16px; cursor: pointer; }
+  .radio-opt span { font-size: 10px; color: var(--color-text-tertiary); }
+  .kisi-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .kisi-table th { padding: 8px 12px; text-align: left; font-weight: 500; font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .kisi-table td { padding: 7px 12px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); vertical-align: top; line-height: 1.5; }
+  .kisi-table tr:last-child td { border-bottom: none; }
+  .btn-primary { background: var(--color-text-primary); color: var(--color-background-primary); border: none; padding: 9px 20px; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; }
+  .btn-secondary { background: transparent; color: var(--color-text-primary); border: 0.5px solid var(--color-border-primary); padding: 9px 20px; border-radius: var(--border-radius-md); font-size: 14px; cursor: pointer; }
+  .btn-row { display: flex; gap: 10px; padding: 1rem 1rem 1.5rem; justify-content: flex-end; }
+  .score-card { border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; margin: 1rem 1rem 0; }
+  .score-header { padding: 10px 16px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .score-bar-row { padding: 8px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .score-bar-row:last-child { border-bottom: none; }
+  .score-bar-label { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .score-bar-label span:first-child { font-size: 13px; font-weight: 500; }
+  .score-bar-label span:last-child { font-size: 12px; color: var(--color-text-secondary); }
+  .bar-track { height: 8px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+  .result-box { border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin: 1rem 1rem 0; border: 0.5px solid var(--color-border-tertiary); }
+  .result-box h3 { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+  .result-box p { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+  .profesi-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .pill { font-size: 11px; padding: 3px 10px; border-radius: 99px; border: 0.5px solid var(--color-border-tertiary); color: var(--color-text-secondary); }
+  .nav-tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+  .nav-tab { padding: 10px 16px; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--color-text-secondary); border: none; background: none; }
+  .nav-tab.active { color: var(--color-text-primary); font-weight: 500; border-bottom: 2px solid var(--color-text-primary); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .progress-bar-outer { height: 3px; background: var(--color-background-secondary); }
+  .progress-bar-inner { height: 3px; background: var(--color-text-primary); transition: width 0.3s; }
+  .info-row { display: flex; gap: 8px; align-items: flex-start; padding: 8px 14px; font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .warning-box { margin: 1rem; padding: 10px 14px; background: var(--color-background-warning); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-warning); display: none; }
+  .dominan-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 99px; }
+</style>
+
+<div id="pg-main" class="page active">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('kisi')">Kisi-Kisi</button>
+    <button class="nav-tab" onclick="switchTab('instrumen')">Instrumen Asesmen</button>
+    <button class="nav-tab" onclick="switchTab('panduan')">Panduan Skoring</button>
+  </div>
+
+  <!-- TAB KISI-KISI -->
+  <div id="tab-kisi" class="tab-content active">
+    <div style="padding: 1rem 1rem 0.5rem;">
+      <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.6;">Kisi-kisi instrumen asesmen minat dan bakat berbasis RIASEC (Holland, 1959) terdiri dari 6 dimensi dengan total 42 butir pernyataan (7 butir per dimensi). Skala yang digunakan adalah <strong>Likert 4 poin</strong>.</p>
+    </div>
+    <div class="section-block">
+      <table class="kisi-table">
+        <thead>
+          <tr>
+            <th style="width:5%">#</th>
+            <th style="width:15%">Dimensi</th>
+            <th style="width:30%">Indikator</th>
+            <th style="width:35%">Deskripsi Perilaku</th>
+            <th style="width:10%">No. Butir</th>
+            <th style="width:5%">Jml</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:500; color:#3B6D11">R</td>
+            <td><span class="section-label" style="background:#EAF3DE;color:#3B6D11">Realistic</span></td>
+            <td>Keterampilan mekanik, kerja fisik, teknis, outdoor, berorientasi pada benda/alat</td>
+            <td>Menyukai kegiatan yang konkret, praktis, dan menggunakan alat atau mesin</td>
+            <td>1, 3, 7, 14, 21, 22, 37</td>
+            <td>7</td>
+          </tr>
+          <tr>
+            <td style="font-weight:500; color:#185FA5">I</td>
+            <td><span class="section-label" style="background:#E6F1FB;color:#185FA5">Investigative</span></td>
+            <td>Observasi, analisis, pemecahan masalah, berpikir kritis, ilmiah</td>
+            <td>Menyukai kegiatan yang memerlukan pemikiran mendalam, penelitian, dan eksperimen</td>
+            <td>2, 11, 18, 19, 26, 32, 33</td>
+            <td>7</td>
+          </tr>
+          <tr>
+            <td style="font-weight:500; color:#854F0B">A</td>
+            <td><span class="section-label" style="background:#FAEEDA;color:#854F0B">Artistic</span></td>
+            <td>Kreativitas, ekspresi diri, estetika, seni, tidak terstruktur</td>
+            <td>Menyukai kegiatan yang bersifat kreatif, imajinatif, dan ekspresif</td>
+            <td>8, 17, 20, 23, 27, 31, 41</td>
+            <td>7</td>
+          </tr>
+          <tr>
+            <td style="font-weight:500; color:#3C3489">S</td>
+            <td><span class="section-label" style="background:#EEEDFE;color:#3C3489">Social</span></td>
+            <td>Interaksi sosial, empati, membantu, mendidik, melayani orang lain</td>
+            <td>Menyukai kegiatan yang berhubungan dengan orang lain, membantu, dan berkomunikasi</td>
+            <td>4, 12, 13, 28, 34, 38, 40</td>
+            <td>7</td>
+          </tr>
+          <tr>
+            <td style="font-weight:500; color:#993C1D">E</td>
+            <td><span class="section-label" style="background:#FAECE7;color:#993C1D">Enterprising</span></td>
+            <td>Kepemimpinan, persuasi, wirausaha, ambisi, orientasi tujuan</td>
+            <td>Menyukai kegiatan memimpin, memengaruhi orang lain, dan berwirausaha</td>
+            <td>5, 10, 15, 16, 29, 36, 42</td>
+            <td>7</td>
+          </tr>
+          <tr>
+            <td style="font-weight:500; color:#5F5E5A">C</td>
+            <td><span class="section-label" style="background:#F1EFE8;color:#5F5E5A">Conventional</span></td>
+            <td>Keteraturan, detail, data, administrasi, prosedur, sistematis</td>
+            <td>Menyukai kegiatan yang terstruktur, terorganisir, dan berkaitan dengan data/angka</td>
+            <td>6, 9, 24, 25, 35, 38, 39</td>
+            <td>7</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding: 0.75rem 1rem 0.25rem;">
+      <p style="font-size: 12px; color: var(--color-text-secondary);">Total: 42 butir pernyataan • Skala: 1 = Sangat Tidak Suka, 2 = Tidak Suka, 3 = Suka, 4 = Sangat Suka • Tidak ada butir negatif (unfavorable)</p>
+    </div>
+    <div class="btn-row" style="justify-content: flex-start; padding-left: 1rem;">
+      <button class="btn-primary" onclick="switchTab('instrumen')">Mulai Asesmen →</button>
+    </div>
+  </div>
+
+  <!-- TAB INSTRUMEN -->
+  <div id="tab-instrumen" class="tab-content">
+    <div class="info-row">
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
+      <span>Centang pilihan: <strong>1</strong> = Sangat Tidak Suka &nbsp;|&nbsp; <strong>2</strong> = Tidak Suka &nbsp;|&nbsp; <strong>3</strong> = Suka &nbsp;|&nbsp; <strong>4</strong> = Sangat Suka</span>
+    </div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="prog" style="width:0%"></div></div>
+
+    <!-- REALISTIC -->
+    <div class="section-block">
+      <div class="section-header">
+        <span class="section-label" style="background:#EAF3DE;color:#3B6D11">R</span>
+        Realistic — Keterampilan Teknis &amp; Fisik
+      </div>
+      <div id="items-R"></div>
+    </div>
+    <!-- INVESTIGATIVE -->
+    <div class="section-block">
+      <div class="section-header">
+        <span class="section-label" style="background:#E6F1FB;color:#185FA5">I</span>
+        Investigative — Analitis &amp; Ilmiah
+      </div>
+      <div id="items-I"></div>
+    </div>
+    <!-- ARTISTIC -->
+    <div class="section-block">
+      <div class="section-header">
+        <span class="section-label" style="background:#FAEEDA;color:#854F0B">A</span>
+        Artistic — Kreatif &amp; Ekspresif
+      </div>
+      <div id="items-A"></div>
+    </div>
+    <!-- SOCIAL -->
+    <div class="section-block">
+      <div class="section-header">
+        <span class="section-label" style="background:#EEEDFE;color:#3C3489">S</span>
+        Social — Sosial &amp; Komunikatif
+      </div>
+      <div id="items-S"></div>
+    </div>
+    <!-- ENTERPRISING -->
+    <div class="section-block">
+      <div class="section-header">
+        <span class="section-label" style="background:#FAECE7;color:#993C1D">E</span>
+        Enterprising — Kepemimpinan &amp; Wirausaha
+      </div>
+      <div id="items-E"></div>
+    </div>
+    <!-- CONVENTIONAL -->
+    <div class="section-block">
+      <div class="section-header">
+        <span class="section-label" style="background:#F1EFE8;color:#5F5E5A">C</span>
+        Conventional — Keteraturan &amp; Sistematis
+      </div>
+      <div id="items-C"></div>
+    </div>
+
+    <div id="warn-incomplete" class="warning-box">⚠ Harap isi semua pernyataan sebelum menghitung skor.</div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="resetForm()">Reset</button>
+      <button class="btn-primary" onclick="hitungSkor()">Hitung Skor &amp; Lihat Hasil ↗</button>
+    </div>
+  </div>
+
+  <!-- TAB PANDUAN -->
+  <div id="tab-panduan" class="tab-content">
+    <div style="padding: 1rem;">
+      <div class="section-block">
+        <div class="section-header">Cara Pemberian Skor</div>
+        <div style="padding: 10px 14px;">
+          <table class="kisi-table">
+            <thead><tr><th>Pilihan Siswa</th><th>Nilai</th></tr></thead>
+            <tbody>
+              <tr><td>Sangat Suka (SS)</td><td><strong>4</strong></td></tr>
+              <tr><td>Suka (S)</td><td><strong>3</strong></td></tr>
+              <tr><td>Tidak Suka (TS)</td><td><strong>2</strong></td></tr>
+              <tr><td>Sangat Tidak Suka (STS)</td><td><strong>1</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="section-block" style="margin-top: 1rem;">
+        <div class="section-header">Rumus Perhitungan Skor</div>
+        <div style="padding: 10px 14px; font-size: 13px; color: var(--color-text-primary); line-height: 1.8;">
+          <p><strong>Skor per dimensi</strong> = Jumlah nilai dari 7 butir pernyataan dalam dimensi tersebut</p>
+          <p style="margin-top:6px;"><strong>Skor minimum</strong> per dimensi = 7 × 1 = <strong>7</strong></p>
+          <p><strong>Skor maksimum</strong> per dimensi = 7 × 4 = <strong>28</strong></p>
+          <p style="margin-top:8px;"><strong>Persentase</strong> = (Skor Dimensi ÷ 28) × 100%</p>
+        </div>
+      </div>
+      <div class="section-block" style="margin-top: 1rem;">
+        <div class="section-header">Kategori Tingkat Minat</div>
+        <div style="padding: 10px 14px;">
+          <table class="kisi-table">
+            <thead><tr><th>Rentang Skor</th><th>Persentase</th><th>Kategori</th><th>Interpretasi</th></tr></thead>
+            <tbody>
+              <tr><td>25 – 28</td><td>89 – 100%</td><td><span class="section-label" style="background:#EAF3DE;color:#3B6D11">Sangat Tinggi</span></td><td>Minat dan bakat sangat dominan pada dimensi ini</td></tr>
+              <tr><td>19 – 24</td><td>68 – 86%</td><td><span class="section-label" style="background:#E6F1FB;color:#185FA5">Tinggi</span></td><td>Minat dan bakat cukup kuat pada dimensi ini</td></tr>
+              <tr><td>13 – 18</td><td>46 – 64%</td><td><span class="section-label" style="background:#FAEEDA;color:#854F0B">Sedang</span></td><td>Minat dan bakat moderat, perlu eksplorasi lebih</td></tr>
+              <tr><td>7 – 12</td><td>25 – 43%</td><td><span class="section-label" style="background:#FAECE7;color:#993C1D">Rendah</span></td><td>Minat dan bakat kurang pada dimensi ini</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="section-block" style="margin-top: 1rem;">
+        <div class="section-header">Penentuan Tipe Minat Dominan</div>
+        <div style="padding: 10px 14px; font-size: 13px; color: var(--color-text-primary); line-height: 1.8;">
+          <p>1. Urutkan keenam dimensi dari skor tertinggi ke terendah.</p>
+          <p>2. Ambil <strong>2–3 dimensi teratas</strong> sebagai kode Holland siswa (contoh: <em>ISA, RIE</em>).</p>
+          <p>3. Gunakan kode Holland untuk menentukan arah peminatan lintas mata pelajaran.</p>
+          <p>4. Bila skor dua dimensi sama, lakukan wawancara konseling individual untuk klarifikasi.</p>
+          <p style="margin-top:8px; padding: 8px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md);">📌 <strong>Catatan Guru BK:</strong> Hasil asesmen ini bersifat indikatif. Kombinasikan dengan data akademik, rancangan karir, dan observasi perilaku siswa untuk keputusan peminatan yang komprehensif.</p>
+        </div>
+      </div>
+      <div class="section-block" style="margin-top: 1rem;">
+        <div class="section-header">Pemetaan Kode Holland → Mata Pelajaran Lintas Minat</div>
+        <div style="padding: 10px 14px;">
+          <table class="kisi-table">
+            <thead><tr><th>Kode</th><th>Dimensi</th><th>Contoh Mapel Lintas Minat</th><th>Arah Karir</th></tr></thead>
+            <tbody>
+              <tr><td style="color:#3B6D11;font-weight:500">R</td><td>Realistic</td><td>Fisika, Prakarya, Informatika, PJOK</td><td>Teknik, Pertanian, Konstruksi</td></tr>
+              <tr><td style="color:#185FA5;font-weight:500">I</td><td>Investigative</td><td>Biologi, Kimia, Matematika, Fisika</td><td>Kedokteran, Sains, Hukum, Psikologi</td></tr>
+              <tr><td style="color:#854F0B;font-weight:500">A</td><td>Artistic</td><td>Seni Budaya, Bahasa Indonesia, Bahasa Inggris</td><td>Seni, Desain, Komunikasi, Sastra</td></tr>
+              <tr><td style="color:#3C3489;font-weight:500">S</td><td>Social</td><td>Sosiologi, Antropologi, PPKn, Sejarah</td><td>Pendidikan, Keperawatan, Konseling</td></tr>
+              <tr><td style="color:#993C1D;font-weight:500">E</td><td>Enterprising</td><td>Ekonomi, Geografi, Sosiologi</td><td>Bisnis, Manajemen, Politik</td></tr>
+              <tr><td style="color:#5F5E5A;font-weight:500">C</td><td>Conventional</td><td>Matematika, Ekonomi, Informatika</td><td>Akuntansi, Administrasi, Perbankan</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HALAMAN HASIL -->
+<div id="pg-hasil" class="page">
+  <div class="header">
+    <h1>Hasil Asesmen Minat &amp; Bakat RIASEC</h1>
+    <p>Berdasarkan 42 butir pernyataan yang telah dijawab</p>
+  </div>
+  <div id="hasil-konten"></div>
+  <div class="btn-row">
+    <button class="btn-secondary" onclick="kembali()">← Kembali &amp; Edit</button>
+    <button class="btn-primary" onclick="sendPrompt('Berikan rekomendasi mata pelajaran lintas minat dan arah karir berdasarkan hasil RIASEC saya ↗')">Minta Rekomendasi Guru BK ↗</button>
+  </div>
+</div>
+
+<script>
+const items = {
+  R: [
+    {no:1, text:"Aku suka mengulik peralatan"},
+    {no:3, text:"Aku suka bekerja mandiri (dengan tangan/alat)"},
+    {no:7, text:"Aku suka menyusun balok / LEGO"},
+    {no:14, text:"Aku suka memelihara binatang"},
+    {no:21, text:"Aku suka mencari tahu cara kerja sebuah alat"},
+    {no:22, text:"Aku suka merangkaikan atau merakit benda"},
+    {no:37, text:"Aku suka berkegiatan di luar ruangan"}
+  ],
+  I: [
+    {no:2, text:"Aku suka mengerjakan puzzle"},
+    {no:11, text:"Aku suka melakukan percobaan / eksperimen"},
+    {no:18, text:"Aku suka sains"},
+    {no:19, text:"Aku suka mendapatkan tantangan baru"},
+    {no:26, text:"Aku suka mencari tahu penyebab suatu kejadian"},
+    {no:32, text:"Aku suka mempraktikkan hal-hal yang aku pelajari"},
+    {no:33, text:"Aku suka mengerjakan soal matematika atau grafik"}
+  ],
+  A: [
+    {no:8, text:"Aku suka membaca buku tentang seni dan musik"},
+    {no:17, text:"Aku suka membuat karya berbentuk tulisan"},
+    {no:20, text:"Aku suka menghibur teman"},
+    {no:23, text:"Aku adalah orang yang kreatif"},
+    {no:27, text:"Aku suka memainkan alat musik atau bernyanyi"},
+    {no:31, text:"Aku suka bermain peran / drama"},
+    {no:41, text:"Aku suka menggambar"}
+  ],
+  S: [
+    {no:4, text:"Aku suka bekerja dalam kelompok"},
+    {no:12, text:"Aku suka menjelaskan sesuatu kepada teman"},
+    {no:13, text:"Aku suka membantu orang lain memecahkan persoalan"},
+    {no:28, text:"Aku suka mempelajari budaya berbagai daerah"},
+    {no:34, text:"Aku suka mendiskusikan hal-hal yang terjadi di sekitarku"},
+    {no:38, text:"Aku suka berkegiatan di dalam ruangan dengan meja-kursi"},
+    {no:40, text:"Aku suka menolong orang"}
+  ],
+  E: [
+    {no:5, text:"Aku suka membuat target untuk diriku sendiri"},
+    {no:10, text:"Aku suka meyakinkan teman untuk mengikuti caraku"},
+    {no:15, text:"Aku tidak berkeberatan bekerja melebihi waktu yang ditentukan"},
+    {no:16, text:"Aku suka menjual sesuatu"},
+    {no:29, text:"Aku ingin membuka usaha sendiri suatu saat nanti"},
+    {no:36, text:"Aku suka memimpin kelompok atau kelas"},
+    {no:42, text:"Aku suka berbicara di depan umum"}
+  ],
+  C: [
+    {no:6, text:"Aku suka merapikan barang-barang (buku, alat tulis, kamar)"},
+    {no:9, text:"Aku suka mengerjakan hal-hal dengan instruksi yang jelas"},
+    {no:24, text:"Aku suka memperhatikan detail"},
+    {no:25, text:"Aku suka merapikan catatan atau LKS"},
+    {no:35, text:"Aku suka merapikan kamarku"},
+    {no:38, text:"Aku suka berkegiatan di dalam ruangan dengan meja-kursi"},
+    {no:39, text:"Aku suka menghitung"}
+  ]
+};
+
+const colors = {
+  R: {bg:'#EAF3DE', text:'#3B6D11', bar:'#639922', label:'Realistic'},
+  I: {bg:'#E6F1FB', text:'#185FA5', bar:'#378ADD', label:'Investigative'},
+  A: {bg:'#FAEEDA', text:'#854F0B', bar:'#EF9F27', label:'Artistic'},
+  S: {bg:'#EEEDFE', text:'#3C3489', bar:'#7F77DD', label:'Social'},
+  E: {bg:'#FAECE7', text:'#993C1D', bar:'#D85A30', label:'Enterprising'},
+  C: {bg:'#F1EFE8', text:'#5F5E5A', bar:'#888780', label:'Conventional'}
+};
+
+const desc = {
+  R: "Kamu menyukai pekerjaan yang konkret, praktis, dan menggunakan alat atau mesin. Kamu terampil secara mekanik dan senang bekerja di lapangan.",
+  I: "Kamu memiliki rasa ingin tahu yang tinggi dan senang menganalisis masalah secara mendalam. Kamu menikmati penelitian, eksperimen, dan berpikir ilmiah.",
+  A: "Kamu memiliki jiwa kreatif dan ekspresif yang kuat. Kamu senang bekerja dalam situasi yang tidak terstruktur dan bebas mengekspresikan diri.",
+  S: "Kamu senang berinteraksi dengan orang lain, membantu, mendidik, dan melayani. Kamu memiliki empati yang tinggi dan kemampuan komunikasi yang baik.",
+  E: "Kamu memiliki jiwa kepemimpinan dan wirausaha. Kamu senang memengaruhi orang lain, mengambil keputusan, dan berorientasi pada pencapaian tujuan.",
+  C: "Kamu menyukai keteraturan, ketelitian, dan hal-hal yang terorganisir. Kamu senang bekerja dengan data, angka, dan mengikuti prosedur yang jelas."
+};
+
+const profesi = {
+  R: ["Teknik Sipil","Pertanian","Mekanik","Konstruksi","Komputer","Pariwisata"],
+  I: ["Kedokteran","Biologi","Kimia","Fisika","Matematika","Psikologi","Hukum","Ekonomi"],
+  A: ["Desain Komunikasi Visual","Seni","Sastra","Fotografi","Arsitektur","Penyiaran"],
+  S: ["Konseling","Keperawatan","Pendidikan","Public Relation","Terapi Fisik"],
+  E: ["Bisnis","Pemasaran","Hukum","Sosial Politik","Perbankan","Real Estate"],
+  C: ["Akuntansi","Administrasi","Asuransi","Banking","Data Processing"]
+};
+
+function buildItems() {
+  Object.keys(items).forEach(dim => {
+    const container = document.getElementById('items-' + dim);
+    items[dim].forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `<span class="item-num">${item.no}.</span>
+        <span class="item-text">${item.text}</span>
+        <div class="radio-group">
+          ${[1,2,3,4].map(v => `<label class="radio-opt">
+            <input type="radio" name="q${item.no}" value="${v}" onchange="updateProgress()">
+            <span>${v}</span>
+          </label>`).join('')}
+        </div>`;
+      container.appendChild(row);
+    });
+  });
+}
+
+function updateProgress() {
+  let answered = 0;
+  let total = 0;
+  Object.keys(items).forEach(dim => {
+    items[dim].forEach(item => {
+      total++;
+      if (document.querySelector(`input[name="q${item.no}"]:checked`)) answered++;
+    });
+  });
+  document.getElementById('prog').style.width = Math.round((answered/total)*100) + '%';
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.nav-tab').forEach((t,i) => {
+    const tabs = ['kisi','instrumen','panduan'];
+    t.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function hitungSkor() {
+  let incomplete = false;
+  const scores = {};
+  Object.keys(items).forEach(dim => {
+    let total = 0;
+    items[dim].forEach(item => {
+      const checked = document.querySelector(`input[name="q${item.no}"]:checked`);
+      if (!checked) incomplete = true;
+      else total += parseInt(checked.value);
+    });
+    scores[dim] = total;
+  });
+  if (incomplete) {
+    document.getElementById('warn-incomplete').style.display = 'block';
+    return;
+  }
+  document.getElementById('warn-incomplete').style.display = 'none';
+  showHasil(scores);
+}
+
+function showHasil(scores) {
+  const sorted = Object.keys(scores).sort((a,b) => scores[b] - scores[a]);
+  const top3 = sorted.slice(0,3);
+  const kodeHolland = top3.join('');
+
+  let html = '';
+
+  // Kode Holland
+  html += `<div style="padding: 1rem 1rem 0;">
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <span style="font-size:13px; color:var(--color-text-secondary);">Kode Holland kamu:</span>
+      ${top3.map(d => `<span class="dominan-tag" style="background:${colors[d].bg};color:${colors[d].text}">${d} — ${colors[d].label}</span>`).join('')}
+    </div>
+  </div>`;
+
+  // Bar chart skor
+  html += `<div class="score-card" style="margin-top:1rem;">
+    <div class="score-header"><span style="font-size:13px;font-weight:500">Skor per Dimensi</span><span style="font-size:12px;color:var(--color-text-secondary)">Maks. 28</span></div>`;
+  sorted.forEach(dim => {
+    const pct = Math.round((scores[dim]/28)*100);
+    let kat = scores[dim] >= 25 ? 'Sangat Tinggi' : scores[dim] >= 19 ? 'Tinggi' : scores[dim] >= 13 ? 'Sedang' : 'Rendah';
+    html += `<div class="score-bar-row">
+      <div class="score-bar-label">
+        <span style="color:${colors[dim].text}">${dim} — ${colors[dim].label}</span>
+        <span>${scores[dim]} / 28 &nbsp;·&nbsp; ${pct}% &nbsp;·&nbsp; <em>${kat}</em></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[dim].bar}"></div></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Deskripsi dimensi dominan
+  top3.forEach((dim, i) => {
+    html += `<div class="result-box" style="margin-top:${i===0?'1rem':'0.5rem'}; border-left: 3px solid ${colors[dim].bar}">
+      <h3 style="color:${colors[dim].text}">${i===0?'🥇':i===1?'🥈':'🥉'} ${colors[dim].label} (${dim}) — Skor ${scores[dim]}</h3>
+      <p style="margin-top:4px">${desc[dim]}</p>
+      <div class="profesi-pills">
+        ${profesi[dim].map(p => `<span class="pill">${p}</span>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  // Rekomendasi mapel
+  const mapel = {
+    R: "Fisika, Prakarya, Informatika, PJOK",
+    I: "Biologi, Kimia, Matematika, Fisika",
+    A: "Seni Budaya, Bahasa Indonesia, Bahasa Inggris",
+    S: "Sosiologi, Antropologi, PPKn, Sejarah",
+    E: "Ekonomi, Geografi, Sosiologi",
+    C: "Matematika, Ekonomi, Informatika"
+  };
+  html += `<div class="result-box" style="margin-top:0.5rem; background:var(--color-background-secondary);">
+    <h3>📚 Rekomendasi Mata Pelajaran Lintas Minat</h3>
+    <p style="margin-top:6px;">Berdasarkan kode Holland <strong>${kodeHolland}</strong>, kamu disarankan memilih mata pelajaran dari kelompok:</p>
+    <div class="profesi-pills" style="margin-top:8px">
+      ${top3.flatMap(d => mapel[d].split(', ')).filter((v,i,a)=>a.indexOf(v)===i).map(m=>`<span class="pill" style="border-color:var(--color-border-secondary)">${m}</span>`).join('')}
+    </div>
+  </div>`;
+
+  // Tabel skor lengkap
+  html += `<div class="section-block" style="margin-top:1rem; margin-bottom:0;">
+    <div class="section-header">Rekap Skor Lengkap</div>
+    <table class="kisi-table">
+      <thead><tr><th>Dimensi</th><th>Skor</th><th>%</th><th>Kategori</th><th>Peringkat</th></tr></thead>
+      <tbody>
+        ${sorted.map((d,i) => {
+          const pct = Math.round((scores[d]/28)*100);
+          const kat = scores[d]>=25?'Sangat Tinggi':scores[d]>=19?'Tinggi':scores[d]>=13?'Sedang':'Rendah';
+          return `<tr>
+            <td><span class="section-label" style="background:${colors[d].bg};color:${colors[d].text}">${d} — ${colors[d].label}</span></td>
+            <td>${scores[d]}</td><td>${pct}%</td><td>${kat}</td><td>${i+1}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+
+  document.getElementById('hasil-konten').innerHTML = html;
+  document.getElementById('pg-main').classList.remove('active');
+  document.getElementById('pg-hasil').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function kembali() {
+  document.getElementById('pg-hasil').classList.remove('active');
+  document.getElementById('pg-main').classList.add('active');
+  switchTab('instrumen');
+}
+
+function resetForm() {
+  document.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+  updateProgress();
+  document.getElementById('warn-incomplete').style.display = 'none';
+}
+
+buildItems();
+</script>

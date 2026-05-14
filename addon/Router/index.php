@@ -8,6 +8,7 @@ use Addon\Controllers\SettingsController;
 use Addon\Controllers\AdminController;
 use Addon\Controllers\SchoolAdminController;
 use Addon\Controllers\ChatController;
+use Addon\Controllers\TestController;
 
 /** @var \App\Core\Routing\Router $router */
 
@@ -96,6 +97,22 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
 
     // Scholarship
     $router->get('/pmb/scholarship', [PmbController::class, 'scholarship']);
+});
+
+// Test routes (require login, role: user/siswa)
+$router->group(['middleware' => ['auth']], function () use ($router) {
+    // Test Dashboard (redirect ke /profile/results)
+    $router->get('/tests', [TestController::class, 'index']);
+
+    // RIASEC Test routes
+    $router->get('/tests/riasec', [TestController::class, 'riasecIndex']);
+    $router->post('/tests/riasec/start', [TestController::class, 'startTest'], ['csrf']);
+    $router->get('/tests/riasec/take', [TestController::class, 'takeTest']);
+    $router->post('/tests/riasec/submit', [TestController::class, 'submitTest'], ['csrf']);
+    $router->get('/tests/riasec/results', [TestController::class, 'viewResults']);
+
+    // IQ Test routes (placeholder untuk pengembangan selanjutnya)
+    $router->get('/tests/iq', [TestController::class, 'iqIndex']);
 });
 
 $router->group(['middleware' => ['auth']], function () use ($router) {

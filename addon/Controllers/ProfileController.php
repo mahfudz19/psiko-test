@@ -8,6 +8,9 @@ use Addon\Models\TeacherProfileModel;
 use Addon\Models\StaffProfileModel;
 use Addon\Models\UserModel;
 use Addon\Models\SchoolModel;
+use Addon\Models\PmbJourneyModel;
+use Addon\Models\TestResultModel;
+use Addon\Services\ScholarshipCalculator;
 use App\Core\Http\RedirectResponse;
 use App\Services\SessionService;
 use App\Exceptions\AuthorizationException;
@@ -32,7 +35,9 @@ class ProfileController
         private TeacherProfileModel $teacherModel,
         private StaffProfileModel $staffModel,
         private UserModel $userModel,
-        private SchoolModel $schoolModel
+        private SchoolModel $schoolModel,
+        private PmbJourneyModel $pmbJourneyModel,
+        private TestResultModel $testResultModel
     ) {}
 
     /**
@@ -380,7 +385,7 @@ class ProfileController
     }
 
     /**
-     * Get psychotest results
+     * Get RIASEC test results with AI analysis
      */
     public function results(Request $request, Response $response): View
     {
@@ -394,10 +399,20 @@ class ProfileController
         $userProfile = $this->profileModel->findByUserId($currentUser);
         $studentProfile = $this->studentModel->findByProfileId($userProfile['id']);
 
-        return $response->renderPage([
-            'profile' => $userProfile,
-            'studentProfile' => $studentProfile
-        ], ['path' => '/profile/results', 'meta' => ['title' => 'Hasil Psykotest | ' . env('APP_NAME')]]);
+        // Get latest RIASEC test result from TestResultModel
+        $riasecResult = null;
+        if ($studentProfile) {
+            $riasecResult = $this->testResultModel->getLatestRiasecResult($studentProfile['id']);
+        }
+
+        return $response->renderPage(
+            [
+                'profile' => $userProfile,
+                'studentProfile' => $studentProfile,
+                'riasecResult' => $riasecResult
+            ],
+            ['meta' => ['title' => 'Hasil Tes RIASEC | ' . env('APP_NAME')]]
+        );
     }
 
     /**
@@ -419,11 +434,14 @@ class ProfileController
             return $response->redirect('/profile/results?error=' . urlencode('Profil siswa tidak ditemukan'));
         }
 
-        // Calculate Current Hash
+        // Get latest RIASEC test result from TestResultModel (single source of truth)
+        $riasecResult = $this->testResultModel->getLatestRiasecResult($studentProfile['id']);
+
+        // Calculate Current Hash (without psychological_tests, use RIASEC result)
         $academic = $studentProfile['academic_scores'] ?? '';
-        $psycho = $studentProfile['psychological_tests'] ?? '';
         $achievements = $studentProfile['achievements'] ?? '';
-        $currentHash = md5($academic . $psycho . $achievements);
+        $riasecData = $riasecResult ? json_encode($riasecResult) : '';
+        $currentHash = md5($academic . $achievements . $riasecData);
 
         $aiAnalysis = !empty($studentProfile['ai_analysis']) ? json_decode($studentProfile['ai_analysis'], true) : [];
         $lastHash = $aiAnalysis['last_data_hash'] ?? null;
@@ -432,36 +450,60 @@ class ProfileController
             return $response->redirect('/profile/results?success=' . urlencode('Analisis AI Anda sudah paling mutakhir berdasarkan data terbaru.'));
         }
 
-        if (empty($studentData) || (!isset($studentData['academic_scores']) && !isset($studentData['psychological_tests']) && !isset($studentData['achievements']))) {
-            return $response->redirect('/profile/results?error=' . urlencode('Data siswa tidak lengkap untuk analisis AI. Pastikan data akademik, psikologi, dan prestasi sudah diisi.'));
-        }
-        // Gather data for Gemini
+        // Gather data for Gemini (RIASEC from TestResultModel, not psychological_tests)
         $studentData = [
             'academic_scores' => !empty($academic) ? json_decode($academic, true) : [],
-            'psychological_tests' => !empty($psycho) ? json_decode($psycho, true) : [],
             'achievements' => !empty($achievements) ? json_decode($achievements, true) : []
         ];
 
+        // Add RIASEC result data if exists
+        if ($riasecResult) {
+            $studentData['riasec_result'] = [
+                'holland_code' => $riasecResult['holland_code'],
+                'scores' => json_decode($riasecResult['scores'], true),
+                'percentages' => json_decode($riasecResult['percentages'], true),
+                'categories' => json_decode($riasecResult['categories'], true),
+                'ranked_dimensions' => json_decode($riasecResult['ranked_dimensions'], true),
+                'holland_description' => $riasecResult['holland_description'] ?? ''
+            ];
+        }
+
+        // Check MINIMUM data requirement: RIASEC test results
+        if (!$riasecResult) {
+            return $response->redirect('/profile/results?error=' . urlencode('Anda belum mengikuti tes RIASEC. Silakan ikuti tes terlebih dahulu untuk mendapatkan analisis AI.'));
+        }
+
+        // Check data completeness for user feedback
+        $hasAcademic = !empty($studentData['academic_scores']);
+        $hasAchievements = !empty($studentData['achievements']);
+        $hasRiasec = !empty($studentData['riasec_result']);
+
         try {
             $gemini = new \Addon\Services\GeminiService();
-            $aiResponseJson = $gemini->generateProfileAnalysis($studentData);
 
-            $newAiAnalysis = json_decode($aiResponseJson, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Respons dari AI bukan JSON yang valid');
+            // Generate COMBINED AI Analysis (Student Profile + PMB Match in ONE CALL)
+            $combinedResponse = $gemini->generateCombinedAnalysis($studentData);
+
+            // Extract student_profile untuk ai_analysis
+            $newAiAnalysis = $combinedResponse['student_profile'] ?? [];
+
+            if (empty($newAiAnalysis)) {
+                throw new \Exception('Respons AI tidak mengandung student_profile');
             }
 
             // Tambahkan metadata
             $newAiAnalysis['last_data_hash'] = $currentHash;
             $newAiAnalysis['generated_at'] = date('Y-m-d H:i:s');
+            $newAiAnalysis['data_completeness'] = [
+                'has_riasec' => $hasRiasec,
+                'has_academic' => $hasAcademic,
+                'has_achievements' => $hasAchievements
+            ];
 
             // Ambil prompt yang digunakan untuk generate AI
-            $aiPrompt = null;
-            if (method_exists($gemini, 'getLastPrompt')) {
-                $aiPrompt = $gemini->getLastPrompt();
-            }
+            $aiPrompt = $gemini->getLastPrompt();
 
-            // Simpan ke database
+            // Simpan student_profile ke StudentProfileModel
             $updateData = [
                 'ai_analysis' => json_encode($newAiAnalysis)
             ];
@@ -470,8 +512,51 @@ class ProfileController
             }
             $this->studentModel->updateByProfileId($userProfile['id'], $updateData);
 
-            return $response->redirect('/profile/results?success=' . urlencode('Analisis AI berhasil diperbarui!'));
+            // Extract pmb_match untuk PmbJourneyModel
+            $pmbMatch = $combinedResponse['pmb_match'] ?? null;
+
+            // Calculate scholarship eligibility using Rule-Based ScholarshipCalculator
+            $scholarshipCalc = new ScholarshipCalculator();
+            $scholarshipEligibility = $scholarshipCalc->calculateEligibility($studentData);
+
+            // Save both pmb_match and scholarships to PmbJourneyModel
+            try {
+                $matchHash = md5(json_encode($studentData));
+
+                // Save PMB match data
+                if (!empty($pmbMatch)) {
+                    $this->pmbJourneyModel->updateMatches(
+                        $studentProfile['id'],
+                        $pmbMatch,
+                        $matchHash,
+                        $aiPrompt
+                    );
+                }
+
+                // Save scholarship eligibility data (Rule-Based, not AI)
+                $this->pmbJourneyModel->updateScholarships(
+                    $studentProfile['id'],
+                    $scholarshipEligibility,
+                    $matchHash
+                );
+            } catch (\Exception $pmbError) {
+                // Log error tapi jangan gagalkan proses utama
+                error_log('Gagal simpan PMB journey data: ' . $pmbError->getMessage());
+            }
+
+            // Build success message berdasarkan data completeness
+            if ($hasAcademic && $hasAchievements) {
+                $successMessage = 'Analisis AI berhasil dibuat dengan data lengkap!';
+            } else {
+                $missing = [];
+                if (!$hasAcademic) $missing[] = 'nilai akademik';
+                if (!$hasAchievements) $missing[] = 'prestasi';
+                $successMessage = 'Analisis AI berhasil dibuat. Untuk hasil yang lebih akurat, lengkapi data: ' . implode(' dan ', $missing);
+            }
+
+            return $response->redirect('/profile/results?success=' . urlencode($successMessage));
         } catch (\Exception $e) {
+            logger()->error('Gagal generate AI analysis: ' . $e->getMessage());
             return $response->redirect('/profile/results?error=' . urlencode('Gagal generate AI: ' . $e->getMessage()));
         }
     }
@@ -501,6 +586,12 @@ class ProfileController
                     $user = $this->userModel->find($profile['user_id']);
                     $student['user_name'] = $user['name'] ?? 'Unknown';
                     $student['email'] = $user['email'] ?? 'Unknown';
+
+                    // Add RIASEC test status
+                    $riasecResult = $this->testResultModel->getLatestRiasecResult($studentProfileId);
+                    $student['has_riasec_test'] = !empty($riasecResult);
+                    $student['riasec_holland_code'] = $riasecResult['holland_code'] ?? null;
+
                     $students[] = $student;
                 }
             }
@@ -633,13 +724,15 @@ class ProfileController
             case 'user':
                 $studentProfile = $this->studentModel->findByProfileId($profileId);
                 $profile['role_data'] = $studentProfile;
-                // Decode JSON fields
+                // Decode JSON fields (psychological_tests removed - use TestResultModel)
                 if ($studentProfile) {
-                    foreach (['academic_scores', 'extracurricular', 'achievements', 'psychological_tests', 'ai_analysis'] as $field) {
+                    foreach (['academic_scores', 'extracurricular', 'achievements', 'ai_analysis'] as $field) {
                         if (!empty($studentProfile[$field])) {
                             $profile['role_data'][$field] = json_decode($studentProfile[$field], true);
                         }
                     }
+                    // Get RIASEC results from TestResultModel
+                    $profile['role_data']['riasec_results'] = $this->testResultModel->getLatestRiasecResult($studentProfile['id']);
                 }
                 break;
             case 'admin':
@@ -697,7 +790,6 @@ class ProfileController
         switch ($currentRole) {
             case 'user':
                 $studentData = [
-                    'school_id' => $clean($data['school_id'] ?? null),
                     'student_id' => $clean($data['student_id'] ?? null),
                     'grade_level' => $clean($data['grade_level'] ?? null),
                     'major' => $clean($data['major'] ?? null),
@@ -709,7 +801,6 @@ class ProfileController
                 break;
             case 'admin':
                 $teacherData = [
-                    'school_id' => $clean($data['school_id'] ?? null),
                     'teacher_id' => $clean($data['teacher_id'] ?? null),
                     'subject_specialty' => $clean($data['subject_specialty'] ?? null),
                     'certification' => $clean($data['certification'] ?? null)

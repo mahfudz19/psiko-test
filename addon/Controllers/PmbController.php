@@ -5,7 +5,7 @@ namespace Addon\Controllers;
 use Addon\Models\PmbJourneyModel;
 use Addon\Models\ProfileModel;
 use Addon\Models\StudentProfileModel;
-use Addon\Services\GeminiService;
+use Addon\Models\TestResultModel;
 use App\Core\Http\RedirectResponse;
 use App\Core\Http\Request;
 use App\Core\Http\Response;
@@ -15,6 +15,10 @@ use App\Services\SessionService;
  * PMB Controller
  *
  * Handles PMB Journey, Simulation, and Scholarship features
+ *
+ * Best Practice: User-initiated AI Generation
+ * - AI analysis generated via /profile/results/generate (user-initiated)
+ * - PMB journey data fetched from database (no auto-generation)
  */
 class PmbController
 {
@@ -23,7 +27,7 @@ class PmbController
         private ProfileModel $profileModel,
         private StudentProfileModel $studentProfileModel,
         private PmbJourneyModel $pmbJourneyModel,
-        private GeminiService $geminiService
+        private TestResultModel $testResultModel
     ) {}
 
     public function index(Request $request, Response $response): RedirectResponse
@@ -33,6 +37,11 @@ class PmbController
 
     /**
      * Display Match Score Dashboard (Journey page)
+     *
+     * Best Practice: User-initiated AI Generation
+     * - Jika PMB journey data belum ada, redirect ke /profile/results
+     * - User secara eksplisit klik "Generate AI Analysis" di halaman results
+     * - Hindari API call otomatis yang bisa waste resource
      */
     public function journey(Request $request, Response $response)
     {
@@ -40,15 +49,39 @@ class PmbController
         $profile = $this->profileModel->findByUserId($this->session->get('auth.user_id') ?? 0);
         $studentProfile = $profile ? $this->studentProfileModel->findByProfileId($profile['id']) : null;
 
-        // Generate or fetch cached AI data
-        $result = $this->getOrGenerateAiData($studentProfile, 'matches');
+        if (!$studentProfile) {
+            return $response->redirect('/profile/results?error=' . urlencode('Profil siswa tidak ditemukan'));
+        }
 
-        $matchScoreData = $result['data'];
-        $journey = $result['journey'];
-        $ai_error_message = $result['error'];
+        // Check PREREQUISITE: RIASEC test results from TestResultModel (minimum requirement)
+        $riasecResult = $this->testResultModel->getLatestRiasecResult($studentProfile['id']);
+
+        if (empty($riasecResult)) {
+            // User belum ikut RIASEC test - redirect dengan pesan
+            return $response->redirect('/profile/results?error=' . urlencode('Anda belum mengikuti tes RIASEC. Silakan ikuti tes terlebih dahulu untuk mendapatkan rekomendasi program studi.'));
+        }
+
+        // Check if AI analysis exists
+        if (empty($studentProfile['ai_analysis'])) {
+            // User sudah ikut RIASEC tapi belum generate AI analysis
+            // Redirect ke profile results dengan pesan untuk generate
+            return $response->redirect('/profile/results?warning=' . urlencode('Silakan generate Analisis AI terlebih dahulu untuk melihat rekomendasi program studi yang sesuai.'));
+        }
+
+        // Fetch PMB journey data from database (NO auto-generation)
+        $journey = $this->pmbJourneyModel->findByStudentId($studentProfile['id']);
+        // dd($journey);
+
+        // If journey data doesn't exist, redirect to /profile/results to generate AI analysis first
+        if (!$journey || empty($journey['top_matches'])) {
+            return $response->redirect('/profile/results?warning=' . urlencode('Silakan generate Analisis AI terlebih dahulu untuk mendapatkan rekomendasi program studi. Klik tombol "Generate Analisis AI" di halaman Results.'));
+        }
+
+        // Decode match data
+        $matchScoreData = json_decode($journey['top_matches'], true) ?? [];
 
         // Dynamic Simulation Progress from Database
-        $currentSimulationStep = $journey ? (int)($journey['simulation_step'] ?? 1) : 1;
+        $currentSimulationStep = (int)($journey['simulation_step'] ?? 1);
         $matchScoreData['simulation_progress'] = [
             'total_steps' => 5,
             'completed_steps' => max(0, $currentSimulationStep - 1),
@@ -68,7 +101,7 @@ class PmbController
             'profile' => $profile,
             'student_profile' => $studentProfile,
             'match_score' => $matchScoreData,
-            'ai_error_message' => $ai_error_message,
+            'ai_error_message' => null,  // No AI error since we use cached data
         ];
 
         return $response->renderPage($data, [
@@ -201,10 +234,10 @@ class PmbController
     }
 
     /**
-     * Display Scholarship Calculator
+     * Display Scholarship eligibility
      *
-     * Menggunakan AI untuk generate rekomendasi beasiswa berdasarkan profil siswa
-     * Pattern sama seperti journey() - hash-based trigger untuk call AI
+     * Fetch scholarship data from pmb_journeys table (already calculated by generateAiAnalysis)
+     * If data doesn't exist, redirect to /profile/results to generate first
      */
     public function scholarship(Request $request, Response $response)
     {
@@ -212,119 +245,33 @@ class PmbController
         $profile = $this->profileModel->findByUserId($this->session->get('auth.user_id') ?? 0);
         $studentProfile = $profile ? $this->studentProfileModel->findByProfileId($profile['id']) : null;
 
-        // Initialize scholarship data
-        $scholarshipData = [
-            'eligible_scholarships' => [],
-            'not_eligible_scholarships' => [],
-            'average_score' => 0,
-            'has_national_achievement' => false,
-            'technology_interest_level' => 'unknown',
-        ];
+        // Fetch PMB journey data (includes scholarships)
+        $journey = $this->pmbJourneyModel->findByStudentId($studentProfile['id']);
 
+        // Get scholarship data from journey (already calculated by generateAiAnalysis)
+        $scholarshipData = null;
         $ai_error_message = null;
 
-        if ($studentProfile) {
-            // Use rule-based calculator (500x faster, zero API cost)
-            $calculator = new \Addon\Services\ScholarshipCalculator();
+        if ($journey && !empty($journey['scholarships'])) {
+            $scholarshipData = json_decode($journey['scholarships'], true);
+        }
 
-            try {
-                $scholarshipData = $calculator->calculateEligibility($studentProfile);
-            } catch (\Exception $e) {
-                $ai_error_message = "Terjadi kesalahan: " . $e->getMessage();
-                // Fallback to empty data
-            }
+        // If no scholarship data, user needs to generate AI analysis first
+        if (!$scholarshipData) {
+            return $response->redirect('/profile/results?warning=' . urlencode('Silakan generate Analisis AI terlebih dahulu untuk mendapatkan rekomendasi beasiswa.'));
         }
 
         $data = [
             'profile' => $profile,
             'student_profile' => $studentProfile,
-            'scholarships' => $scholarshipData,
+            'scholarships' => $scholarshipData, // Data beasiswa dari pmb_journeys.scholarships
+            'journey' => $journey,
             'ai_error_message' => $ai_error_message,
         ];
-        // dd($data);
 
         return $response->renderPage($data, [
             'path' => '/pmb/scholarship',
             'meta' => ['title' => 'Kalkulator Beasiswa | ' . env('APP_NAME')],
         ]);
-    }
-
-    /**
-     * Get or generate AI data (PMB matches) dengan hash-based caching
-     *
-     * Method ini menghandle pattern yang berulang untuk PMB matching:
-     * 1. Hitung hash dari data siswa
-     * 2. Cek cache di database
-     * 3. Jika hash berbeda/belum ada, call AI untuk generate matches
-     * 4. Fallback ke cached data jika AI gagal
-     *
-     * NOTE: Untuk scholarship, sekarang menggunakan ScholarshipCalculator (rule-based)
-     * langsung di controller, tidak lagi menggunakan caching di database.
-     *
-     * @param array|null $studentProfile Data profil siswa
-     * @param string $type Tipe data: 'matches' (scholarships deprecated)
-     * @return array ['data' => array, 'journey' => array|null, 'error' => string|null]
-     */
-    private function getOrGenerateAiData(?array $studentProfile, string $type): array
-    {
-        $data = [];
-        $journey = null;
-        $error = null;
-
-        if (empty($studentProfile) || (empty($studentProfile['academic_scores']) && empty($studentProfile['psychological_tests']) && empty($studentData['achievements']) && empty($studentData['ai_analysis']))) {
-            return ['data' => $data, 'journey' => $journey, 'error' => "Data siswa tidak lengkap untuk analisis PMB. Pastikan setidaknya ada data akademik, psikologi, prestasi, atau analisis AI sebelumnya."];
-        }
-
-        // Hitung hash dari data siswa
-        $rawString = json_encode($studentProfile['academic_scores'] ?? []) .
-            json_encode($studentProfile['psychological_tests'] ?? []) .
-            json_encode($studentProfile['achievements'] ?? []) .
-            json_encode($studentProfile['ai_analysis'] ?? []);
-        $currentHash = md5($rawString);
-
-        // Cek di DB
-        $studentProfileId = $studentProfile['student_profile_id'] ?? $studentProfile['id'] ?? null;
-        $journey = $this->pmbJourneyModel->findByStudentId($studentProfileId);
-
-        // Tentukan field dan method berdasarkan type
-        // NOTE: 'scholarships' deprecated, sekarang menggunakan ScholarshipCalculator
-        $dbField = $type === 'matches' ? 'top_matches' : 'scholarships';
-        $aiMethod = $type === 'matches' ? 'generatePmbMatch' : 'generateScholarshipRecommendations';
-        $updateMethod = $type === 'matches' ? 'updateMatches' : 'updateScholarships';
-
-        // Cek apakah perlu call AI
-        $needsRefresh = !$journey ||
-            $journey['last_data_hash'] !== $currentHash ||
-            empty($journey[$dbField]);
-
-        if ($needsRefresh) {
-            try {
-                // Call AI untuk generate data
-                $generatedData = $this->geminiService->$aiMethod($studentProfile);
-
-                // Ambil prompt dari GeminiService (jika tersedia)
-                $prompt = null;
-                if (method_exists($this->geminiService, 'getLastPrompt')) {
-                    $prompt = $this->geminiService->getLastPrompt();
-                }
-
-                $this->pmbJourneyModel->$updateMethod($studentProfileId, $generatedData, $currentHash, $prompt);
-                $data = $generatedData;
-            } catch (\Exception $e) {
-                // Fallback to existing if AI fails temporarily
-                if ($journey && !empty($journey[$dbField])) {
-                    $error = $e->getMessage();
-                    $data = json_decode($journey[$dbField], true);
-                } else {
-                    // AI gagal dan belum ada data sebelumnya
-                    throw new \Exception($e->getMessage());
-                }
-            }
-        } else {
-            // Data mutakhir, gunakan yang di DB
-            $data = json_decode($journey[$dbField], true);
-        }
-
-        return ['data' => $data, 'journey' => $journey, 'error' => $error];
     }
 }

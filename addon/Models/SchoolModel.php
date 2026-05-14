@@ -15,6 +15,8 @@ use App\Core\Database\Model;
  * - principal_name: Principal name
  * - contact: Contact information
  * - accreditation: School accreditation (A, B, C)
+ *
+ * Note: Konfigurasi tes default disimpan di school_config_mappings dengan flag is_default = TRUE
  */
 class SchoolModel extends Model
 {
@@ -319,5 +321,119 @@ class SchoolModel extends Model
             'school_id' => $schoolId,
             'profile_id' => $teacherProfileId
         ]);
+    }
+
+    /**
+     * Get school with its default test configuration mapping
+     */
+    /**
+     * @deprecated Use SchoolConfigMappingModel::getDefaultConfig() instead
+     */
+    public function findWithConfig(int|string $id): ?array
+    {
+        trigger_error('findWithConfig() is deprecated. Use SchoolConfigMappingModel::getDefaultConfig() instead.', E_USER_DEPRECATED);
+        return $this->find($id);
+    }
+
+    /**
+     * @deprecated Use SchoolConfigMappingModel::assignConfig() with is_default flag instead
+     */
+    public function setDefaultConfig(int $schoolId, int $mappingId): bool
+    {
+        trigger_error('setDefaultConfig() is deprecated. Use SchoolConfigMappingModel::assignConfig() with is_default flag instead.', E_USER_DEPRECATED);
+        return false;
+    }
+
+    /**
+     * Get all test configurations assigned to this school
+     * Uses SchoolConfigMappingModel for many-to-many relationships
+     */
+    public function getConfigs(int $schoolId): array
+    {
+        $stmt = $this->getDb()->prepare("
+            SELECT scm.*, tc.name as config_name, tc.test_type, tc.dimensions, tc.scoring_rules
+            FROM school_config_mappings scm
+            JOIN test_configurations tc ON scm.config_id = tc.id
+            WHERE scm.school_id = :school_id
+            ORDER BY scm.is_default DESC, tc.name ASC
+        ");
+        $stmt->execute(['school_id' => $schoolId]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Get default test configuration for this school
+     */
+    public function getDefaultConfig(int $schoolId): ?array
+    {
+        $stmt = $this->getDb()->prepare("
+            SELECT scm.*, tc.name as config_name, tc.test_type, tc.dimensions, tc.scoring_rules
+            FROM school_config_mappings scm
+            JOIN test_configurations tc ON scm.config_id = tc.id
+            WHERE scm.school_id = :school_id AND scm.is_default = TRUE
+            LIMIT 1
+        ");
+        $stmt->execute(['school_id' => $schoolId]);
+        $row = $stmt->fetch();
+        return $row === false ? null : $row;
+    }
+
+    /**
+     * Assign a test configuration to this school
+     */
+    public function assignConfig(int $schoolId, int $configId, bool $isDefault = false): int
+    {
+        // If setting as default, unset other defaults
+        if ($isDefault) {
+            $this->getDb()->query(
+                "UPDATE school_config_mappings SET is_default = FALSE WHERE school_id = :school_id",
+                ['school_id' => $schoolId]
+            );
+        }
+
+        $stmt = $this->getDb()->prepare("
+            INSERT INTO school_config_mappings (school_id, config_id, is_default, created_at)
+            VALUES (:school_id, :config_id, :is_default, NOW())
+            ON DUPLICATE KEY UPDATE is_default = :is_default
+        ");
+        $stmt->execute([
+            'school_id' => $schoolId,
+            'config_id' => $configId,
+            'is_default' => $isDefault
+        ]);
+
+        $mappingId = (int) $this->getDb()->lastInsertId();
+
+        // Note: Default configuration is now tracked via is_default flag in school_config_mappings
+        // No need to update schools table
+
+        return $mappingId;
+    }
+
+    /**
+     * Remove a test configuration from this school
+     */
+    public function removeConfig(int $schoolId, int $configId): bool
+    {
+        return $this->getDb()->query(
+            "DELETE FROM school_config_mappings WHERE school_id = :school_id AND config_id = :config_id",
+            ['school_id' => $schoolId, 'config_id' => $configId]
+        );
+    }
+
+    /**
+     * Check if school has a specific configuration
+     */
+    public function hasConfig(int $schoolId, int $configId): bool
+    {
+        $stmt = $this->getDb()->prepare("
+            SELECT COUNT(*) FROM school_config_mappings
+            WHERE school_id = :school_id AND config_id = :config_id
+        ");
+        $stmt->execute([
+            'school_id' => $schoolId,
+            'config_id' => $configId
+        ]);
+        return (int) $stmt->fetchColumn() > 0;
     }
 }

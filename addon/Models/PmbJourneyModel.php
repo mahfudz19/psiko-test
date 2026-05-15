@@ -95,9 +95,9 @@ class PmbJourneyModel extends Model
      */
     public function findByStudentId(int $studentProfileId): ?array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE student_profile_id = :student_id LIMIT 1";
+        $sql = "SELECT * FROM {$this->table} WHERE student_profile_id = :student_profile_id LIMIT 1";
         $stmt = $this->getDb()->prepare($sql);
-        $stmt->execute(['student_id' => $studentProfileId]);
+        $stmt->execute(['student_profile_id' => $studentProfileId]);
         $row = $stmt->fetch();
         return $row === false ? null : $row;
     }

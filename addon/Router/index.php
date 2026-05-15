@@ -94,6 +94,7 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
     $router->get('/pmb/simulation', [PmbController::class, 'simulation']);
     $router->post('/pmb/simulation/step', [PmbController::class, 'saveSimulationStep'], ['csrf']);
     $router->get('/pmb/simulation/complete', [PmbController::class, 'completeSimulation']);
+    $router->get('/pmb/simulation/convert', [PmbController::class, 'convertToRealApplication']);
 
     // Scholarship
     $router->get('/pmb/scholarship', [PmbController::class, 'scholarship']);

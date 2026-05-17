@@ -724,4 +724,111 @@ class SchoolModel extends Model
         ]);
         return (int) $stmt->fetchColumn() > 0;
     }
+
+    /**
+     * Get schools with pagination
+     *
+     * @param array $params Query parameters (page, per_page, sort_by, sort_order)
+     * @return array ['data' => [], 'total' => int, 'page' => int, 'per_page' => int, 'total_pages' => int]
+     * @throws \PDOException When database query fails
+     */
+    public function getPaginated(array $params = []): array
+    {
+        try {
+            // Default values
+            $page = max(1, (int) ($params['page'] ?? 1));
+            $perPage = min(100, max(1, (int) ($params['per_page'] ?? 15)));
+            $offset = ($page - 1) * $perPage;
+
+            // Search (name, npsn, address, principal_name, contact)
+            $search = trim($params['search'] ?? '');
+
+            // Filter by accreditation (A, B, C)
+            $accreditation = in_array($params['accreditation'] ?? '', ['A', 'B', 'C']) ? $params['accreditation'] : null;
+
+            // Filter by min/max students
+            $minStudents = is_numeric($params['min_students'] ?? '') ? (int) $params['min_students'] : null;
+            $maxStudents = is_numeric($params['max_students'] ?? '') ? (int) $params['max_students'] : null;
+
+            // Sort
+            $allowedSorts = ['name', 'npsn', 'address', 'principal_name', 'contact', 'accreditation', 'created_at'];
+            $sortBy = in_array($params['sort_by'] ?? 'name', $allowedSorts) ? $params['sort_by'] : 'name';
+            $sortOrder = strtoupper($params['sort_order'] ?? 'ASC') === 'DESC' ? 'DESC' : 'ASC';
+
+            // Build WHERE clause
+            $whereConditions = [];
+            $bindings = [];
+
+            // Search condition
+            if ($search !== '') {
+                $whereConditions[] = "(name LIKE :search_name OR npsn LIKE :search_npsn OR address LIKE :search_address OR principal_name LIKE :search_principal OR contact LIKE :search_contact)";
+                $bindings[':search_name'] = "%{$search}%";
+                $bindings[':search_npsn'] = "%{$search}%";
+                $bindings[':search_address'] = "%{$search}%";
+                $bindings[':search_principal'] = "%{$search}%";
+                $bindings[':search_contact'] = "%{$search}%";
+            }
+
+            // Accreditation condition
+            if ($accreditation !== null) {
+                $whereConditions[] = "accreditation = :accreditation";
+                $bindings[':accreditation'] = $accreditation;
+            }
+
+            // Min students condition (using subquery)
+            if ($minStudents !== null) {
+                $whereConditions[] = "(SELECT COUNT(*) FROM student_profiles sp WHERE sp.school_id = s.id) >= :min_students";
+                $bindings[':min_students'] = $minStudents;
+            }
+
+            // Max students condition (using subquery)
+            if ($maxStudents !== null) {
+                $whereConditions[] = "(SELECT COUNT(*) FROM student_profiles sp WHERE sp.school_id = s.id) <= :max_students";
+                $bindings[':max_students'] = $maxStudents;
+            }
+
+            // Build WHERE clause
+            $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
+
+            // Build count query (use alias 's' for consistency with subqueries)
+            $countSql = "SELECT COUNT(*) as total FROM {$this->table} s {$whereClause}";
+            $stmt = $this->getDb()->prepare($countSql);
+            foreach ($bindings as $param => $value) {
+                $stmt->bindValue($param, $value);
+            }
+            $stmt->execute();
+            $total = (int) ($stmt->fetch()['total'] ?? 0);
+
+            // Build main query with pagination
+            $selectSql = "
+                SELECT s.*,
+                       (SELECT COUNT(*) FROM student_profiles sp WHERE sp.school_id = s.id) as student_count,
+                       (SELECT COUNT(*) FROM teacher_profiles tp WHERE tp.school_id = s.id) as teacher_count
+                FROM {$this->table} s
+                {$whereClause}
+                ORDER BY s.{$sortBy} {$sortOrder}
+                LIMIT :limit OFFSET :offset
+            ";
+
+            $stmt = $this->getDb()->prepare($selectSql);
+            foreach ($bindings as $param => $value) {
+                $stmt->bindValue($param, $value);
+            }
+            $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $data = $stmt->fetchAll();
+
+            return [
+                'data' => $data,
+                'total' => $total,
+                'page' => $page,
+                'per_page' => $perPage,
+                'total_pages' => (int) ceil($total / $perPage)
+            ];
+        } catch (\PDOException $e) {
+            throw $e;
+        }
+    }
 }

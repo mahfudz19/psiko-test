@@ -45,23 +45,41 @@ class AdminController
   }
 
   /**
-   * Daftar semua sekolah
+   * Daftar semua sekolah dengan pagination, search, sort, dan filter
    */
   public function schools(Request $request, Response $response): View | RedirectResponse
   {
     try {
-      $keyword = $request->input('search', '');
-      $schools = !empty($keyword)
-        ? $this->schoolModel->searchByName($keyword)
-        : $this->schoolModel->all();
+      $params = [
+        'page' => $request->input('page', 1),
+        'per_page' => $request->input('per_page', 15),
+        'search' => $request->input('search', ''),
+        'sort_by' => $request->input('sort_by', 'name'),
+        'sort_order' => $request->input('sort_order', 'ASC'),
+        'accreditation' => $request->input('accreditation', ''),
+        'min_students' => $request->input('min_students', ''),
+        'max_students' => $request->input('max_students', ''),
+      ];
 
-      // Tambahkan jumlah guru dan siswa untuk setiap sekolah
-      foreach ($schools as &$school) {
-        $school['teacher_count'] = count($this->teacherModel->findBySchoolId($school['id']));
-        $school['student_count'] = count($this->studentModel->findBySchoolId($school['id']));
-      }
+      $result = $this->schoolModel->getPaginated($params);
 
-      return $response->renderPage(['schools' => $schools, 'keyword' => $keyword], ['meta' => ['title' => 'Daftar Sekolah']]);
+      return $response->renderPage([
+        'schools' => $result['data'],
+        'pagination' => [
+          'page' => $result['page'],
+          'per_page' => $result['per_page'],
+          'total' => $result['total'],
+          'total_pages' => $result['total_pages'],
+        ],
+        'filters' => [
+          'search' => $params['search'],
+          'sort_by' => $params['sort_by'],
+          'sort_order' => $params['sort_order'],
+          'accreditation' => $params['accreditation'],
+          'min_students' => $params['min_students'],
+          'max_students' => $params['max_students'],
+        ]
+      ], ['meta' => ['title' => 'Daftar Sekolah']]);
     } catch (\Exception $e) {
       return $response->redirect('/admin?error=500&message=' . urlencode($e->getMessage()));
     }

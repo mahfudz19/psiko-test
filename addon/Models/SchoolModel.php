@@ -36,19 +36,307 @@ class SchoolModel extends Model
 
     protected array $seed = [
         [
-            'name' => 'SMA Negeri 1 Example',
-            'npsn' => '12345678',
-            'address' => 'Jl. Pendidikan No. 1, Example City',
-            'principal_name' => 'Dr. John Doe, M.Pd',
-            'contact' => '021-1234567',
+            'name' => 'SMAN 1 Makassar',
+            'npsn' => '40312010',
+            'address' => 'JL. GUNUNG BAWAKARAENG NO. 53, Gaddong, Kec. Bontoala, Kota Makassar',
+            'principal_name' => 'Sulihin',
+            'contact' => '0411-3613670',
             'accreditation' => 'A'
         ],
         [
-            'name' => 'SMA Negeri 2 Example',
-            'npsn' => '87654321',
-            'address' => 'Jl. Ilmu No. 2, Example City',
-            'principal_name' => 'Dr. Jane Smith, M.Pd',
-            'contact' => '021-7654321',
+            'name' => 'SMAN 2 Makassar',
+            'npsn' => '40311889',
+            'address' => 'JL. BAJI GAU NO. 17, Baji Mappakasunggu, Kec. Mamajang, Kota Makassar',
+            'principal_name' => 'Hj. Sitti Khadijah',
+            'contact' => '0411-852963',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 3 Makassar',
+            'npsn' => '40311891',
+            'address' => 'JL. BAJI ARENG NO. 18, Baji Mappakasunggu, Kec. Mamajang, Kota Makassar',
+            'principal_name' => 'Nasriadi',
+            'contact' => '0411-852964',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 4 Makassar',
+            'npsn' => '40311892',
+            'address' => 'JL. CAKALANG NO. 3, Totaka, Kec. Ujung Tanah, Kota Makassar',
+            'principal_name' => 'Supardin',
+            'contact' => '0411-3615467',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 5 Makassar',
+            'npsn' => '40307392',
+            'address' => 'JL. TAMAN MAKAM PAHLAWAN, Tello Baru, Kec. Panakkukang, Kota Makassar',
+            'principal_name' => 'Sudirman',
+            'contact' => '0411-449174',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 6 Makassar',
+            'npsn' => '40311893',
+            'address' => 'JL. PROF. DR. IR. SUTAMI, NO.4, Bira, Kec. Tamalanrea, Kota Makassar',
+            'principal_name' => 'Samsuddin',
+            'contact' => '0411-510123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 7 Makassar',
+            'npsn' => '40311894',
+            'address' => 'JL. PERINTIS KEMERDEKAAN KOMP 18, Sudiang, Kec. Biringkanaya, Kota Makassar',
+            'principal_name' => 'Anwar',
+            'contact' => '0411-510456',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 8 Makassar',
+            'npsn' => '40314020',
+            'address' => 'JL. ANDI MANGERANGI II NO.24, Bongaya, Kec. Tamalate, Kota Makassar',
+            'principal_name' => 'Ruslan',
+            'contact' => '0411-872123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 9 Makassar',
+            'npsn' => '40311896',
+            'address' => 'JL. KARUNRUNG RAYA NO.37, Karunrung, Kec. Rappocini, Kota Makassar',
+            'principal_name' => 'Muh. Asrar',
+            'contact' => '0411-861123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 10 Makassar',
+            'npsn' => '40311885',
+            'address' => 'JL. TAMANGAPA V NO.12, Tamangapa, Kec. Manggala, Kota Makassar',
+            'principal_name' => 'Andi Umar',
+            'contact' => '0411-491123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 11 Makassar',
+            'npsn' => '40307375',
+            'address' => 'JL. LETJEN POL. MAPPAOUDANG NO. 66, Bongaya, Kec. Tamalate, Kota Makassar',
+            'principal_name' => 'Masita',
+            'contact' => '0411-872456',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 12 Makassar',
+            'npsn' => '40312013',
+            'address' => 'JL. MOHA LASULORO 57 ANTANG, Antang, Kec. Manggala, Kota Makassar',
+            'principal_name' => 'Hamzah',
+            'contact' => '0411-492123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 13 Makassar',
+            'npsn' => '40312014',
+            'address' => 'JL. TAMANGAPA RAYA III NO.37, Bangkala, Kec. Manggala, Kota Makassar',
+            'principal_name' => 'Nursiah',
+            'contact' => '0411-493123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 14 Makassar',
+            'npsn' => '40311948',
+            'address' => 'JL. BAJIMINASA NO.9, Tamarunang, Kec. Mariso, Kota Makassar',
+            'principal_name' => 'Hj. Nurhidayah Masri',
+            'contact' => '0411-872433',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 15 Makassar',
+            'npsn' => '40311949',
+            'address' => 'JL. PROF. DR. IR. SUTAMI, Bulurokeng, Kec. Biringkanaya, Kota Makassar',
+            'principal_name' => 'Bunyamin',
+            'contact' => '0411-511123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 16 Makassar',
+            'npsn' => '40311950',
+            'address' => 'JL. AMANAGAPPA NO. 8, Baru, Kec. Ujung Pandang, Kota Makassar',
+            'principal_name' => 'Yusuf',
+            'contact' => '0411-361123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 17 Makassar',
+            'npsn' => '40311951',
+            'address' => 'JL. SUNU NO. 11, Suwangga, Kec. Tallo, Kota Makassar',
+            'principal_name' => 'Asmar Achmad, S.Pd',
+            'contact' => '0411-449175',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 18 Makassar',
+            'npsn' => '40311952',
+            'address' => 'KOMP. MANGGA TIGA PERMAI, Paccerakang, Kec. Biringkanaya, Kota Makassar',
+            'principal_name' => 'Muh. Aras',
+            'contact' => '0411-512123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 19 Makassar',
+            'npsn' => '40307376',
+            'address' => 'JL. INSPEKSI PAM TIMUR NO. 19, Manggala, Kec. Manggala, Kota Makassar',
+            'principal_name' => 'Muh. Tahir',
+            'contact' => '0411-494123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 20 Makassar',
+            'npsn' => '40307377',
+            'address' => 'JL. BONTO BIRAENG, Barombong, Kec. Tamalate, Kota Makassar',
+            'principal_name' => 'Mirdan Midding',
+            'contact' => '0411-873123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 21 Makassar',
+            'npsn' => '40311953',
+            'address' => 'JL. TAMALANREA RAYA NO. 1A BTP, Tamalanrea, Kec. Tamalanrea, Kota Makassar',
+            'principal_name' => 'Andi Erna',
+            'contact' => '0411-513123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMAN 22 Makassar',
+            'npsn' => '40310219',
+            'address' => 'JL. PAJJAIANG KOMP. KOR/KNPI SUDIANG, Laikang, Kec. Biringkanaya, Kota Makassar',
+            'principal_name' => 'Suhardi',
+            'contact' => '0411-514123',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMA Katolik Rajawali',
+            'npsn' => '40307369',
+            'address' => 'JL. LAMADUKELLENG NO. 07, Losari, Kec. Ujung Pandang, Kota Makassar',
+            'principal_name' => 'Sr. Paulina',
+            'contact' => '0411-3613259',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMA Islam Athirah',
+            'npsn' => '40310213',
+            'address' => 'JL. KAJAOLALIDO NO. 22, Baru, Kec. Ujung Pandang, Kota Makassar',
+            'principal_name' => 'Tawakkal Kahar',
+            'contact' => '0411-3624571',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMA Dian Harapan',
+            'npsn' => '40310211',
+            'address' => 'JL. GUNUNG AGUNG NO. 201, TANJUNG BUNGA, Tanjung Merdeka, Kec. Tamalate, Kota Makassar',
+            'principal_name' => 'Yuliana',
+            'contact' => '0411-8113710',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMA Nasional Makassar',
+            'npsn' => '40311947',
+            'address' => 'JL. DR. RATULANGI NO. 84, Mario, Kec. Mariso, Kota Makassar',
+            'principal_name' => 'Hj. Andi Wahyuni',
+            'contact' => '0411-872841',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMA Katolik Cenderawasih',
+            'npsn' => '40311938',
+            'address' => 'JL. OPU DAENG RISADJU NO. 61, Kunjung Mae, Kec. Mariso, Kota Makassar',
+            'principal_name' => 'Sr. Maria',
+            'contact' => '0411-873344',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Negeri 1 Makassar',
+            'npsn' => '40313125',
+            'address' => 'JL. BAJI ARENG NO. 17, Baji Mappakasunggu, Kec. Mamajang, Kota Makassar',
+            'principal_name' => 'Suaib Ramli',
+            'contact' => '0411-852034',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Negeri 3 Makassar',
+            'npsn' => '40312436',
+            'address' => 'JL. BAJI GAU NO. 11, Baji Mappakasunggu, Kec. Mamajang, Kota Makassar',
+            'principal_name' => 'Kasman',
+            'contact' => '0411-852035',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Negeri 6 Makassar',
+            'npsn' => '40312441',
+            'address' => 'JL. AHMAD YANI NO. 25, Baru, Kec. Ujung Pandang, Kota Makassar',
+            'principal_name' => 'Munir',
+            'contact' => '0411-3613654',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Telkom Makassar',
+            'npsn' => '69938800',
+            'address' => 'JL. ANDI PANGERAN PETTARANI NO. 4, Gunung Sari, Kec. Rappocini, Kota Makassar',
+            'principal_name' => 'Muh. Idrus',
+            'contact' => '0411-835566',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Islam Athirah Makassar',
+            'npsn' => '40310198',
+            'address' => 'JL. KAJAOLALIDO NO. 22, Baru, Kec. Ujung Pandang, Kota Makassar',
+            'principal_name' => 'Nilam',
+            'contact' => '0411-3624571',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Katolik Rajawali',
+            'npsn' => '40307304',
+            'address' => 'JL. ARIF RATE NO. 2, Losari, Kec. Ujung Pandang, Kota Makassar',
+            'principal_name' => 'Sr. Maria',
+            'contact' => '0411-3613259',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Negeri 2 Makassar',
+            'npsn' => '40312434',
+            'address' => 'JL. AMANAGAPPA NO. 4, Baru, Kec. Ujung Pandang, Kota Makassar',
+            'principal_name' => 'Hj. Mercy',
+            'contact' => '0411-3611234',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Negeri 12 Makassar',
+            'npsn' => '40312428',
+            'address' => 'JL. ABDULLAH DG. SIRUA NO. 132, Batua, Kec. Manggala, Kota Makassar',
+            'principal_name' => 'Laode',
+            'contact' => '0411-491234',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Negeri 18 Makassar',
+            'npsn' => '40307323',
+            'address' => 'JL. DAENG TATA BTN HARTACO, Barombong, Kec. Tamalate, Kota Makassar',
+            'principal_name' => 'Muh. Guntur',
+            'contact' => '0411-871234',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Negeri 24 Makassar',
+            'npsn' => '40312432',
+            'address' => 'JL. BTP BLOK M, Tamalanrea, Kec. Tamalanrea, Kota Makassar',
+            'principal_name' => 'Hj. Rosdiana',
+            'contact' => '0411-511234',
+            'accreditation' => 'A'
+        ],
+        [
+            'name' => 'SMP Negeri 30 Makassar',
+            'npsn' => '40312438',
+            'address' => 'JL. BTP BLOK AF, Tamalanrea, Kec. Tamalanrea, Kota Makassar',
+            'principal_name' => 'Hj. Hijrah',
+            'contact' => '0411-512234',
             'accreditation' => 'A'
         ]
     ];

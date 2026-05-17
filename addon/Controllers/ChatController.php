@@ -194,7 +194,7 @@ class ChatController
         // Handle foreign key constraint violation
         if (str_contains($e->getMessage(), 'foreign key constraint fails')) {
           // Log the error for debugging
-          error_log("Chat FK constraint violation - user_id: {$user_id}, student_profile_id: {$studentProfileId}");
+          logger()->error("Chat FK constraint violation - user_id: {$user_id}, student_profile_id: {$studentProfileId}");
 
           return $response->json([
             'error' => 'Profil siswa tidak valid',

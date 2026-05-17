@@ -29,7 +29,7 @@ class PmbJourneyModel extends Model
             'values' => ['not_started', 'in_progress', 'completed', 'converted'],
             'default' => 'not_started'
         ],
-        'simulation_step' => ['type' => 'int', 'default' => 1],
+        'simulation_step' => ['type' => 'int', 'default' => 0],
         'simulation_data' => ['type' => 'json', 'nullable' => true], // Data form pendaftaran mentah
 
         // Hash untuk mendeteksi kapan perlu update data AI

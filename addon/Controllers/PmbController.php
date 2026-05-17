@@ -81,16 +81,14 @@ class PmbController
         $matchScoreData = json_decode($journey['top_matches'], true) ?? [];
 
         // Dynamic Simulation Progress from Database
-        $currentSimulationStep = (int)($journey['simulation_step'] ?? 1);
+        $completedSteps = (int)($journey['simulation_step'] ?? 0);
         $matchScoreData['simulation_progress'] = [
-            'total_steps' => 5,
-            'completed_steps' => max(0, $currentSimulationStep - 1),
+            'total_steps' => 3,
+            'completed_steps' => $completedSteps,
             'steps' => [
-                ['name' => 'Data Pribadi', 'is_completed' => $currentSimulationStep > 1],
-                ['name' => 'Nilai Akademik', 'is_completed' => $currentSimulationStep > 2],
-                ['name' => 'Hasil Analisis AI', 'is_completed' => $currentSimulationStep > 3],
-                ['name' => 'Upload Dokumen', 'is_completed' => $currentSimulationStep > 4],
-                ['name' => 'Pembayaran', 'is_completed' => $currentSimulationStep > 5],
+                ['name' => 'Data Pribadi', 'is_completed' => $completedSteps >= 1],
+                ['name' => 'Upload Dokumen', 'is_completed' => $completedSteps >= 2],
+                ['name' => 'Pembayaran', 'is_completed' => $completedSteps >= 3],
             ],
         ];
 
@@ -130,7 +128,9 @@ class PmbController
 
         // Get saved simulation data
         $savedSimulationData = $journey && $journey['simulation_data'] ? json_decode($journey['simulation_data'], true) ?? [] : [];
-        $currentStep = $journey ? (int)$journey['simulation_step'] : 1;
+        // Cap currentStep at 3 (max step) to prevent "Step 4/3" issue
+        $completedSteps = $journey ? (int)$journey['simulation_step'] : 0;
+        $currentStep = min($completedSteps + 1, 3);
         $simulationStatus = $journey ? $journey['simulation_status'] : 'not_started';
 
         // Build steps with data from database and fallback to student profile (3 steps only)
@@ -322,11 +322,12 @@ class PmbController
             $existingData = json_decode($journey['simulation_data'], true) ?? [];
         }
 
-        // Merge with existing data
-        $mergedData = array_merge($existingData, [$stepId => $stepData]);
+        // Merge with existing data - preserve step IDs as keys (don't use array_merge with numeric keys)
+        $mergedData = $existingData;
+        $mergedData[$stepId] = $stepData;
 
         // Determine next step and status (3 steps total)
-        $nextStep = $stepId + 1;
+        $nextStep = $stepId;
         $status = $stepId === 3 ? 'completed' : 'in_progress';
 
         // Save to database
@@ -525,7 +526,7 @@ class PmbController
         try {
             $this->pmbJourneyModel->updateSimulationProgress(
                 $studentProfile['id'],
-                6, // All steps completed
+                3,
                 $simulationData,
                 'completed'
             );

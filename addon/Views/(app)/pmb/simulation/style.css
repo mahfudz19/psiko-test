@@ -953,3 +953,15 @@
         width: 100%;
     }
 }
+
+/* ===== Simulation Note (for skipped file uploads) ===== */
+.simulation-note {
+    display: block;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--bg-default);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    border: 1px dashed var(--divider);
+}

@@ -755,7 +755,7 @@ class EmailService
             return $this->mailer->send();
         } catch (Exception $e) {
             // Log error
-            error_log("Email sending failed: " . $e->getMessage());
+            logger()->error("Email sending failed: " . $e->getMessage());
             return false;
         }
     }

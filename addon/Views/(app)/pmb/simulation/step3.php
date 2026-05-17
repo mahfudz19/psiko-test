@@ -53,7 +53,9 @@
                     </div>
                     <div class="form-group full-width">
                         <label for="proof_upload">Bukti Transfer *</label>
-                        <input type="file" id="proof_upload" name="proof_upload" accept="image/*" required>
+                        <!-- File upload di-skip untuk simulasi -->
+                        <input type="hidden" name="proof_upload" value="simulated_proof.jpg">
+                        <span class="simulation-note">📝 Skip upload untuk simulasi</span>
                     </div>
                 </div>
 

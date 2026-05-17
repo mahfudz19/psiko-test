@@ -455,7 +455,7 @@ class GeminiService
             }
             return $decoded;
         } catch (\Exception $e) {
-            error_log("Gemini Combined Analysis Error: " . $e->getMessage());
+            logger()->error("Gemini Combined Analysis Error: " . $e->getMessage());
             throw new \Exception("Gagal menghubungi layanan AI: " . $e->getMessage());
         }
     }
@@ -608,7 +608,7 @@ class GeminiService
             }
             return $decoded;
         } catch (\Exception $e) {
-            error_log("Gemini PMB Match Error: " . $e->getMessage());
+            logger()->error("Gemini PMB Match Error: " . $e->getMessage());
             throw new \Exception("Gagal menghubungi layanan AI: " . $e->getMessage());
         }
     }

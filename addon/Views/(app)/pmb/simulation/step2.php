@@ -22,9 +22,11 @@
                     </div>
                     <div class="document-upload">
                         <!-- File upload di-skip untuk simulasi -->
-                        <input type="hidden" name="documents[<?= $index ?>][name]" value="<?= htmlspecialchars($doc['name']) ?>">
-                        <input type="hidden" name="documents[<?= $index ?>][required]" value="<?= $doc['required'] ? '1' : '0' ?>">
-                        <input type="hidden" name="documents[<?= $index ?>][is_uploaded]" value="1">
+                        <!-- Use document name slug as key instead of array index -->
+                        <?php $docSlug = strtolower(str_replace([' ', '/', '&'], '-', $doc['name'])); ?>
+                        <input type="hidden" name="documents[<?= $docSlug ?>][name]" value="<?= htmlspecialchars($doc['name']) ?>">
+                        <input type="hidden" name="documents[<?= $docSlug ?>][required]" value="<?= $doc['required'] ? '1' : '0' ?>">
+                        <input type="hidden" name="documents[<?= $docSlug ?>][is_uploaded]" value="1">
                         <span class="simulation-note">📝 Skip upload untuk simulasi</span>
                     </div>
                 </div>

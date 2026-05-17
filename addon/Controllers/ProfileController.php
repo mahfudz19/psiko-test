@@ -541,7 +541,7 @@ class ProfileController
                 );
             } catch (\Exception $pmbError) {
                 // Log error tapi jangan gagalkan proses utama
-                error_log('Gagal simpan PMB journey data: ' . $pmbError->getMessage());
+                logger()->error('Gagal simpan PMB journey data: ' . $pmbError->getMessage());
             }
 
             // Build success message berdasarkan data completeness

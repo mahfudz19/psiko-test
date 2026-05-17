@@ -133,7 +133,7 @@ document.querySelectorAll('.simulation-form').forEach(form => {
 
             if (result.success) {
                 // If last step, redirect to complete
-                if (stepId === 5) {
+                if (stepId === 3) {
                     window.location.href = '/pmb/simulation/complete';
                 } else {
                     // Navigate to next step

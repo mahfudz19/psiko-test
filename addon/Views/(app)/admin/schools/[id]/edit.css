@@ -1,0 +1,167 @@
+/* School Form Page Styles */
+.school-form-page {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.school-form-page .page-header {
+    margin-bottom: 32px;
+}
+
+.school-form-page .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 8px 0;
+}
+
+.school-form-page .page-description {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+.school-form-page .form-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 32px;
+}
+
+.school-form-page .school-form {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.school-form-page .form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.school-form-page .form-section h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin: 0 0 8px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.school-form-page .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.school-form-page .form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.school-form-page .form-label .required {
+    color: #dc3545;
+    margin-left: 4px;
+}
+
+.school-form-page .form-input {
+    padding: 12px 16px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+}
+
+.school-form-page .form-input:focus {
+    outline: none;
+    border-color: #4a90d9;
+    box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.1);
+}
+
+.school-form-page .form-input::placeholder {
+    color: #999;
+}
+
+.school-form-page .form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.school-form-page .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.school-form-page .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.school-form-page .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.school-form-page .btn-primary {
+    background: #4a90d9;
+    color: #fff;
+}
+
+.school-form-page .btn-primary:hover {
+    background: #3a7bc8;
+}
+
+.school-form-page .btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.school-form-page .btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .school-form-page {
+        padding: 16px;
+    }
+
+    .school-form-page .form-container {
+        padding: 20px;
+    }
+
+    .school-form-page .page-header h1 {
+        font-size: 22px;
+    }
+
+    .school-form-page .form-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .school-form-page .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .school-form-page .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

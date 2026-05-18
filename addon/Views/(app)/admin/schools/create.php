@@ -15,6 +15,7 @@
 
     <div class="form-container">
         <form data-spa method="POST" action="/admin/schools" class="school-form">
+            <?= csrf_field() ?>
             <div class="form-section">
                 <h2>Informasi Dasar</h2>
 
@@ -64,28 +65,6 @@
                         placeholder="Masukkan alamat lengkap sekolah"
                         required></textarea>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="province" class="form-label">Provinsi</label>
-                        <input
-                            type="text"
-                            id="province"
-                            name="province"
-                            class="form-input"
-                            placeholder="Contoh: DKI Jakarta">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="city" class="form-label">Kota/Kabupaten</label>
-                        <input
-                            type="text"
-                            id="city"
-                            name="city"
-                            class="form-input"
-                            placeholder="Contoh: Jakarta Pusat">
-                    </div>
-                </div>
             </div>
 
             <div class="form-section">
@@ -101,28 +80,6 @@
                             class="form-input"
                             placeholder="Contoh: 021-1234567"
                             required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email" class="form-label">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            class="form-input"
-                            placeholder="Contoh: info@sman1jakarta.sch.id">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="website" class="form-label">Website</label>
-                        <input
-                            type="url"
-                            id="website"
-                            name="website"
-                            class="form-input"
-                            placeholder="Contoh: https://sman1jakarta.sch.id">
                     </div>
 
                     <div class="form-group">

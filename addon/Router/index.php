@@ -131,7 +131,7 @@ $router->group(['middleware' => ['auth', 'role:super-admin', 'csrf']], function 
     $router->post('/admin/schools', [AdminController::class, 'storeSchool']);
     $router->get('/admin/schools/:id', [AdminController::class, 'showSchool']);
     $router->get('/admin/schools/:id/edit', [AdminController::class, 'editSchool']);
-    $router->post('/admin/schools/:id', [AdminController::class, 'updateSchool']);
+    $router->post('/admin/schools/:id/update', [AdminController::class, 'updateSchool']);
     $router->post('/admin/schools/:id/delete', [AdminController::class, 'deleteSchool']);
 
     // Teachers routes (dalam konteks sekolah)

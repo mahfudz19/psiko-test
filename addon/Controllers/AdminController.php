@@ -103,20 +103,29 @@ class AdminController
   public function storeSchool(Request $request, Response $response): View | RedirectResponse
   {
     try {
-      $data = $request->input();
+      $inputData = $request->input();
 
       // Validasi sederhana
       $required = ['name', 'npsn', 'address', 'principal_name', 'contact', 'accreditation'];
       foreach ($required as $field) {
-        if (empty($data[$field])) {
+        if (empty($inputData[$field])) {
           return $response->redirect('/admin/schools/create?error=400&message=' . urlencode('Field ' . $field . ' wajib diisi'));
         }
       }
 
       // Cek NPSN unique
-      $existing = $this->schoolModel->findByNpsn($data['npsn']);
+      $existing = $this->schoolModel->findByNpsn($inputData['npsn']);
       if ($existing) {
         return $response->redirect('/admin/schools/create?error=400&message=' . urlencode('NPSN sudah digunakan'));
+      }
+
+      // Filter data yang valid sesuai schema schools (hapus _token, dll)
+      $validFields = ['name', 'npsn', 'address', 'principal_name', 'contact', 'accreditation'];
+      $data = [];
+      foreach ($validFields as $field) {
+        if (isset($inputData[$field])) {
+          $data[$field] = $inputData[$field];
+        }
       }
 
       $schoolId = $this->schoolModel->create($data);
@@ -185,10 +194,35 @@ class AdminController
         return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
       }
 
-      $data = $request->input();
+      $inputData = $request->input();
+
+      // Validasi sederhana (sama seperti storeSchool)
+      $required = ['name', 'npsn', 'address', 'principal_name', 'contact', 'accreditation'];
+      foreach ($required as $field) {
+        if (empty($inputData[$field])) {
+          return $response->redirect('/admin/schools/' . $id . '/edit?error=400&message=' . urlencode('Field ' . $field . ' wajib diisi'));
+        }
+      }
+
+      // Cek NPSN unique (kecuali NPSN sekolah ini sendiri)
+      $existing = $this->schoolModel->findByNpsn($inputData['npsn']);
+
+      if ($existing && $existing['id'] != $id) {
+        return $response->redirect('/admin/schools/' . $id . '/edit?error=400&message=' . urlencode('NPSN sudah digunakan sekolah lain'));
+      }
+
+      // Filter data yang valid sesuai schema schools (hapus _token, dll)
+      $validFields = ['name', 'npsn', 'address', 'principal_name', 'contact', 'accreditation'];
+      $data = [];
+      foreach ($validFields as $field) {
+        if (isset($inputData[$field])) {
+          $data[$field] = $inputData[$field];
+        }
+      }
+
       $this->schoolModel->updateById($id, $data);
 
-      return $response->redirect('/admin/schools/' . $id);
+      return $response->redirect('/admin/schools');
     } catch (\Exception $e) {
       return $response->redirect('/admin/schools/' . $request->param('id') . '/edit?error=500&message=' . urlencode($e->getMessage()));
     }

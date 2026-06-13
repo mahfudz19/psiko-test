@@ -224,37 +224,14 @@
         // Cek apakah sedang di halaman Admin
         $isAdminPage = str_starts_with($currentPath, '/admin');
         ?>
-        <div class="sidebar-nav-group">
-          <div class="sidebar-nav-group-header <?= $isAdminPage ? 'active-group' : '' ?>">
-            <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="m9 12 2 2 4-4" />
-            </svg>
-            <span class="sidebar-link-text">Super Admin</span>
-            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-collapse-toggle>
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </div>
-          <div class="sidebar-nav-group-content">
-            <a data-spa href="/admin" class="sidebar-link sidebar-link-sub <?= $currentPath === '/admin' ? 'active' : '' ?>">
-              <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="7" height="9" x="3" y="3" rx="1" />
-                <rect width="7" height="5" x="14" y="3" rx="1" />
-                <rect width="7" height="9" x="14" y="12" rx="1" />
-                <rect width="7" height="5" x="3" y="16" rx="1" />
-              </svg>
-              <span class="sidebar-link-text">Dashboard</span>
-            </a>
-            <a data-spa href="/admin/schools" class="sidebar-link sidebar-link-sub <?= str_starts_with($currentPath, '/admin/schools') ? 'active' : '' ?>">
-              <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 21c0-1.7.9-3.3 2.3-4.2" />
-                <path d="M18.7 16.8c1.4.9 2.3 2.5 2.3 4.2" />
-                <path d="M12 2a7 7 0 0 0-7 7v2H3v2h2v2H3v2h2v2a7 7 0 0 0 14 0v-2h2v-2h-2v-2h2V9h-2V9a7 7 0 0 0-7-7Z" />
-              </svg>
-              <span class="sidebar-link-text">Sekolah</span>
-            </a>
-          </div>
-        </div>
+        <a data-spa href="/admin/schools" class="sidebar-link <?= str_starts_with($currentPath, '/admin/schools') ? 'active' : '' ?>">
+          <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21c0-1.7.9-3.3 2.3-4.2" />
+            <path d="M18.7 16.8c1.4.9 2.3 2.5 2.3 4.2" />
+            <path d="M12 2a7 7 0 0 0-7 7v2H3v2h2v2H3v2h2v2a7 7 0 0 0 14 0v-2h2v-2h-2v-2h2V9h-2V9a7 7 0 0 0-7-7Z" />
+          </svg>
+          <span class="sidebar-link-text">Sekolah</span>
+        </a>
       <?php endif; ?>
       <a data-spa href="/settings" class="sidebar-link <?= $currentPath === '/settings' ? 'active' : '' ?>">
         <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

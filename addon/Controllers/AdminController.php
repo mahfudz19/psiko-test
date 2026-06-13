@@ -362,6 +362,139 @@ class AdminController
     }
   }
 
+  public function showTeacher(Request $request, Response $response): View | RedirectResponse
+  {
+    try {
+      $schoolId = $request->param('id');
+      $userId = $request->param('user_id');
+
+      $school = $this->schoolModel->find($schoolId);
+      if (!$school) {
+        return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+      }
+
+      $teacher = $this->teacherModel->findByUserId((int)$userId);
+      if (!$teacher) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/teachers?error=404&message=' . urlencode('Guru tidak ditemukan di sekolah ini'));
+      }
+
+      return $response->renderPage([
+        'school' => $school,
+        'teacher' => $teacher,
+      ]);
+    } catch (\Exception $e) {
+      return $response->redirect('/admin/schools/' . $request->param('id') . '/teachers?error=500&message=' . urlencode($e->getMessage()));
+    }
+  }
+
+  /**
+   * Form edit guru
+   */
+  public function editTeacher(Request $request, Response $response): View | RedirectResponse
+  {
+    try {
+      $schoolId = $request->param('id');
+      $userId = $request->param('user_id');
+
+      $school = $this->schoolModel->find($schoolId);
+      if (!$school) {
+        return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+      }
+
+      $teacher = $this->teacherModel->findByUserId((int)$userId);
+      if (!$teacher) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/teachers?error=404&message=' . urlencode('Guru tidak ditemukan di sekolah ini'));
+      }
+
+      return $response->renderPage([
+        'school' => $school,
+        'teacher' => $teacher,
+      ]);
+    } catch (\Exception $e) {
+      return $response->redirect('/admin/schools/' . $request->param('id') . '/teachers?error=500&message=' . urlencode($e->getMessage()));
+    }
+  }
+
+  /**
+   * Proses update guru
+   */
+  public function updateTeacher(Request $request, Response $response): View | RedirectResponse
+  {
+    try {
+      $schoolId = $request->param('id');
+      $userId = $request->param('user_id');
+
+      $school = $this->schoolModel->find($schoolId);
+      if (!$school) {
+        return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+      }
+
+      $teacher = $this->teacherModel->findByUserId((int)$userId);
+      if (!$teacher) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/teachers?error=404&message=' . urlencode('Guru tidak ditemukan di sekolah ini'));
+      }
+
+      $data = $request->input();
+
+      // Validasi
+      $required = ['name', 'email', 'teacher_id', 'subject_specialty'];
+      foreach ($required as $field) {
+        if (empty($data[$field])) {
+          return $response->redirect('/admin/schools/' . $schoolId . '/teachers/' . $userId . '/edit?error=400&message=' . urlencode('Field ' . $field . ' wajib diisi'));
+        }
+      }
+
+      // Cek email unique (kecuali email yang sama)
+      $existingUser = $this->userModel->findByEmail($data['email']);
+      if ($existingUser && $existingUser['id'] != $userId) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/teachers/' . $userId . '/edit?error=400&message=' . urlencode('Email sudah digunakan'));
+      }
+
+      $db = $this->userModel->getDb();
+      $db->beginTransaction();
+
+      try {
+        // 1. Update user
+        $userData = [
+          'email' => $data['email'],
+          'name' => $data['name'],
+        ];
+
+        // Update password hanya jika diisi
+        if (!empty($data['password'])) {
+          $userData['password'] = $data['password'];
+        }
+
+        $this->userModel->updateById($userId, $userData);
+
+        // 2. Update profile
+        $this->profileModel->updateByUserId((int)$userId, [
+          'phone' => $data['phone'] ?? '',
+          'address' => $data['address'] ?? '',
+          'gender' => $data['gender'] ?? null,
+          'birth_place' => $data['birth_place'] ?? null,
+          'birth_date' => $data['birth_date'] ?? null,
+        ]);
+
+        // 3. Update teacher_profiles
+        $this->teacherModel->updateByProfileId((int)$teacher['profile_id'], [
+          'teacher_id' => $data['teacher_id'],
+          'subject_specialty' => $data['subject_specialty'],
+          'certification' => $data['certification'] ?? '',
+        ]);
+
+        $db->commit();
+
+        return $response->redirect('/admin/schools/' . $schoolId . '/teachers/' . $userId);
+      } catch (\Exception $e) {
+        $db->rollBack();
+        throw $e;
+      }
+    } catch (\Exception $e) {
+      return $response->redirect('/admin/schools/' . $request->param('id') . '/teachers/' . $request->param('user_id') . '/edit?error=500&message=' . urlencode($e->getMessage()));
+    }
+  }
+
   /**
    * Daftar siswa di sekolah tertentu
    */

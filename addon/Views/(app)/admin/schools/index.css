@@ -72,10 +72,6 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.filter-input {
-  width: 100%;
-}
-
 .filter-select {
   cursor: pointer;
   appearance: none;
@@ -481,7 +477,7 @@
   .filter-input,
   .filter-select,
   .btn-filter {
-    width: 100%;
+    width: auto;
   }
 
   .btn-reset {

@@ -95,6 +95,54 @@ class UserModel extends Model
     ];
 
     /**
+     * Minimum password length
+     */
+    public const MIN_PASSWORD_LENGTH = 8;
+
+    /**
+     * Verify password against hash
+     *
+     * @param string $password Plain text password
+     * @param string $hash Hashed password
+     * @return bool True if password matches
+     */
+    public function verifyPassword(string $password, string $hash): bool
+    {
+        return password_verify($password, $hash);
+    }
+
+    /**
+     * Validate password strength
+     *
+     * @param string $password Password to validate
+     * @return array{valid: bool, errors: array<string>} Validation result
+     */
+    public function validatePassword(string $password): array
+    {
+        $errors = [];
+
+        if (strlen($password) < self::MIN_PASSWORD_LENGTH) {
+            $errors[] = "Password minimal " . self::MIN_PASSWORD_LENGTH . " karakter";
+        }
+
+        return [
+            'valid' => empty($errors),
+            'errors' => $errors,
+        ];
+    }
+
+    /**
+     * Hash password menggunakan bcrypt
+     *
+     * @param string $password Plain text password
+     * @return string Hashed password
+     */
+    private function hashPassword(string $password): string
+    {
+        return password_hash($password, PASSWORD_BCRYPT, ['cost' => 10]);
+    }
+
+    /**
      * Get all users
      */
     public function all(): array
@@ -139,6 +187,9 @@ class UserModel extends Model
     public function create(array $data): int
     {
         try {
+            if (isset($data['password'])) {
+                $data['password'] = $this->hashPassword($data['password']);
+            }
             // Filter data based on schema
             $validData = [];
             foreach ($data as $key => $value) {
@@ -176,6 +227,10 @@ class UserModel extends Model
     {
         if (empty($data)) {
             return false;
+        }
+
+        if (isset($data['password'])) {
+            $data['password'] = $this->hashPassword($data['password']);
         }
 
         // Auto-update updated_at if not provided

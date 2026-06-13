@@ -39,54 +39,6 @@ class AuthController
     ) {}
 
     /**
-     * Minimum password length
-     */
-    private const MIN_PASSWORD_LENGTH = 8;
-
-    /**
-     * Hash password menggunakan bcrypt
-     *
-     * @param string $password Plain text password
-     * @return string Hashed password
-     */
-    private function hashPassword(string $password): string
-    {
-        return password_hash($password, PASSWORD_BCRYPT, ['cost' => 10]);
-    }
-
-    /**
-     * Verify password against hash
-     *
-     * @param string $password Plain text password
-     * @param string $hash Hashed password
-     * @return bool True if password matches
-     */
-    private function verifyPassword(string $password, string $hash): bool
-    {
-        return password_verify($password, $hash);
-    }
-
-    /**
-     * Validate password strength
-     *
-     * @param string $password Password to validate
-     * @return array{valid: bool, errors: array<string>} Validation result
-     */
-    private function validatePassword(string $password): array
-    {
-        $errors = [];
-
-        if (strlen($password) < self::MIN_PASSWORD_LENGTH) {
-            $errors[] = "Password minimal " . self::MIN_PASSWORD_LENGTH . " karakter";
-        }
-
-        return [
-            'valid' => empty($errors),
-            'errors' => $errors,
-        ];
-    }
-
-    /**
      * Check if user is logged in
      */
     private function check(): bool
@@ -191,7 +143,7 @@ class AuthController
         }
 
         // Verify password
-        if (!$this->verifyPassword($password, $user['password'])) {
+        if (!$this->users->verifyPassword($password, $user['password'])) {
             return $response->redirect('/login?error=Password+salah');
         }
 
@@ -256,7 +208,7 @@ class AuthController
         }
 
         // Validate password strength
-        $passwordValidation = $this->validatePassword($password);
+        $passwordValidation = $this->users->validatePassword($password);
         if (!$passwordValidation['valid']) {
             return $response->redirect('/register?error=' . urlencode(implode(', ', $passwordValidation['errors'])));
         }
@@ -276,7 +228,7 @@ class AuthController
         // Prepare user data (is_active = false, waiting for OTP verification)
         $userData = [
             'email' => $email,
-            'password' => $this->hashPassword($password),
+            'password' => $password,
             'name' => $name,
             'avatar' => null,
             'is_active' => 0, // Not active until OTP verified
@@ -684,7 +636,7 @@ class AuthController
         }
 
         // Validate new password
-        $passwordValidation = $this->validatePassword($password);
+        $passwordValidation = $this->users->validatePassword($password);
         if (!$passwordValidation['valid']) {
             return $response->redirect('/password/reset?' . urlencode(implode(', ', $passwordValidation['errors'])));
         }
@@ -703,7 +655,7 @@ class AuthController
         }
 
         // Update password
-        $this->users->updateById($user['id'], ['password' => $this->hashPassword($password)]);
+        $this->users->updateById($user['id'], ['password' => $password]);
 
         // Invalidate all reset tokens
         $this->passwordResetTokens->invalidateAll($user['id']);

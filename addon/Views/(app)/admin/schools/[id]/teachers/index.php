@@ -35,7 +35,7 @@
             </div>
         <?php else: ?>
             <?php foreach ($teachers as $teacher): ?>
-                <div class="teacher-card">
+                <a class="teacher-card" data-spa href="/admin/schools/<?= $school['id'] ?>/teachers/<?= $teacher['user_id'] ?>">
                     <div class="teacher-avatar">
                         <span>👨‍🏫</span>
                     </div>
@@ -54,7 +54,7 @@
                             <span class="badge">📜 <?= htmlspecialchars($teacher['certification']) ?></span>
                         <?php endif; ?>
                     </div>
-                </div>
+                </a>
             <?php endforeach; ?>
         <?php endif; ?>
     </div>

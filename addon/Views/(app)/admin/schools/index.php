@@ -19,70 +19,68 @@
     </div>
 
     <!-- Filters Section -->
-    <div class="filters-section">
-        <form method="GET" action="/admin/schools" id="schools-filter-form">
-            <div class="filters-row">
-                <!-- Search Input -->
-                <div class="filter-group filter-group--search">
-                    <input
-                        type="text"
-                        id="search-input"
-                        name="search"
-                        class="filter-input"
-                        placeholder="🔍 Cari nama, NPSN, atau alamat..."
-                        value="<?= htmlspecialchars($filters['search'] ?? '') ?>">
-                </div>
-
-                <!-- Accreditation Filter -->
-                <div class="filter-group filter-group--small">
-                    <select id="accreditation-select" name="accreditation" class="filter-select" title="Akreditasi">
-                        <option value="">Semua Akreditasi</option>
-                        <option value="A" <?= ($filters['accreditation'] ?? '') === 'A' ? 'selected' : '' ?>>A</option>
-                        <option value="B" <?= ($filters['accreditation'] ?? '') === 'B' ? 'selected' : '' ?>>B</option>
-                        <option value="C" <?= ($filters['accreditation'] ?? '') === 'C' ? 'selected' : '' ?>>C</option>
-                    </select>
-                </div>
-
-                <!-- Min Students Filter -->
-                <div class="filter-group filter-group--small">
-                    <input
-                        type="number"
-                        id="min-students-input"
-                        name="min_students"
-                        class="filter-input"
-                        placeholder="Min siswa"
-                        min="0"
-                        value="<?= htmlspecialchars($filters['min_students'] ?? '') ?>">
-                </div>
-
-                <!-- Max Students Filter -->
-                <div class="filter-group filter-group--small">
-                    <input
-                        type="number"
-                        id="max-students-input"
-                        name="max_students"
-                        class="filter-input"
-                        placeholder="Max siswa"
-                        min="0"
-                        value="<?= htmlspecialchars($filters['max_students'] ?? '') ?>">
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-filter">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                    </svg>
-                    Filter
-                </button>
-                <a href="/admin/schools" class="btn btn-secondary btn-reset" title="Reset filter">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="1 4 1 10 7 10"></polyline>
-                        <polyline points="23 20 23 14 17 14"></polyline>
-                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
-                    </svg>
-                </a>
+    <form method="GET" action="/admin/schools" id="schools-filter-form" class="filters-section">
+        <div class="filters-row">
+            <!-- Search Input -->
+            <div class="filter-group filter-group--search">
+                <input
+                    type="text"
+                    id="search-input"
+                    name="search"
+                    class="filter-input"
+                    placeholder="🔍 Cari nama, NPSN, atau alamat..."
+                    value="<?= htmlspecialchars($filters['search'] ?? '') ?>">
             </div>
-        </form>
-    </div>
+
+            <!-- Accreditation Filter -->
+            <div class="filter-group filter-group--small">
+                <select id="accreditation-select" name="accreditation" class="filter-select" title="Akreditasi">
+                    <option value="">Semua Akreditasi</option>
+                    <option value="A" <?= ($filters['accreditation'] ?? '') === 'A' ? 'selected' : '' ?>>A</option>
+                    <option value="B" <?= ($filters['accreditation'] ?? '') === 'B' ? 'selected' : '' ?>>B</option>
+                    <option value="C" <?= ($filters['accreditation'] ?? '') === 'C' ? 'selected' : '' ?>>C</option>
+                </select>
+            </div>
+
+            <!-- Min Students Filter -->
+            <div class="filter-group filter-group--small">
+                <input
+                    type="number"
+                    id="min-students-input"
+                    name="min_students"
+                    class="filter-input"
+                    placeholder="Min siswa"
+                    min="0"
+                    value="<?= htmlspecialchars($filters['min_students'] ?? '') ?>">
+            </div>
+
+            <!-- Max Students Filter -->
+            <div class="filter-group filter-group--small">
+                <input
+                    type="number"
+                    id="max-students-input"
+                    name="max_students"
+                    class="filter-input"
+                    placeholder="Max siswa"
+                    min="0"
+                    value="<?= htmlspecialchars($filters['max_students'] ?? '') ?>">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-filter">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                Filter
+            </button>
+            <a href="/admin/schools" class="btn btn-secondary btn-reset" title="Reset filter">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <polyline points="23 20 23 14 17 14"></polyline>
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                </svg>
+            </a>
+        </div>
+    </form>
 
     <!-- Results Info -->
     <div class="results-info">

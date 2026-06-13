@@ -267,6 +267,46 @@ class UserModel extends Model
     }
 
     /**
+     * Deactivate user (set is_active to false)
+     *
+     * @param string|int $id User ID
+     * @return bool True if successful
+     */
+    public function deactivate(string|int $id): bool
+    {
+        return $this->updateById($id, ['is_active' => 0]);
+    }
+
+    /**
+     * Activate user (set is_active to true)
+     *
+     * @param string|int $id User ID
+     * @return bool True if successful
+     */
+    public function activate(string|int $id): bool
+    {
+        return $this->updateById($id, ['is_active' => 1]);
+    }
+
+    /**
+     * Toggle user active status (atomic operation)
+     *
+     * @param string|int $id User ID
+     * @return bool|null New active status or null if user not found
+     */
+    public function toggleActive(string|int $id): ?bool
+    {
+        $user = $this->find($id);
+        if (!$user) {
+            return null;
+        }
+
+        $newStatus = $user['is_active'] ? 0 : 1;
+        $this->updateById($id, ['is_active' => $newStatus]);
+        return (bool) $newStatus;
+    }
+
+    /**
      * Check if user has specific role (if role system enabled)
      */
     public function hasRole(array $user, string $role): bool

@@ -496,6 +496,46 @@ class AdminController
   }
 
   /**
+   * Toggle status aktif/nonaktif guru (menggunakan transaction untuk menghindari race condition)
+   */
+  public function toggleTeacherStatus(Request $request, Response $response): RedirectResponse
+  {
+    try {
+      $schoolId = $request->param('id');
+      $userId = $request->param('user_id');
+
+      $school = $this->schoolModel->find($schoolId);
+      if (!$school) {
+        return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+      }
+
+      $teacher = $this->teacherModel->findByUserId((int)$userId);
+      if (!$teacher) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/teachers?error=404&message=' . urlencode('Guru tidak ditemukan di sekolah ini'));
+      }
+
+      // Gunakan transaction untuk menghindari race condition
+      $db = $this->userModel->getDb();
+      $db->beginTransaction();
+
+      try {
+        // Toggle status dengan query langsung untuk memastikan atomik
+        $this->userModel->toggleActive((int)$userId);
+
+        $db->commit();
+
+        // Redirect kembali ke halaman detail guru
+        return $response->redirect('/admin/schools/' . $schoolId . '/teachers/' . $userId);
+      } catch (\Exception $e) {
+        $db->rollBack();
+        throw $e;
+      }
+    } catch (\Exception $e) {
+      return $response->redirect('/admin/schools/' . $request->param('id') . '/teachers?error=500&message=' . urlencode($e->getMessage()));
+    }
+  }
+
+  /**
    * Daftar siswa di sekolah tertentu
    */
   public function schoolStudents(Request $request, Response $response): View | RedirectResponse

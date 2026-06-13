@@ -141,6 +141,7 @@ $router->group(['middleware' => ['auth', 'role:super-admin', 'csrf']], function 
     $router->get('/admin/schools/:id/teachers/:user_id', [AdminController::class, 'showTeacher']);
     $router->get('/admin/schools/:id/teachers/:user_id/edit', [AdminController::class, 'editTeacher']);
     $router->post('/admin/schools/:id/teachers/:user_id/update', [AdminController::class, 'updateTeacher']);
+    $router->post('/admin/schools/:id/teachers/:user_id/toggle-status', [AdminController::class, 'toggleTeacherStatus']);
 
     // Students routes (dalam konteks sekolah)
     $router->get('/admin/schools/:id/students', [AdminController::class, 'schoolStudents']);

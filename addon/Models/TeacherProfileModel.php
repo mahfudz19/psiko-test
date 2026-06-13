@@ -123,6 +123,7 @@ class TeacherProfileModel extends Model
                 p.birth_date,
                 u.id as user_id,
                 u.email,
+                u.is_active,
                 u.name as user_name
             FROM {$this->table} tp
             JOIN profiles p ON tp.profile_id = p.id
@@ -255,7 +256,7 @@ class TeacherProfileModel extends Model
     public function findBySchoolId(int $schoolId): array
     {
         $stmt = $this->getDb()->prepare("
-            SELECT tp.*, p.*, u.email, u.name as user_name
+            SELECT tp.*, p.*, u.is_active, u.email, u.name as user_name
             FROM {$this->table} tp
             JOIN profiles p ON tp.profile_id = p.id
             JOIN users u ON p.user_id = u.id

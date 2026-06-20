@@ -16,9 +16,14 @@
             <h1>Siswa - <?= htmlspecialchars($school['name']) ?></h1>
             <p class="page-description">Daftar siswa yang terdaftar di sekolah ini</p>
         </div>
-        <a data-spa href="/admin/schools/<?= $school['id'] ?>/students/create" class="btn btn-primary">
-            <span>➕</span> Tambah Siswa
-        </a>
+        <div class="header-actions">
+            <a data-spa href="/admin/schools/<?= $school['id'] ?>/students/bulk-create" class="btn btn-secondary">
+                <span>📥</span> Import Banyak Siswa
+            </a>
+            <a data-spa href="/admin/schools/<?= $school['id'] ?>/students/create" class="btn btn-primary">
+                <span>➕</span> Tambah Siswa
+            </a>
+        </div>
     </div>
 
     <div class="students-table-container">

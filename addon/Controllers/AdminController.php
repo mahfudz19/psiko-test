@@ -650,4 +650,192 @@ class AdminController
       return $response->redirect('/admin/schools/' . $request->param('id') . '/students/create?error=500&message=' . urlencode($e->getMessage()));
     }
   }
+
+  /**
+   * Form bulk import siswa (CSV upload) untuk superadmin
+   * Method ini untuk super-admin yang ingin input banyak siswa sekaligus di sekolah tertentu
+   */
+  public function bulkCreateStudent(Request $request, Response $response): View | RedirectResponse
+  {
+    try {
+      $schoolId = $request->param('id');
+      $school = $this->schoolModel->find($schoolId);
+
+      if (!$school) {
+        return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+      }
+
+      return $response->renderPage(['school' => $school], ['meta' => ['title' => 'Import Banyak Siswa']]);
+    } catch (\Exception $e) {
+      return $response->redirect('/admin/schools?error=500&message=' . urlencode($e->getMessage()));
+    }
+  }
+
+  /**
+   * Proses upload CSV dan simpan banyak siswa sekaligus untuk superadmin
+   * Format CSV: name,email,password,student_id,grade_level,major,phone,address,birth_place,birth_date,gender,parent_name,parent_phone,parent_email
+   */
+  public function storeBulkStudent(Request $request, Response $response): View | RedirectResponse
+  {
+    try {
+      $schoolId = $request->param('id');
+      $school = $this->schoolModel->find($schoolId);
+
+      if (!$school) {
+        return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+      }
+
+      // Validasi file upload
+      $file = $request->file('csv_file');
+
+      if (!$file) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=400&message=' . urlencode('File CSV wajib diupload'));
+      }
+
+      // Validasi upload error
+      if ($file->getError() !== UPLOAD_ERR_OK) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=400&message=' . urlencode('Gagal upload file'));
+      }
+
+      // Validasi tipe file
+      $allowedTypes = ['text/csv', 'text/plain', 'application/vnd.ms-excel'];
+      if (!in_array($file->getClientMimeType(), $allowedTypes)) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=400&message=' . urlencode('File harus berformat CSV'));
+      }
+
+      // Pindahkan file ke temporary directory untuk diproses
+      $tempDir = sys_get_temp_dir() . '/bulk_import';
+      if (!is_dir($tempDir)) {
+        mkdir($tempDir, 0755, true);
+      }
+
+      $tempFilename = 'bulk_' . time() . '_' . uniqid() . '.csv';
+      $tempPath = $tempDir . '/' . $tempFilename;
+
+      if (!$file->move($tempDir, $tempFilename)) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=500&message=' . urlencode('Gagal menyimpan file CSV'));
+      }
+
+      // Baca file CSV
+      $csvData = file_get_contents($tempPath);
+
+      // Hapus file temporary setelah dibaca
+      unlink($tempPath);
+
+      $lines = explode("\n", $csvData);
+
+      // Skip header dan ambil data
+      $headers = str_getcsv(array_shift($lines));
+      $studentsData = [];
+      $errors = [];
+
+      foreach ($lines as $index => $line) {
+        if (empty(trim($line))) {
+          continue;
+        }
+
+        $row = str_getcsv($line);
+        if (count($row) < count($headers)) {
+          $errors[] = "Baris " . ($index + 2) . ": Jumlah kolom tidak sesuai";
+          continue;
+        }
+
+        $studentData = array_combine($headers, $row);
+
+        // Validasi required fields
+        $required = ['name', 'email', 'password', 'student_id', 'grade_level', 'parent_name', 'parent_phone'];
+        $missingFields = [];
+        foreach ($required as $field) {
+          if (empty($studentData[$field])) {
+            $missingFields[] = $field;
+          }
+        }
+
+        if (!empty($missingFields)) {
+          $errors[] = "Baris " . ($index + 2) . ": Field wajib kosong - " . implode(', ', $missingFields);
+          continue;
+        }
+
+        // Cek email unik
+        $existingUser = $this->userModel->findByEmail($studentData['email']);
+        if ($existingUser) {
+          $errors[] = "Baris " . ($index + 2) . ": Email " . $studentData['email'] . " sudah digunakan";
+          continue;
+        }
+
+        $studentsData[] = $studentData;
+      }
+
+      // Jika ada error validasi, kembalikan dengan error
+      if (!empty($errors)) {
+        return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=400&message=' . urlencode('Terdapat ' . count($errors) . ' error validasi'));
+      }
+
+      // Proses transaksi database
+      $db = $this->userModel->getDb();
+      $db->beginTransaction();
+
+      try {
+        $successCount = 0;
+        $failedData = [];
+
+        foreach ($studentsData as $studentData) {
+          try {
+            // 1. Buat user dengan role user
+            $userId = $this->userModel->create([
+              'email' => $studentData['email'],
+              'password' => $studentData['password'],
+              'name' => $studentData['name'],
+              'role' => 'user',
+              'is_active' => 1,
+            ]);
+
+            // 2. Buat profile
+            $profileId = $this->profileModel->create([
+              'user_id' => $userId,
+              'phone' => $studentData['phone'] ?? '',
+              'address' => $studentData['address'] ?? '',
+              'birth_place' => $studentData['birth_place'] ?? '',
+              'birth_date' => $studentData['birth_date'] ?? null,
+              'gender' => $studentData['gender'] ?? '',
+            ]);
+
+            // 3. Buat student profile
+            $this->studentModel->create([
+              'profile_id' => $profileId,
+              'school_id' => (int)$schoolId,
+              'student_id' => $studentData['student_id'],
+              'grade_level' => $studentData['grade_level'],
+              'major' => $studentData['major'] ?? '',
+              'parent_name' => $studentData['parent_name'],
+              'parent_phone' => $studentData['parent_phone'],
+              'parent_email' => $studentData['parent_email'] ?? '',
+            ]);
+
+            $successCount++;
+          } catch (\Exception $e) {
+            $failedData[] = [
+              'data' => $studentData,
+              'error' => $e->getMessage()
+            ];
+          }
+        }
+
+        $db->commit();
+
+        // Set success message
+        $message = "Berhasil mengimport {$successCount} siswa";
+        if (!empty($failedData)) {
+          $message .= " ({$successCount} berhasil, " . count($failedData) . " gagal)";
+        }
+
+        return $response->redirect('/admin/schools/' . $schoolId . '/students?success=1&message=' . urlencode($message));
+      } catch (\Exception $e) {
+        $db->rollBack();
+        return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=500&message=' . urlencode('Gagal mengimport data: ' . $e->getMessage()));
+      }
+    } catch (\Exception $e) {
+      return $response->redirect('/admin/schools?error=500&message=' . urlencode($e->getMessage()));
+    }
+  }
 }

@@ -152,48 +152,6 @@
     border-top: 1px solid var(--border-color, #e5e7eb);
 }
 
-/* Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-md, 8px);
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-icon {
-    font-size: 1.125rem;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.btn-secondary {
-    background: var(--bg-secondary, #f3f4f6);
-    color: var(--text-primary, #1a1a1a);
-    border: 1px solid var(--border-color, #e5e7eb);
-}
-
-.btn-secondary:hover {
-    background: var(--bg-tertiary, #e5e7eb);
-    border-color: var(--border-hover, #d1d5db);
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     .page-container {

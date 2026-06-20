@@ -299,35 +299,6 @@
         gap: 8px;
     }
 
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
-
-    .btn-secondary {
-        background: var(--md-sys-color-secondary-container, #e6f0ff);
-        color: var(--md-sys-color-on-secondary-container, #004c99);
-    }
-
-    .btn-secondary:hover {
-        background: var(--md-sys-color-secondary, #0066cc);
-        color: white;
-    }
-
     /* No Students */
     .no-students-card {
         background: var(--md-sys-color-surface-container, #f5f5f5);

@@ -781,33 +781,6 @@ if (!$dataCompleteness['has_achievements']) $missingData[] = 'prestasi';
         border: 1px solid var(--md-sys-color-warning, #ff9800);
     }
 
-    /* Buttons */
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        border: none;
-        transition: 0.2s;
-    }
-
-    .btn-primary {
-        background: var(--md-sys-color-primary, #0066cc);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--md-sys-color-on-primary, #0052a3);
-    }
-
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 14px;
-    }
-
     @media (max-width: 768px) {
         .talents-grid {
             grid-template-columns: repeat(2, 1fr);

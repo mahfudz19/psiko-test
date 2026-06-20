@@ -310,39 +310,6 @@ $permissionGroups = [
         padding-top: 24px;
     }
 
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 500;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .btn-primary {
-        background: var(--md-sys-color-primary, #0066cc);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--md-sys-color-on-primary, #0052a3);
-    }
-
-    .btn-secondary {
-        background: var(--md-sys-color-secondary-container, #e6f0ff);
-        color: var(--md-sys-color-on-secondary-container, #004c99);
-    }
-
-    .btn-secondary:hover {
-        background: var(--md-sys-color-secondary, #0066cc);
-        color: white;
-    }
-
     /* Alert */
     .alert {
         padding: 12px 16px;

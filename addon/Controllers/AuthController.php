@@ -666,6 +666,43 @@ class AuthController
         );
     }
 
+    /**
+     * Change password for authenticated user
+     */
+    public function changePassword(Request $request, Response $response): View | RedirectResponse
+    {
+        $currentPassword = $request->input('current_password');
+        $newPassword = $request->input('new_password');
+        $newPasswordConfirmation = $request->input('new_password_confirmation');
+
+        // Get authenticated user
+        $user = $this->user();
+
+        if (!$user) {
+            return $response->redirect('/login?error=Sesi+tidak+valid');
+        }
+
+        // Validate current password
+        if (!$this->users->verifyPassword($currentPassword, $user['password'])) {
+            return $response->redirect('/settings?error=Password+saat+ini+salah');
+        }
+
+        // Validate new password confirmation
+        if ($newPassword !== $newPasswordConfirmation) {
+            return $response->redirect('/settings?error=Password+konfirmasi+tidak+cocok');
+        }
+
+        // Validate new password strength
+        $passwordValidation = $this->users->validatePassword($newPassword);
+        if (!$passwordValidation['valid']) {
+            return $response->redirect('/settings?error=' . urlencode(implode(', ', $passwordValidation['errors'])));
+        }
+
+        // Update password
+        $this->users->updateById($user['id'], ['password' => $newPassword]);
+
+        return $response->redirect('/settings?success=Password+berhasil+diubah');
+    }
 
     public function authGoogle(Request $request, Response $response): RedirectResponse
     {

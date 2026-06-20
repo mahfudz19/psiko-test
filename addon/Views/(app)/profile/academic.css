@@ -129,24 +129,6 @@
     outline: 1px solid #0066cc;
 }
 
-.btn-icon {
-    background: transparent;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-.btn-icon:hover {
-    background: #e0e0e0;
-    color: #dc3545;
-}
-
 .semester-body {
     padding: 20px;
 }

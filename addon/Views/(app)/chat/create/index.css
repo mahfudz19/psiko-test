@@ -228,10 +228,6 @@
     transform: none;
 }
 
-.btn-icon {
-    font-size: 20px;
-}
-
 /* Tips Card */
 .chat-tips-card {
     background: var(--bg-paper);

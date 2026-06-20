@@ -118,6 +118,7 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
 
 $router->group(['middleware' => ['auth']], function () use ($router) {
     $router->get('/settings', [SettingsController::class, 'index']);
+    $router->post('/settings/change-password', [AuthController::class, 'changePassword'], ['csrf']);
 });
 
 // Super Admin Routes

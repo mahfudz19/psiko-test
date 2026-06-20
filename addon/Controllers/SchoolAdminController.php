@@ -395,7 +395,9 @@ class SchoolAdminController
     public function bulkCreateStudent(Request $request, Response $response): View | RedirectResponse
     {
         try {
-            $schoolId = $request->param('id');
+            $is_super_admin = $this->isSuperAdmin();
+            $schoolId = $is_super_admin ? $request->param('id') : $this->getAdminSchoolId();
+
             $school = $this->schoolModel->find($schoolId);
 
             if (!$school) {
@@ -414,30 +416,33 @@ class SchoolAdminController
      */
     public function storeBulkStudent(Request $request, Response $response): View | RedirectResponse
     {
+        $is_super_admin = $this->isSuperAdmin();
+        $schoolId = $is_super_admin ? $request->param('id') : $this->getAdminSchoolId();
+        $url = $is_super_admin ? '/admin/schools/' . $schoolId . '/students/bulk-create' : '/admin/students/bulk-create';
+        $url_success = $is_super_admin ? '/admin/schools/' . $schoolId . '/students' : '/admin/students';
         try {
-            $schoolId = $request->param('id');
             $school = $this->schoolModel->find($schoolId);
 
             if (!$school) {
-                return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+                return $response->redirect($url . '?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
             }
 
             // Validasi file upload
             $file = $request->file('csv_file');
 
             if (!$file) {
-                return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=400&message=' . urlencode('File CSV wajib diupload'));
+                return $response->redirect($url . '?error=400&message=' . urlencode('File CSV wajib diupload'));
             }
 
             // Validasi upload error
             if ($file->getError() !== UPLOAD_ERR_OK) {
-                return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=400&message=' . urlencode('Gagal upload file'));
+                return $response->redirect($url . '?error=400&message=' . urlencode('Gagal upload file'));
             }
 
             // Validasi tipe file
             $allowedTypes = ['text/csv', 'text/plain', 'application/vnd.ms-excel'];
             if (!in_array($file->getClientMimeType(), $allowedTypes)) {
-                return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=400&message=' . urlencode('File harus berformat CSV'));
+                return $response->redirect($url . '?error=400&message=' . urlencode('File harus berformat CSV'));
             }
 
             // Pindahkan file ke temporary directory untuk diproses
@@ -450,7 +455,7 @@ class SchoolAdminController
             $tempPath = $tempDir . '/' . $tempFilename;
 
             if (!$file->move($tempDir, $tempFilename)) {
-                return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=500&message=' . urlencode('Gagal menyimpan file CSV'));
+                return $response->redirect($url . '?error=500&message=' . urlencode('Gagal menyimpan file CSV'));
             }
 
             // Baca file CSV
@@ -507,7 +512,7 @@ class SchoolAdminController
             if (!empty($errors)) {
                 $_SESSION['bulk_import_errors'] = $errors;
                 $_SESSION['bulk_import_data'] = $studentsData;
-                return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=400&message=' . urlencode('Terdapat ' . count($errors) . ' error validasi'));
+                return $response->redirect($url . '?error=400&message=' . urlencode('Terdapat ' . count($errors) . ' error validasi'));
             }
 
             // Proses transaksi database
@@ -569,13 +574,13 @@ class SchoolAdminController
                     $_SESSION['bulk_import_failed'] = $failedData;
                 }
 
-                return $response->redirect('/admin/schools/' . $schoolId . '/students?success=1&message=' . urlencode($message));
+                return $response->redirect($url_success . '?success=1&message=' . urlencode($message));
             } catch (\Exception $e) {
                 $db->rollBack();
-                return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=500&message=' . urlencode('Gagal mengimport data: ' . $e->getMessage()));
+                return $response->redirect($url . '?error=500&message=' . urlencode('Gagal mengimport data: ' . $e->getMessage()));
             }
         } catch (\Exception $e) {
-            return $response->redirect('/admin/schools?error=500&message=' . urlencode($e->getMessage()));
+            return $response->redirect($url . '?error=500&message=' . urlencode($e->getMessage()));
         }
     }
 }

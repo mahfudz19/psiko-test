@@ -156,7 +156,7 @@ $router->group(['middleware' => ['auth', 'role:super-admin', 'csrf']], function 
 });
 
 // School Admin Routes (untuk role admin - mengelola sekolah sendiri)
-$router->group(['middleware' => ['auth', 'role:super-admin,role:admin', 'schooladmin', 'csrf']], function () use ($router) {
+$router->group(['middleware' => ['auth', 'role:super-admin,admin', 'schooladmin', 'csrf']], function () use ($router) {
     // Dashboard sekolah sendiri
     $router->get('/admin/schools/my', [SchoolAdminController::class, 'mySchool']);
     $router->get('/admin/schools/my/edit', [SchoolAdminController::class, 'editMySchool']);

@@ -56,7 +56,7 @@
         <div class="step">
             <h3>📤 Langkah 3: Upload File CSV</h3>
             <p>Pilih file CSV yang sudah diisi dan upload</p>
-            <form action="/admin/students/bulk-create" method="POST" enctype="multipart/form-data" class="upload-form">
+            <form data-spa action="/admin/students/bulk-create" method="POST" enctype="multipart/form-data" class="upload-form">
                 <div class="form-group">
                     <label for="csv_file">Pilih File CSV:</label>
                     <input

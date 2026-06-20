@@ -17,6 +17,9 @@
             <p class="page-description">Daftar siswa yang terdaftar di sekolah ini</p>
         </div>
         <div class="header-actions">
+            <a data-spa href="/admin/schools/<?= $school['id'] ?>/students/bulk-scores" class="btn btn-secondary">
+                <span>📊</span> Input Nilai Massal
+            </a>
             <a data-spa href="/admin/schools/<?= $school['id'] ?>/students/bulk-create" class="btn btn-secondary">
                 <span>📥</span> Import Banyak Siswa
             </a>

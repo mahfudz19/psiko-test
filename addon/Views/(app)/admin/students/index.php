@@ -20,6 +20,10 @@ $hasSearch = !empty($keyword);
             <p class="page-description">Kelola data siswa di sekolah Anda</p>
         </div>
         <div class="page-header-actions">
+            <a data-spa href="/admin/students/bulk-scores" class="btn btn-secondary">
+                <span class="btn-icon">📊</span>
+                Input Nilai Massal
+            </a>
             <a data-spa href="/admin/students/bulk-create" class="btn btn-secondary">
                 <span class="btn-icon">📥</span>
                 Import Banyak Siswa

@@ -382,3 +382,566 @@
         transform: translateY(0);
     }
 }
+
+/* ===================================
+   Tabs Section
+   =================================== */
+
+.student-detail-tabs-section {
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.4s ease-out 0.25s both;
+}
+
+/* Tab Navigation */
+.student-detail-tab-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--bg-secondary, #f3f4f6);
+    padding: 0.5rem;
+    border-radius: var(--radius-xl, 16px);
+    overflow-x: auto;
+}
+
+.student-detail-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-lg, 12px);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-muted, #6b7280);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.student-detail-tab-btn:hover {
+    background: var(--card-bg, #ffffff);
+    color: var(--text-primary, #1a1a1a);
+}
+
+.student-detail-tab-btn-active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.student-detail-tab-btn-active:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #6a4190 100%);
+}
+
+.student-detail-tab-icon {
+    font-size: 1.125rem;
+}
+
+/* Tab Content */
+.student-detail-tab-content {
+    display: none;
+    background: var(--card-bg, #ffffff);
+    border-radius: var(--radius-xl, 16px);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    overflow: hidden;
+    animation: fadeInUp 0.3s ease-out;
+}
+
+.student-detail-tab-content-active {
+    display: block;
+}
+
+.student-detail-tab-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.student-detail-tab-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary, #1a1a1a);
+}
+
+.student-detail-tab-subtitle {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+    color: var(--text-muted, #6b7280);
+}
+
+/* Empty State */
+.student-detail-empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.student-detail-empty-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.student-detail-empty-text {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-muted, #6b7280);
+}
+
+/* ===================================
+   Academic Scores Section
+   =================================== */
+
+.student-detail-semester-list {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.student-detail-semester-card {
+    background: var(--bg-secondary, #f9fafb);
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.student-detail-semester-header {
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.student-detail-semester-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.student-detail-subjects-table-wrapper {
+    overflow-x: auto;
+}
+
+.student-detail-subjects-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.student-detail-th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted, #6b7280);
+    border-bottom: 2px solid var(--border-color, #e5e7eb);
+}
+
+.student-detail-th-final {
+    text-align: center;
+}
+
+.student-detail-tr {
+    transition: background-color 0.15s ease;
+}
+
+.student-detail-tr:hover {
+    background: var(--bg-tertiary, #f3f4f6);
+}
+
+.student-detail-td {
+    padding: 0.875rem 1rem;
+    font-size: 0.9375rem;
+    color: var(--text-primary, #1a1a1a);
+    border-bottom: 1px solid var(--border-color-light, #f3f4f6);
+}
+
+.student-detail-td-subject {
+    font-weight: 600;
+}
+
+.student-detail-td-final {
+    text-align: center;
+}
+
+.student-detail-final-score {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #16a34a;
+    border-radius: var(--radius-full, 50px);
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+/* ===================================
+   Achievements Section
+   =================================== */
+
+.student-detail-achievements-grid {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+}
+
+.student-detail-achievement-card {
+    background: var(--bg-secondary, #f9fafb);
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    border: 1px solid var(--border-color, #e5e7eb);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.student-detail-achievement-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+.student-detail-achievement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-bottom: 1px solid #fcd34d;
+}
+
+.student-detail-achievement-name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #92400e;
+}
+
+.student-detail-achievement-rank {
+    padding: 0.25rem 0.625rem;
+    background: white;
+    color: #d97706;
+    border-radius: var(--radius-full, 50px);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.student-detail-achievement-body {
+    padding: 1.25rem;
+}
+
+.student-detail-achievement-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a1a);
+}
+
+.student-detail-achievement-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.student-detail-achievement-badge {
+    padding: 0.25rem 0.625rem;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1d4ed8;
+    border-radius: var(--radius-full, 50px);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.student-detail-achievement-year {
+    font-size: 0.75rem;
+    color: var(--text-muted, #6b7280);
+}
+
+.student-detail-achievement-organizer {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    color: var(--text-muted, #6b7280);
+}
+
+.student-detail-achievement-description {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary, #374151);
+    line-height: 1.5;
+}
+
+.student-detail-achievement-footer {
+    padding: 0.875rem 1.25rem;
+    background: var(--bg-tertiary, #f3f4f6);
+    border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
+.student-detail-achievement-cert-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.student-detail-achievement-cert-link:hover {
+    color: #764ba2;
+}
+
+.student-detail-icon {
+    font-size: 0.875rem;
+}
+
+/* ===================================
+   AI Analysis Section
+   =================================== */
+
+.student-detail-ai-analysis {
+    padding: 1.5rem;
+}
+
+.student-detail-holland-section {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.student-detail-holland-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--radius-xl, 16px);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.student-detail-holland-code {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: 0.25em;
+}
+
+.student-detail-holland-label {
+    font-size: 0.8125rem;
+    opacity: 0.9;
+    margin-top: 0.25rem;
+}
+
+.student-detail-section-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--text-primary, #1a1a1a);
+}
+
+/* RIASEC Bars */
+.student-detail-riasec-section {
+    margin-bottom: 2rem;
+}
+
+.student-detail-riasec-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.student-detail-riasec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.student-detail-riasec-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.student-detail-riasec-code {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: var(--radius-md, 8px);
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.student-detail-riasec-label {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary, #1a1a1a);
+}
+
+.student-detail-riasec-score {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #667eea;
+    min-width: 40px;
+    text-align: right;
+}
+
+.student-detail-riasec-bar {
+    height: 8px;
+    background: var(--bg-secondary, #f3f4f6);
+    border-radius: var(--radius-full, 50px);
+    overflow: hidden;
+    margin-left: 40px;
+}
+
+.student-detail-riasec-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--radius-full, 50px);
+    transition: width 0.5s ease;
+}
+
+/* Summary Section */
+.student-detail-summary-section {
+    margin-bottom: 2rem;
+    padding: 1.25rem;
+    background: var(--bg-secondary, #f9fafb);
+    border-radius: var(--radius-lg, 12px);
+    border-left: 4px solid #667eea;
+}
+
+.student-detail-summary-text {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--text-secondary, #374151);
+    line-height: 1.7;
+}
+
+/* Trait Grid */
+.student-detail-trait-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.student-detail-trait-card {
+    background: var(--bg-secondary, #f9fafb);
+    border-radius: var(--radius-lg, 12px);
+    padding: 1.25rem;
+    border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.student-detail-trait-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--text-primary, #1a1a1a);
+}
+
+.student-detail-trait-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.student-detail-trait-list li {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #374151);
+}
+
+/* Recommendations Section */
+.student-detail-recommendations-section {
+    margin-bottom: 2rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-radius: var(--radius-lg, 12px);
+    border: 1px solid #a7f3d0;
+}
+
+.student-detail-recommendations-list {
+    margin: 0.75rem 0 0 0;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.student-detail-recommendation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    font-size: 0.9375rem;
+    color: var(--text-secondary, #065f46);
+}
+
+.student-detail-recommendation-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #10b981;
+    color: white;
+    border-radius: var(--radius-full, 50%);
+    font-size: 0.625rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* Career Section */
+.student-detail-career-section {
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: var(--radius-lg, 12px);
+    border: 1px solid #fcd34d;
+}
+
+.student-detail-career-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.student-detail-career-tag {
+    padding: 0.5rem 0.875rem;
+    background: white;
+    color: #92400e;
+    border-radius: var(--radius-full, 50px);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive for Tabs */
+@media (max-width: 768px) {
+    .student-detail-tab-nav {
+        flex-direction: column;
+    }
+
+    .student-detail-tab-btn {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .student-detail-achievements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .student-detail-trait-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .student-detail-riasec-bar {
+        margin-left: 0;
+    }
+}

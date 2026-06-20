@@ -149,6 +149,9 @@ $router->group(['middleware' => ['auth', 'role:super-admin', 'csrf']], function 
     $router->post('/admin/schools/:id/students', [AdminController::class, 'storeStudent']);
     $router->get('/admin/schools/:id/students/bulk-create', [AdminController::class, 'bulkCreateStudent']);
     $router->post('/admin/schools/:id/students/bulk-create', [AdminController::class, 'storeBulkStudent']);
+    $router->get('/admin/schools/:id/students/bulk-scores', [AdminController::class, 'bulkInputScores']);
+    $router->post('/admin/schools/:id/students/bulk-scores', [AdminController::class, 'storeBulkScores']);
+    $router->get('/admin/schools/:id/students/bulk-scores/template', [AdminController::class, 'downloadBulkScoresTemplate']);
 
     $router->get('/admin/schools/:id/students/:student_id', [SchoolAdminController::class, 'showStudent']);
     $router->get('/admin/schools/:id/students/:student_id/edit', [SchoolAdminController::class, 'editStudent']);
@@ -174,4 +177,9 @@ $router->group(['middleware' => ['auth', 'role:super-admin,admin', 'schooladmin'
     // Bulk Import Students routes (untuk admin/teacher)
     $router->get('/admin/students/bulk-create', [SchoolAdminController::class, 'bulkCreateStudent']);
     $router->post('/admin/students/bulk-create', [SchoolAdminController::class, 'storeBulkStudent']);
+
+    // Bulk Input Scores routes (untuk admin/teacher)
+    $router->get('/admin/students/bulk-scores', [SchoolAdminController::class, 'bulkInputScores']);
+    $router->post('/admin/students/bulk-scores', [SchoolAdminController::class, 'storeBulkScores']);
+    $router->get('/admin/students/bulk-scores/template', [SchoolAdminController::class, 'downloadBulkScoresTemplate']);
 });

@@ -660,4 +660,214 @@ class StudentProfileModel extends Model
         // Sort keys untuk konsistensi hash (gunakan nilai numeric 1 = JSON_SORT_KEYS)
         return md5(json_encode($data, 1));
     }
+
+    /**
+     * Find student by identifier (NIS/NISN or name)
+     *
+     * @param string|int $identifier NIS/NISN or student name
+     * @param int $schoolId School ID to filter by
+     * @return array|null Student profile data or null if not found
+     */
+    public function findByIdentifier(string|int $identifier, int $schoolId): ?array
+    {
+        // First, try exact match on student_id (NIS/NISN)
+        $stmt = $this->getDb()->prepare("
+            SELECT sp.*, p.*, u.email, u.name as user_name
+            FROM {$this->table} sp
+            JOIN profiles p ON sp.profile_id = p.id
+            JOIN users u ON p.user_id = u.id
+            WHERE sp.student_id = :identifier AND sp.school_id = :school_id
+            LIMIT 1
+        ");
+        $stmt->execute(['identifier' => (string)$identifier, 'school_id' => $schoolId]);
+        $row = $stmt->fetch();
+
+        if ($row !== false) {
+            return $row;
+        }
+
+        // If not found by student_id, try fuzzy match on name
+        $stmt = $this->getDb()->prepare("
+            SELECT sp.*, p.*, u.email, u.name as user_name
+            FROM {$this->table} sp
+            JOIN profiles p ON sp.profile_id = p.id
+            JOIN users u ON p.user_id = u.id
+            WHERE (p.full_name LIKE :name OR u.name LIKE :name) AND sp.school_id = :school_id
+            LIMIT 1
+        ");
+        $stmt->execute(['name' => '%' . (string)$identifier . '%', 'school_id' => $schoolId]);
+        $row = $stmt->fetch();
+
+        return $row === false ? null : $row;
+    }
+
+    /**
+     * Bulk update academic scores by identifier
+     *
+     * @param array $scoresData Array of score data from CSV
+     * @param string $semester Semester identifier (e.g., "Semester 1 Kelas 10")
+     * @param int $schoolId School ID
+     * @return array Result summary with success, failed, and errors
+     */
+    public function bulkUpdateAcademicScoresByIdentifier(array $scoresData, string $semester, int $schoolId): array
+    {
+        $result = [
+            'success' => 0,
+            'failed' => 0,
+            'errors' => []
+        ];
+
+        // Group scores by student identifier
+        $groupedByStudent = [];
+        foreach ($scoresData as $row) {
+            $identifier = $row['identifier'];
+            if (!isset($groupedByStudent[$identifier])) {
+                $groupedByStudent[$identifier] = [];
+            }
+            $groupedByStudent[$identifier][] = [
+                'subject' => $row['subject'],
+                'final_score' => (float)$row['final_score'],
+                'pengetahuan' => isset($row['pengetahuan']) ? (float)$row['pengetahuan'] : null,
+                'keterampilan' => isset($row['keterampilan']) ? (float)$row['keterampilan'] : null
+            ];
+        }
+
+        // Process each student
+        foreach ($groupedByStudent as $identifier => $subjects) {
+            try {
+                // Find student by identifier
+                $student = $this->findByIdentifier($identifier, $schoolId);
+
+                if (!$student) {
+                    $result['failed']++;
+                    $result['errors'][] = [
+                        'identifier' => $identifier,
+                        'error' => 'Student tidak ditemukan dengan NIS/NISN atau nama tersebut'
+                    ];
+                    continue;
+                }
+
+                // Parse existing academic scores
+                $existingScores = json_decode($student['academic_scores'] ?? 'null', true) ?? [];
+                if (!is_array($existingScores)) {
+                    $existingScores = [];
+                }
+
+                // Find or create semester entry
+                $semesterIndex = -1;
+                foreach ($existingScores as $index => $semData) {
+                    if (($semData['semester'] ?? '') === $semester) {
+                        $semesterIndex = $index;
+                        break;
+                    }
+                }
+
+                // Build new subjects array
+                $newSubjects = [];
+                foreach ($subjects as $subjectData) {
+                    $subject = [
+                        'name' => $subjectData['subject'],
+                        'final_score' => $subjectData['final_score']
+                    ];
+
+                    // Add sub_scores if provided
+                    $subScores = [];
+                    if ($subjectData['pengetahuan'] !== null) {
+                        $subScores['pengetahuan'] = $subjectData['pengetahuan'];
+                    }
+                    if ($subjectData['keterampilan'] !== null) {
+                        $subScores['keterampilan'] = $subjectData['keterampilan'];
+                    }
+
+                    if (!empty($subScores)) {
+                        $subject['sub_scores'] = $subScores;
+                    }
+
+                    $newSubjects[] = $subject;
+                }
+
+                // Merge with existing semester data
+                if ($semesterIndex >= 0) {
+                    // Update existing semester - merge subjects
+                    $existingSubjects = $existingScores[$semesterIndex]['subjects'] ?? [];
+                    $mergedSubjects = $this->mergeSubjects($existingSubjects, $newSubjects);
+                    $existingScores[$semesterIndex]['subjects'] = $mergedSubjects;
+                } else {
+                    // Add new semester entry
+                    $existingScores[] = [
+                        'semester' => $semester,
+                        'subjects' => $newSubjects
+                    ];
+                }
+
+                // Update database
+                $updated = $this->updateByProfileId((int)$student['profile_id'], [
+                    'academic_scores' => json_encode($existingScores)
+                ]);
+
+                if ($updated) {
+                    $result['success']++;
+                } else {
+                    $result['failed']++;
+                    $result['errors'][] = [
+                        'identifier' => $identifier,
+                        'error' => 'Gagal mengupdate database'
+                    ];
+                }
+            } catch (\Exception $e) {
+                $result['failed']++;
+                $result['errors'][] = [
+                    'identifier' => $identifier,
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Merge subjects - update existing or add new
+     *
+     * @param array $existing Existing subjects array
+     * @param array $new New subjects to merge
+     * @return array Merged subjects array
+     */
+    private function mergeSubjects(array $existing, array $new): array
+    {
+        $merged = [];
+        $existingByName = [];
+
+        // Index existing subjects by name
+        foreach ($existing as $subject) {
+            $name = $subject['name'] ?? '';
+            if ($name !== '') {
+                $existingByName[$name] = $subject;
+            }
+        }
+
+        // Merge or add new subjects
+        foreach ($new as $subject) {
+            $name = $subject['name'] ?? '';
+            if ($name === '') {
+                continue;
+            }
+
+            if (isset($existingByName[$name])) {
+                // Update existing subject - override with new values
+                $merged[] = array_merge($existingByName[$name], $subject);
+                unset($existingByName[$name]);
+            } else {
+                // Add new subject
+                $merged[] = $subject;
+            }
+        }
+
+        // Add remaining existing subjects that weren't updated
+        foreach ($existingByName as $subject) {
+            $merged[] = $subject;
+        }
+
+        return $merged;
+    }
 }

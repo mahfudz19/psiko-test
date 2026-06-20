@@ -389,6 +389,30 @@ class SchoolAdminController
     }
 
     /**
+     * Download template CSV untuk bulk input scores
+     */
+    public function downloadBulkScoresTemplate(Request $request, Response $response): void
+    {
+        // CSV content - contoh dengan 3 nilai per siswa
+        $csvContent = "identifier,semester,subject,final_score,pengetahuan,keterampilan\n";
+        $csvContent .= "0012345678,Semester 1 Kelas 10,Matematika,85,80,90\n";
+        $csvContent .= "0012345678,Semester 1 Kelas 10,Bahasa Indonesia,88,85,91\n";
+        $csvContent .= "0012345678,Semester 1 Kelas 10,Bahasa Inggris,90,88,92\n";
+        $csvContent .= "0012345679,Semester 1 Kelas 10,Matematika,92,90,94\n";
+        $csvContent .= "0012345679,Semester 1 Kelas 10,Bahasa Indonesia,87,85,89\n";
+        $csvContent .= "0012345679,Semester 1 Kelas 10,IPA,95,93,97\n";
+
+        // Set headers for download
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="template_input_nilai_massal.csv"');
+        header('Content-Length: ' . strlen($csvContent));
+
+        // Output CSV content
+        echo $csvContent;
+        exit;
+    }
+
+    /**
      * Form bulk import siswa (CSV upload)
      * Method ini untuk super-admin yang ingin input banyak siswa sekaligus di sekolah tertentu
      */
@@ -578,6 +602,194 @@ class SchoolAdminController
             } catch (\Exception $e) {
                 $db->rollBack();
                 return $response->redirect($url . '?error=500&message=' . urlencode('Gagal mengimport data: ' . $e->getMessage()));
+            }
+        } catch (\Exception $e) {
+            return $response->redirect($url . '?error=500&message=' . urlencode($e->getMessage()));
+        }
+    }
+
+    /**
+     * Form bulk input nilai untuk school admin
+     * Method ini untuk admin sekolah yang ingin input banyak nilai siswa sekaligus
+     */
+    public function bulkInputScores(Request $request, Response $response): View | RedirectResponse
+    {
+        try {
+            $is_super_admin = $this->isSuperAdmin();
+            $schoolId = $is_super_admin ? $request->param('id') : $this->getAdminSchoolId();
+
+            $school = $this->schoolModel->find($schoolId);
+
+            if (!$school) {
+                return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+            }
+
+            return $response->renderPage(['school' => $school], ['meta' => ['title' => 'Input Nilai Massal']]);
+        } catch (\Exception $e) {
+            return $response->redirect('/admin/schools?error=500&message=' . urlencode($e->getMessage()));
+        }
+    }
+
+    /**
+     * Proses upload CSV dan simpan banyak nilai siswa sekaligus
+     * Format CSV: identifier,semester,subject,final_score,pengetahuan,keterampilan
+     * identifier bisa NIS/NISN atau nama siswa
+     */
+    public function storeBulkScores(Request $request, Response $response): View | RedirectResponse
+    {
+        $is_super_admin = $this->isSuperAdmin();
+        $schoolId = $is_super_admin ? $request->param('id') : $this->getAdminSchoolId();
+        $url = $is_super_admin ? '/admin/schools/' . $schoolId . '/students/bulk-scores' : '/admin/students/bulk-scores';
+        $url_success = $is_super_admin ? '/admin/schools/' . $schoolId . '/students' : '/admin/students';
+
+        try {
+            // Validasi file upload
+            $file = $request->file('csv_file');
+
+            if (!$file) {
+                return $response->redirect($url . '?error=400&message=' . urlencode('File CSV wajib diupload'));
+            }
+
+            // Validasi upload error
+            if ($file->getError() !== UPLOAD_ERR_OK) {
+                return $response->redirect($url . '?error=400&message=' . urlencode('Gagal upload file'));
+            }
+
+            // Validasi tipe file
+            $allowedTypes = ['text/csv', 'text/plain', 'application/vnd.ms-excel'];
+            if (!in_array($file->getClientMimeType(), $allowedTypes)) {
+                return $response->redirect($url . '?error=400&message=' . urlencode('File harus berformat CSV'));
+            }
+
+            // Pindahkan file ke temporary directory untuk diproses
+            $tempDir = sys_get_temp_dir() . '/bulk_import';
+            if (!is_dir($tempDir)) {
+                mkdir($tempDir, 0755, true);
+            }
+
+            $tempFilename = 'bulk_scores_' . time() . '_' . uniqid() . '.csv';
+            $tempPath = $tempDir . '/' . $tempFilename;
+
+            if (!$file->move($tempDir, $tempFilename)) {
+                return $response->redirect($url . '?error=500&message=' . urlencode('Gagal menyimpan file CSV'));
+            }
+
+            // Baca file CSV
+            $csvData = file_get_contents($tempPath);
+
+            // Hapus file temporary setelah dibaca
+            unlink($tempPath);
+
+            $lines = explode("\n", $csvData);
+
+            // Skip header dan ambil data
+            $headers = str_getcsv(array_shift($lines));
+            $scoresData = [];
+            $errors = [];
+
+            foreach ($lines as $index => $line) {
+                if (empty(trim($line))) {
+                    continue;
+                }
+
+                $row = str_getcsv($line);
+                if (count($row) < count($headers)) {
+                    $errors[] = "Baris " . ($index + 2) . ": Jumlah kolom tidak sesuai";
+                    continue;
+                }
+
+                $rowData = array_combine($headers, $row);
+
+                // Validasi required fields
+                $required = ['identifier', 'semester', 'subject', 'final_score'];
+                $missingFields = [];
+                foreach ($required as $field) {
+                    if (empty($rowData[$field])) {
+                        $missingFields[] = $field;
+                    }
+                }
+
+                if (!empty($missingFields)) {
+                    $errors[] = "Baris " . ($index + 2) . ": Field wajib kosong - " . implode(', ', $missingFields);
+                    continue;
+                }
+
+                // Validasi score format
+                if (!is_numeric($rowData['final_score']) || $rowData['final_score'] < 0 || $rowData['final_score'] > 100) {
+                    $errors[] = "Baris " . ($index + 2) . ": final_score harus angka 0-100";
+                    continue;
+                }
+
+                if (isset($rowData['pengetahuan']) && !empty($rowData['pengetahuan'])) {
+                    if (!is_numeric($rowData['pengetahuan']) || $rowData['pengetahuan'] < 0 || $rowData['pengetahuan'] > 100) {
+                        $errors[] = "Baris " . ($index + 2) . ": pengetahuan harus angka 0-100";
+                        continue;
+                    }
+                }
+
+                if (isset($rowData['keterampilan']) && !empty($rowData['keterampilan'])) {
+                    if (!is_numeric($rowData['keterampilan']) || $rowData['keterampilan'] < 0 || $rowData['keterampilan'] > 100) {
+                        $errors[] = "Baris " . ($index + 2) . ": keterampilan harus angka 0-100";
+                        continue;
+                    }
+                }
+
+                $scoresData[] = $rowData;
+            }
+
+            // Jika ada error validasi, kembalikan dengan error
+            if (!empty($errors)) {
+                return $response->redirect($url . '?error=400&message=' . urlencode('Terdapat ' . count($errors) . ' error validasi'));
+            }
+
+            if (empty($scoresData)) {
+                return $response->redirect($url . '?error=400&message=' . urlencode('Tidak ada data nilai untuk diproses'));
+            }
+
+            // Group data by semester
+            $groupedBySemester = [];
+            foreach ($scoresData as $row) {
+                $semester = $row['semester'];
+                if (!isset($groupedBySemester[$semester])) {
+                    $groupedBySemester[$semester] = [];
+                }
+                $groupedBySemester[$semester][] = $row;
+            }
+
+            // Process each semester batch
+            $db = $this->studentModel->getDb();
+            $db->beginTransaction();
+
+            try {
+                $totalSuccess = 0;
+                $totalFailed = 0;
+                $allErrors = [];
+
+                foreach ($groupedBySemester as $semester => $semesterData) {
+                    $result = $this->studentModel->bulkUpdateAcademicScoresByIdentifier($semesterData, $semester, $schoolId);
+
+                    $totalSuccess += $result['success'];
+                    $totalFailed += $result['failed'];
+                    $allErrors = array_merge($allErrors, $result['errors']);
+                }
+
+                $db->commit();
+
+                // Set success message
+                $message = "Berhasil mengupdate nilai {$totalSuccess} siswa";
+                if ($totalFailed > 0) {
+                    $message .= " ({$totalSuccess} berhasil, {$totalFailed} gagal)";
+                }
+
+                // Store errors in session for display
+                if (!empty($allErrors)) {
+                    $_SESSION['bulk_scores_errors'] = $allErrors;
+                }
+
+                return $response->redirect($url_success . '?success=1&message=' . urlencode($message));
+            } catch (\Exception $e) {
+                $db->rollBack();
+                return $response->redirect($url . '?error=500&message=' . urlencode('Gagal mengupdate data: ' . $e->getMessage()));
             }
         } catch (\Exception $e) {
             return $response->redirect($url . '?error=500&message=' . urlencode($e->getMessage()));

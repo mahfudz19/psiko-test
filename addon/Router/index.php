@@ -67,14 +67,6 @@ $router->group(['middleware' => ['auth']], function () use ($router) {
     $router->get('/profile/results', [ProfileController::class, 'results']);
     $router->post('/profile/results/generate', [ProfileController::class, 'generateAiAnalysis'], ['csrf']);
 
-    // Teacher routes
-    $router->get('/profile/students', [ProfileController::class, 'listStudents']);
-    $router->get('/profile/schedule', [ProfileController::class, 'schedule']);
-
-    // Staff routes
-    $router->get('/profile/permissions', [ProfileController::class, 'permissions']);
-    $router->post('/profile/permissions', [ProfileController::class, 'updatePermissions'], ['csrf']);
-
     // Chat Consultation routes (untuk siswa)
     $router->get('/chat', [ChatController::class, 'index']);
     $router->get('/chat/create', [ChatController::class, 'create']);

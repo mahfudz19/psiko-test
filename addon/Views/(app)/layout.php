@@ -31,7 +31,7 @@
       </a>
       <?php
       // Profile menu dengan submenu untuk student
-      $isProfilePage = in_array($currentPath, ['/profile', '/profile/academic', '/profile/achievements', '/profile/results', '/profile/schedule', '/profile/permissions', '/profile/students', '/profile/edit']);
+      $isProfilePage = in_array($currentPath, ['/profile', '/profile/academic', '/profile/achievements', '/profile/results', '/profile/edit']);
       $isStudentProfile = in_array($currentPath, ['/profile/academic', '/profile/achievements', '/profile/results']);
       ?>
       <div class="sidebar-nav-group">

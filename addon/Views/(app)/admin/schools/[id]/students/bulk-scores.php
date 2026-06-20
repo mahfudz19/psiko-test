@@ -1,3 +1,9 @@
+<?php
+
+/**
+ * @var array $school
+ */
+?>
 <header class="bulk-scores-header">
     <h1>📊 Input Nilai Massal</h1>
     <p>Sekolah: <strong><?= htmlspecialchars($school['name'] ?? '') ?></strong></p>

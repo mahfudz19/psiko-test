@@ -598,7 +598,7 @@ class SchoolAdminController
                     $_SESSION['bulk_import_failed'] = $failedData;
                 }
 
-                return $response->redirect($url_success . '?success=1&message=' . urlencode($message));
+                return $response->redirect($url_success . '?success=' . urlencode($message));
             } catch (\Exception $e) {
                 $db->rollBack();
                 return $response->redirect($url . '?error=500&message=' . urlencode('Gagal mengimport data: ' . $e->getMessage()));
@@ -786,7 +786,7 @@ class SchoolAdminController
                     $_SESSION['bulk_scores_errors'] = $allErrors;
                 }
 
-                return $response->redirect($url_success . '?success=1&message=' . urlencode($message));
+                return $response->redirect($url_success . '?success=' . urlencode($message));
             } catch (\Exception $e) {
                 $db->rollBack();
                 return $response->redirect($url . '?error=500&message=' . urlencode('Gagal mengupdate data: ' . $e->getMessage()));

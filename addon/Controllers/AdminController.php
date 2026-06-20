@@ -233,19 +233,31 @@ class AdminController
    */
   public function deleteSchool(Request $request, Response $response): View | RedirectResponse
   {
+    $id = $request->param('id');
     try {
-      $id = $request->param('id');
       $school = $this->schoolModel->find($id);
 
       if (!$school) {
-        return $response->redirect('/admin/schools?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+        return $response->redirect('/admin/schools/' . $id . '?error=404&message=' . urlencode('Sekolah tidak ditemukan'));
+      }
+
+      // check if school has teachers
+      $allTeachers = $this->teacherModel->findBySchoolId($id);
+      if ($allTeachers) {
+        return $response->redirect('/admin/schools/' . $id . '?error=400&message=' . urlencode('Sekolah ini masih memiliki guru'));
+      }
+
+      // check if school has students
+      $allStudents = $this->studentModel->findBySchoolId($id);
+      if ($allStudents) {
+        return $response->redirect('/admin/schools/' . $id . '?error=400&message=' . urlencode('Sekolah ini masih memiliki siswa'));
       }
 
       $this->schoolModel->deleteById($id);
 
       return $response->redirect('/admin/schools');
     } catch (\Exception $e) {
-      return $response->redirect('/admin/schools?error=500&message=' . urlencode($e->getMessage()));
+      return $response->redirect('/admin/schools/' . $id . '?error=500&message=' . urlencode($e->getMessage()));
     }
   }
 
@@ -855,7 +867,7 @@ class AdminController
           $message .= " ({$successCount} berhasil, " . count($failedData) . " gagal)";
         }
 
-        return $response->redirect('/admin/schools/' . $schoolId . '/students?success=1&message=' . urlencode($message));
+        return $response->redirect('/admin/schools/' . $schoolId . '/students?success=' . urlencode($message));
       } catch (\Exception $e) {
         $db->rollBack();
         return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-create?error=500&message=' . urlencode('Gagal mengimport data: ' . $e->getMessage()));
@@ -1043,7 +1055,7 @@ class AdminController
           $_SESSION['bulk_scores_errors'] = $allErrors;
         }
 
-        return $response->redirect('/admin/schools/' . $schoolId . '/students?success=1&message=' . urlencode($message));
+        return $response->redirect('/admin/schools/' . $schoolId . '/students?success=' . urlencode($message));
       } catch (\Exception $e) {
         $db->rollBack();
         return $response->redirect('/admin/schools/' . $schoolId . '/students/bulk-scores?error=500&message=' . urlencode('Gagal mengupdate data: ' . $e->getMessage()));

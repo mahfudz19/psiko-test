@@ -34,8 +34,6 @@ class TeacherProfileModel extends Model
         'counseling_schedule' => ['type' => 'json', 'nullable' => true]
     ];
 
-
-
     protected array $seed = [
         [
             'profile_id' => 1,

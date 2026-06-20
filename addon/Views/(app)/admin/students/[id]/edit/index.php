@@ -23,13 +23,6 @@
                 <?= csrf_field() ?>
                 <!-- Section 1: Student Info -->
                 <div class="form-section">
-                    <div class="section-header">
-                        <span class="section-icon">🎓</span>
-                        <div class="section-info">
-                            <h3 class="section-title">Informasi Siswa</h3>
-                            <p class="section-description">Data akademik siswa</p>
-                        </div>
-                    </div>
                     <div class="form-grid form-grid-2">
                         <div class="form-group">
                             <label for="student_id" class="form-label">

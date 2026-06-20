@@ -8,6 +8,7 @@
  */
 
 $url_edit_page = $is_super_admin ? "/admin/schools/{$student['school_id']}/students/{$student['user_id']}/edit" : "/admin/students/{$student['user_id']}/edit";
+$url_delete_action = $is_super_admin ? "/admin/schools/{$student['school_id']}/students/{$student['user_id']}/delete" : "/admin/students/{$student['user_id']}/delete";
 ?>
 
 <div class="student-detail-page">
@@ -144,7 +145,7 @@ $url_edit_page = $is_super_admin ? "/admin/schools/{$student['school_id']}/stude
         Menghapus siswa akan menghapus semua data terkait termasuk nilai, pencapaian, dan riwayat konseling.
         Pastikan Anda telah melakukan backup data sebelum melanjutkan.
       </p>
-      <form data-spa action="/admin/students/<?= $student['user_id'] ?>/delete" method="POST" class="student-detail-danger-form">
+      <form data-spa action="<?= $url_delete_action ?>" method="POST" class="student-detail-danger-form">
         <button type="submit" class="student-detail-btn student-detail-btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini? Tindakan ini tidak dapat dibatalkan.')">
           <span class="student-detail-btn-icon">🗑️</span>
           Hapus Siswa

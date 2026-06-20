@@ -301,6 +301,8 @@ class SchoolAdminController
     {
         try {
             $studentId = $request->param('id');
+            $is_super_admin = $this->isSuperAdmin();
+
             $profile = $this->profileModel->findByUserId($studentId);
             if (!$profile) {
                 return $response->redirect('/admin/students?error=404&message=' . urlencode('Profile siswa tidak ditemukan'));
@@ -313,9 +315,10 @@ class SchoolAdminController
 
             // Validasi bahwa siswa ini berada di sekolah admin
             $schoolId = $this->getAdminSchoolId();
-            if ($student['school_id'] != $schoolId) {
+            if ($student['school_id'] != $schoolId && !$is_super_admin) {
                 return $response->redirect('/admin/students?error=403&message=' . urlencode('Anda tidak memiliki akses ke siswa ini'));
             }
+
 
             $data = $request->input();
             // Validasi field yang diperlukan
@@ -343,7 +346,7 @@ class SchoolAdminController
             ];
             $this->studentModel->updateById($student['id'], $studentData);
 
-            return $response->redirect('/admin/students/' . $studentId);
+            return $response->redirect($is_super_admin ? '/admin/schools/'  . $student['school_id'] . '/students/' . $studentId : '/admin/students/' . $studentId);
         } catch (\Exception $e) {
             return $response->redirect('/admin/students/' . $request->param('id') . '/edit?error=500&message=' . urlencode($e->getMessage()));
         }

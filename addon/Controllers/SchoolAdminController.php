@@ -11,6 +11,7 @@ use App\Core\Http\Request;
 use App\Core\Http\Response;
 use App\Core\Http\RedirectResponse;
 use App\Core\View\View;
+use App\Services\SessionService;
 
 /**
  * School Admin Controller
@@ -25,6 +26,7 @@ class SchoolAdminController
         private TeacherProfileModel $teacherModel,
         private StudentProfileModel $studentModel,
         private ProfileModel $profileModel,
+        private SessionService $session,
         private UserModel $userModel
     ) {}
 
@@ -34,6 +36,11 @@ class SchoolAdminController
     private function getAdminSchoolId(): int
     {
         return $_SESSION['admin.school_id'] ?? 0;
+    }
+
+    private function isSuperAdmin(): bool
+    {
+        return $this->session->get('auth.user_role') === 'super-admin';
     }
 
     /**
@@ -232,7 +239,9 @@ class SchoolAdminController
     public function showStudent(Request $request, Response $response): View | RedirectResponse
     {
         try {
-            $studentId = $request->param('id');
+            $is_super_admin = $this->isSuperAdmin();
+
+            $studentId = $is_super_admin ? $request->param('student_id') : $request->param('id');
             $student = $this->studentModel->findByUserId($studentId);
 
             if (!$student) {
@@ -240,12 +249,16 @@ class SchoolAdminController
             }
 
             // Validasi bahwa siswa ini berada di sekolah admin
-            $schoolId = $this->getAdminSchoolId();
+            $schoolId = $is_super_admin ? $request->param('id')  : $this->getAdminSchoolId();
+
             if ($student['school_id'] != $schoolId) {
                 return $response->redirect('/admin/students?error=403&message=' . urlencode('Anda tidak memiliki akses ke siswa ini'));
             }
 
-            return $response->renderPage(['student' => $student], ['meta' => ['title' => 'Detail Siswa']]);
+            return $response->renderPage(
+                ['student' => $student, 'is_super_admin' => $is_super_admin],
+                ['meta' => ['title' => 'Detail Siswa'], 'path' => '/admin/students/:id']
+            );
         } catch (\Exception $e) {
             return $response->redirect('/admin/students?error=500&message=' . urlencode($e->getMessage()));
         }
@@ -257,7 +270,9 @@ class SchoolAdminController
     public function editStudent(Request $request, Response $response): View | RedirectResponse
     {
         try {
-            $studentId = $request->param('id');
+            $is_super_admin = $this->isSuperAdmin();
+
+            $studentId = $is_super_admin ? $request->param('student_id') : $request->param('id');
             $student = $this->studentModel->findByUserId($studentId);
 
             if (!$student) {
@@ -265,12 +280,15 @@ class SchoolAdminController
             }
 
             // Validasi bahwa siswa ini berada di sekolah admin
-            $schoolId = $this->getAdminSchoolId();
+            $schoolId = $is_super_admin ? $request->param('id') : $this->getAdminSchoolId();
             if ($student['school_id'] != $schoolId) {
                 return $response->redirect('/admin/students?error=403&message=' . urlencode('Anda tidak memiliki akses ke siswa ini'));
             }
 
-            return $response->renderPage(['student' => $student], ['meta' => ['title' => 'Edit Siswa']]);
+            return $response->renderPage(
+                ['student' => $student, 'is_super_admin' => $is_super_admin],
+                ['meta' => ['title' => 'Edit Siswa'], 'path' => '/admin/students/:id/edit']
+            );
         } catch (\Exception $e) {
             return $response->redirect('/admin/students?error=500&message=' . urlencode($e->getMessage()));
         }
@@ -337,7 +355,9 @@ class SchoolAdminController
     public function deleteStudent(Request $request, Response $response): View | RedirectResponse
     {
         try {
-            $studentId = $request->param('id');
+            $is_super_admin = $this->isSuperAdmin();
+
+            $studentId = $is_super_admin ? $request->param('student_id') : $request->param('id');
             $user = $this->userModel->find($studentId);
             if (!$user) {
                 return $response->redirect('/admin/students?error=404&message=' . urlencode('Siswa tidak ditemukan'));
@@ -352,14 +372,14 @@ class SchoolAdminController
             }
 
             // Validasi bahwa siswa ini berada di sekolah admin
-            $schoolId = $this->getAdminSchoolId();
+            $schoolId = $is_super_admin ? $request->param('id') : $this->getAdminSchoolId();
             if ($student['school_id'] != $schoolId) {
                 return $response->redirect('/admin/students?error=403&message=' . urlencode('Anda tidak memiliki akses ke siswa ini'));
             }
 
             $this->userModel->deleteById($user['id']);
 
-            return $response->redirect('/admin/students');
+            return $response->redirect($is_super_admin ? '/admin/schools/' . $schoolId . '/students' :  '/admin/students');
         } catch (\Exception $e) {
             return $response->redirect('/admin/students?error=500&message=' . urlencode($e->getMessage()));
         }

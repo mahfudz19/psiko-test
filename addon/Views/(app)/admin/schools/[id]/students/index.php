@@ -58,7 +58,7 @@
                         <tr>
                             <td>
                                 <div class="student-name">
-                                    <strong><?= htmlspecialchars($student['name'] ?? 'N/A') ?></strong>
+                                    <strong><?= htmlspecialchars($student['user_name'] ?? 'N/A') ?></strong>
                                 </div>
                             </td>
                             <td><?= htmlspecialchars($student['student_id'] ?? 'N/A') ?></td>
@@ -77,14 +77,14 @@
                                 <div class="action-buttons">
                                     <a
                                         data-spa
-                                        href="/admin/students/<?= $student['id'] ?>"
+                                        href="/admin/schools/<?= $school['id'] ?>/students/<?= $student['id'] ?>"
                                         class="btn btn-sm btn-secondary"
                                         title="Lihat Detail">
                                         👁️
                                     </a>
                                     <a
                                         data-spa
-                                        href="/admin/students/<?= $student['id'] ?>/edit"
+                                        href="/admin/schools/<?= $school['id'] ?>/students/<?= $student['id'] ?>/edit"
                                         class="btn btn-sm btn-warning"
                                         title="Edit">
                                         ✏️

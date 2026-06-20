@@ -50,12 +50,6 @@
     border-bottom: 2px solid #e0e0e0;
 }
 
-.school-form-page .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
 .school-form-page .form-label {
     font-size: 14px;
     font-weight: 500;

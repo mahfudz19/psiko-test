@@ -125,17 +125,6 @@
   margin-top: 1rem;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
-}
-
 .file-input {
   display: block;
   width: 100%;

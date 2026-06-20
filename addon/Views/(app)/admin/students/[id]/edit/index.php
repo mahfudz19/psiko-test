@@ -11,12 +11,6 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-header-content">
-            <div class="header-breadcrumb">
-                <a data-spa href="/admin/students/<?= $student['user_id'] ?>" class="breadcrumb-link">
-                    <span class="breadcrumb-icon">←</span>
-                    Detail Siswa
-                </a>
-            </div>
             <h1 class="page-title">✏️ Edit Siswa</h1>
             <p class="page-description">Perbarui informasi siswa</p>
         </div>
@@ -24,12 +18,6 @@
 
     <!-- Edit Form Card -->
     <div class="card edit-form-card">
-        <div class="card-header">
-            <div class="card-header-content">
-                <h2 class="card-title">📝 Formulir Edit Data</h2>
-                <p class="card-subtitle">Perbarui data siswa yang sudah terdaftar</p>
-            </div>
-        </div>
         <div class="card-body">
             <form action="/admin/students/<?= $student['user_id'] ?>" method="POST" class="edit-form">
                 <?= csrf_field() ?>
@@ -103,7 +91,7 @@
                                 pattern="08[0-9]{8,12}"
                                 title="Format: 08xxxxxxxxxx" />
                         </div>
-                        <div class="form-group form-group-full">
+                        <div class="form-group full-width">
                             <label for="address" class="form-label">
                                 <span class="label-icon">📍</span>
                                 Alamat Lengkap
@@ -184,10 +172,6 @@
                         <span class="btn-icon">💾</span>
                         Simpan Perubahan
                     </button>
-                    <a data-spa href="/admin/students/<?= $student['user_id'] ?>" class="btn btn-secondary">
-                        <span class="btn-icon">✕</span>
-                        Batal
-                    </a>
                 </div>
             </form>
         </div>

@@ -35,7 +35,7 @@
                 <!-- Form Grid -->
                 <div class="form-grid">
                     <!-- School Name -->
-                    <div class="form-group form-group-full">
+                    <div class="form-group full-width">
                         <label for="name" class="form-label">
                             <span class="label-icon">🏫</span>
                             Nama Sekolah
@@ -89,7 +89,7 @@
                     </div>
 
                     <!-- Address -->
-                    <div class="form-group form-group-full">
+                    <div class="form-group full-width">
                         <label for="address" class="form-label">
                             <span class="label-icon">📍</span>
                             Alamat Lengkap

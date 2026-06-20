@@ -147,14 +147,16 @@ $router->group(['middleware' => ['auth', 'role:super-admin', 'csrf']], function 
     $router->get('/admin/schools/:id/students', [AdminController::class, 'schoolStudents']);
     $router->get('/admin/schools/:id/students/create', [AdminController::class, 'createStudent']);
     $router->post('/admin/schools/:id/students', [AdminController::class, 'storeStudent']);
-
-    // Bulk Import Students routes (untuk superadmin)
     $router->get('/admin/schools/:id/students/bulk-create', [AdminController::class, 'bulkCreateStudent']);
     $router->post('/admin/schools/:id/students/bulk-create', [AdminController::class, 'storeBulkStudent']);
+
+    $router->get('/admin/schools/:id/students/:student_id', [SchoolAdminController::class, 'showStudent']);
+    $router->get('/admin/schools/:id/students/:student_id/edit', [SchoolAdminController::class, 'editStudent']);
+    $router->post('/admin/schools/:id/students/:student_id/delete', [SchoolAdminController::class, 'deleteStudent']);
 });
 
 // School Admin Routes (untuk role admin - mengelola sekolah sendiri)
-$router->group(['middleware' => ['auth', 'role:super-admin,admin', 'schooladmin', 'csrf']], function () use ($router) {
+$router->group(['middleware' => ['auth', 'role:super-admin,role:admin', 'schooladmin', 'csrf']], function () use ($router) {
     // Dashboard sekolah sendiri
     $router->get('/admin/schools/my', [SchoolAdminController::class, 'mySchool']);
     $router->get('/admin/schools/my/edit', [SchoolAdminController::class, 'editMySchool']);

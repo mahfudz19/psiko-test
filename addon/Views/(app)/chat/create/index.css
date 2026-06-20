@@ -123,15 +123,6 @@
     border-radius: 2px;
 }
 
-/* Form Group */
-.form-group {
-    margin-bottom: 28px;
-}
-
-.form-group:last-of-type {
-    margin-bottom: 32px;
-}
-
 .form-label {
     display: block;
     font-size: 15px;

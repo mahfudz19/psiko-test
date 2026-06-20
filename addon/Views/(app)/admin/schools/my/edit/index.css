@@ -117,16 +117,6 @@
     margin-bottom: 1.5rem;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.form-group-full {
-    grid-column: 1 / -1;
-}
-
 /* Form Labels */
 .form-label {
     display: flex;
@@ -145,51 +135,6 @@
     color: #ef4444;
     font-weight: 700;
     margin-left: auto;
-}
-
-/* Form Inputs */
-.form-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1.5px solid var(--border-color, #e5e7eb);
-    border-radius: var(--radius-md, 8px);
-    font-size: 0.9375rem;
-    font-family: inherit;
-    background: var(--card-bg, #ffffff);
-    color: var(--text-primary, #1a1a1a);
-    transition: all 0.2s ease;
-}
-
-.form-input:hover {
-    border-color: var(--border-hover, #d1d5db);
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--primary-color, #667eea);
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-}
-
-.form-input::placeholder {
-    color: var(--text-placeholder, #9ca3af);
-}
-
-textarea.form-input {
-    resize: vertical;
-    min-height: 100px;
-}
-
-select.form-input {
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    padding-right: 2.5rem;
-}
-
-select.form-input:focus {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
 /* Form Hints */
@@ -279,21 +224,4 @@ select.form-input:focus {
     .form-actions .btn {
         width: 100%;
     }
-}
-
-/* Focus Visible for Accessibility */
-.btn:focus-visible,
-.form-input:focus-visible,
-.breadcrumb-link:focus-visible {
-    outline: 2px solid var(--primary-color, #667eea);
-    outline-offset: 2px;
-}
-
-/* Input Validation States */
-.form-input:invalid:not(:placeholder-shown) {
-    border-color: #ef4444;
-}
-
-.form-input:valid:not(:placeholder-shown) {
-    border-color: #10b981;
 }

@@ -74,7 +74,7 @@
                                 autocomplete="email" />
                             <span class="form-hint">Email aktif untuk notifikasi</span>
                         </div>
-                        <div class="form-group form-group-full">
+                        <div class="form-group full-width">
                             <label for="password" class="form-label">
                                 <span class="label-icon">🔒</span>
                                 Password
@@ -161,7 +161,7 @@
                                 pattern="08[0-9]{8,12}"
                                 title="Format: 08xxxxxxxxxx" />
                         </div>
-                        <div class="form-group form-group-full">
+                        <div class="form-group full-width">
                             <label for="address" class="form-label">
                                 <span class="label-icon">📍</span>
                                 Alamat Lengkap

@@ -17,6 +17,9 @@ use App\Exceptions\AuthorizationException;
 use App\Core\Http\Request;
 use App\Core\Http\Response;
 use App\Core\View\View;
+use App\Core\Upload\ImageUploadService;
+use App\Core\Upload\UploadConfig;
+use App\Core\Upload\Storage\LocalFileSystemStorage;
 
 /**
  * Profile Controller - CRUD Profile + All Business Logic
@@ -158,57 +161,71 @@ class ProfileController
     }
 
     /**
-     * Upload avatar
+     * Upload avatar menggunakan ImageUploadService
+     *
+     * Endpoint ini menerima upload file avatar dari client, melakukan validasi
+     * berlapis (MIME type, file size, magic bytes), dan menyimpannya ke storage lokal.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @return Response JSON response dengan success status dan avatar URL
      */
     public function uploadAvatar(Request $request, Response $response)
     {
         $currentUser = $this->session->get('auth.user_id');
         $currentRole = $this->session->get('auth.user_role');
 
+        // Get user profile
         $userProfile = $this->profileModel->findByUserId($currentUser);
         if (!$userProfile) {
             return $response->setStatusCode(404)->setContent(json_encode(['error' => 'Profile not found']));
         }
 
+        // Get uploaded file from request
         $file = $request->file('avatar');
         if (!$file) {
-            return $response->setStatusCode(400)->setContent(json_encode(['error' => 'No file uploaded']));
+            return $response->setStatusCode(400)->setContent(json_encode(['error' => 'Tidak ada file yang diupload']));
         }
 
-        // Validate file type
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        if (!in_array($file->getClientMimeType(), $allowedTypes)) {
-            return $response->setStatusCode(400)->setContent(json_encode(['error' => 'File type not allowed']));
+        // Initialize ImageUploadService
+        $storage = new LocalFileSystemStorage();
+        $uploadService = new ImageUploadService($storage);
+
+        // Configure upload untuk avatar
+        $config = new UploadConfig(
+            uploadType: 'avatar',
+            allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+            maxSize: 2 * 1024 * 1024, // 2MB
+            maxWidth: 512,
+            maxHeight: 512,
+            directory: 'uploads/avatars',
+            generateUniqueName: true,
+            deleteOldFile: !empty($userProfile['avatar']),
+            oldFilePath: $userProfile['avatar'] ?? null
+        );
+
+        // Execute upload
+        $result = $uploadService->upload($file, $config);
+
+        // Handle failure
+        if (!$result->isSuccess()) {
+            return $response->setStatusCode(400)->setContent(json_encode([
+                'error' => $result->getErrorsAsString(),
+                'success' => false
+            ]));
         }
 
-        // Validate file size (max 2MB)
-        if ($file->getSize() > 2 * 1024 * 1024) {
-            return $response->setStatusCode(400)->setContent(json_encode(['error' => 'File size too large (max 2MB)']));
-        }
+        // Update database dengan avatar URL yang baru
+        $this->profileModel->updateById($userProfile['id'], ['avatar' => $result->publicUrl]);
 
-        // Generate unique filename
-        $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-        $filename = 'avatar_' . $currentUser . '_' . time() . '.' . $extension;
-        $uploadDir = __DIR__ . '/../../public/uploads/avatars';
-
-        // Ensure directory exists
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-
-        // Move file using UploadedFile's move() method
-        if ($file->move($uploadDir, $filename)) {
-            $avatarUrl = '/uploads/avatars/' . $filename;
-
-            // Update profile
-            $this->profileModel->updateById($userProfile['id'], ['avatar' => $avatarUrl]);
-
-            $response->setStatusCode(200);
-            $response->setHeader('Content-Type', 'application/json');
-            return $response->setContent(json_encode(['success' => true, 'avatar_url' => $avatarUrl]));
-        }
-
-        return $response->setStatusCode(500)->setContent(json_encode(['error' => 'Failed to upload file']));
+        // Return success response
+        $response->setStatusCode(200);
+        $response->setHeader('Content-Type', 'application/json');
+        return $response->setContent(json_encode([
+            'success' => true,
+            'avatar_url' => $result->publicUrl,
+            'metadata' => $result->metadata
+        ]));
     }
 
     /**

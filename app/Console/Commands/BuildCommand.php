@@ -82,7 +82,18 @@ class BuildCommand implements CommandInterface
       $this->printLineWithDots(color("!", "yellow") . " No addon providers found (skipped)", $provTime);
     }
 
-    // 5. Publish Assets
+    // 5. Storage Directory Permissions
+    echo "  5. STORAGE PERMISSIONS\n";
+    $permStart = microtime(true);
+    $permResult = $this->ensureStoragePermissions();
+    $permTime = number_format(microtime(true) - $permStart, 2) . "s";
+    if ($permResult) {
+      $this->printLineWithDots(color("✔", "green") . " Storage directories ready", $permTime);
+    } else {
+      $this->printLineWithDots(color("!", "yellow") . " Storage permission warning", $permTime);
+    }
+
+    // 6. Publish Assets
     echo "  5. ASSET MANAGEMENT\n";
     $pubStart = microtime(true);
     $coreCount = $this->publishCoreAssets();
@@ -91,7 +102,7 @@ class BuildCommand implements CommandInterface
     $pubTime = number_format(microtime(true) - $pubStart, 2) . "s";
     $this->printLineWithDots(color("✔", "green") . " {$totalAssets} assets published", $pubTime);
 
-    // 6. Minify Assets
+    // 7. Minify Assets
     echo "  6. MINIFICATION (Native PHP)\n";
     $minStart = microtime(true);
     $stats = $this->minifyAssets();
@@ -104,14 +115,14 @@ class BuildCommand implements CommandInterface
       $this->printLineWithDots(color("●", "cyan") . " CSS [" . $stats['css'] . " files]", $minTime);
     }
 
-    // 7. Versioning (Content Hashing)
+    // 8. Versioning (Content Hashing)
     echo "  7. VERSIONING (Cache Busting)\n";
     $verStart = microtime(true);
     $manifestCount = $this->versionAssets();
     $verTime = number_format(microtime(true) - $verStart, 2) . "s";
     $this->printLineWithDots(color("✔", "green") . " Manifest generated ({$manifestCount} assets)", $verTime);
 
-    // 8. Size Report
+    // 9. Size Report
     echo "  8. SIZE REPORT\n";
     $this->reportSizes();
 
@@ -580,6 +591,52 @@ class BuildCommand implements CommandInterface
     if (!is_dir($path)) {
       mkdir($path, 0755, true);
     }
+  }
+
+  /**
+   * Ensure storage directories exist with proper permissions
+   *
+   * Membuat dan mengatur permission untuk folder storage yang diperlukan:
+   * - storage/logs: untuk logging aplikasi
+   * - storage/cache: untuk cache files
+   * - public/uploads: untuk file uploads user
+   *
+   * @return bool True jika semua direktori berhasil dibuat/diatur permission-nya
+   */
+  private function ensureStoragePermissions(): bool
+  {
+    $storageDirs = [
+      __DIR__ . '/../../../storage/logs',
+      __DIR__ . '/../../../storage/cache',
+      __DIR__ . '/../../../public/uploads',
+      __DIR__ . '/../../../public/uploads/avatars',
+      __DIR__ . '/../../../public/uploads/test-statements',
+      __DIR__ . '/../../../public/uploads/school-logos',
+      __DIR__ . '/../../../public/uploads/achievements',
+    ];
+
+    $success = true;
+
+    foreach ($storageDirs as $dir) {
+      if (!is_dir($dir)) {
+        // Create directory dengan permission yang tepat
+        if (!mkdir($dir, 0755, true)) {
+          echo color("     ✖ Failed to create: {$dir}", "red") . "\n";
+          $success = false;
+          continue;
+        }
+      }
+
+      // Set permission yang aman (bukan 777!)
+      // 0755 = owner: rwx, group: rx, others: rx
+      // Ini aman karena web server biasanya berjalan sebagai owner atau group yang sama
+      if (!chmod($dir, 0755)) {
+        echo color("     ✖ Failed to set permission: {$dir}", "red") . "\n";
+        $success = false;
+      }
+    }
+
+    return $success;
   }
 
   private function buildProviderCache(): bool

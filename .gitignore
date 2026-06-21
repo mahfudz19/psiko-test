@@ -4,3 +4,4 @@ vendor
 storage/secrets/*
 public/build
 storage
+public/uploads

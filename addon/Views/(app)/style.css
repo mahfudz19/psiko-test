@@ -74,8 +74,6 @@
   padding: 12px 16px;
   border-radius: 12px;
   color: var(--text-secondary);
-  font-weight: 600;
-  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   color: var(--primary-dark);

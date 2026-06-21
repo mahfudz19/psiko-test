@@ -193,7 +193,7 @@ class SchoolConfigMappingModel extends Model
         $data = [
             'school_id' => $schoolId,
             'config_id' => $configId,
-            'is_default' => $isDefault
+            'is_default' => $isDefault ? 1 : 0  // Explicitly cast boolean to integer for MySQL
         ];
 
         if (isset($options['valid_from'])) {

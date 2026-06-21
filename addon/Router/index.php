@@ -9,6 +9,7 @@ use Addon\Controllers\AdminController;
 use Addon\Controllers\SchoolAdminController;
 use Addon\Controllers\ChatController;
 use Addon\Controllers\TestController;
+use Addon\Controllers\TestManagementController;
 
 /** @var \App\Core\Routing\Router $router */
 
@@ -145,6 +146,20 @@ $router->group(['middleware' => ['auth', 'role:super-admin', 'csrf']], function 
     $router->get('/admin/schools/:id/students/bulk-scores', [AdminController::class, 'bulkInputScores']);
     $router->post('/admin/schools/:id/students/bulk-scores', [AdminController::class, 'storeBulkScores']);
     $router->get('/admin/schools/:id/students/bulk-scores/template', [AdminController::class, 'downloadBulkScoresTemplate']);
+
+    // Test Management routes
+    $router->get('/admin/tests', [TestManagementController::class, 'index']);
+    $router->get('/admin/tests/create', [TestManagementController::class, 'create']);
+    $router->post('/admin/tests', [TestManagementController::class, 'store']);
+    $router->get('/admin/tests/:id/edit', [TestManagementController::class, 'edit']);
+    $router->post('/admin/tests/:id/update', [TestManagementController::class, 'update']);
+    $router->post('/admin/tests/:id/delete', [TestManagementController::class, 'delete']);
+    $router->get('/admin/tests/:id/statements', [TestManagementController::class, 'manageStatements']);
+    $router->post('/admin/tests/:id/statements', [TestManagementController::class, 'addStatement']);
+    $router->post('/admin/tests/:id/statements/:statement_id/delete', [TestManagementController::class, 'deleteStatement']);
+    $router->get('/admin/tests/:id/assign', [TestManagementController::class, 'assignToSchools']);
+    $router->post('/admin/tests/:id/assign', [TestManagementController::class, 'saveAssignment']);
+    $router->post('/admin/tests/:id/toggle-active', [TestManagementController::class, 'toggleActive']);
 
     $router->get('/admin/schools/:id/students/:student_id', [SchoolAdminController::class, 'showStudent']);
     $router->get('/admin/schools/:id/students/:student_id/edit', [SchoolAdminController::class, 'editStudent']);

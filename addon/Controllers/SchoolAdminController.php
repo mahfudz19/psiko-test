@@ -35,7 +35,7 @@ class SchoolAdminController
      */
     private function getAdminSchoolId(): int
     {
-        return $_SESSION['admin.school_id'] ?? 0;
+        return $_SESSION['auth.school_id'] ?? 0;
     }
 
     private function isSuperAdmin(): bool

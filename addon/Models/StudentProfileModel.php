@@ -392,6 +392,42 @@ class StudentProfileModel extends Model
     }
 
     /**
+     * Assign school to student profile
+     * If profile doesn't exist, create it first
+     *
+     * @param int $profileId Profile ID siswa
+     * @param int $schoolId School ID yang akan di-assign
+     * @return bool True jika berhasil
+     */
+    public function assignSchool(int $profileId, int $schoolId): bool
+    {
+        // Check if student profile exists
+        $existing = $this->findByProfileId($profileId);
+
+        if ($existing) {
+            // Update existing record
+            $sql = "UPDATE {$this->table} SET school_id = :school_id WHERE profile_id = :profile_id";
+            return $this->getDb()->query($sql, [
+                'school_id' => $schoolId,
+                'profile_id' => $profileId
+            ]);
+        } else {
+            // Create new record
+            try {
+                $this->create([
+                    'profile_id' => $profileId,
+                    'school_id' => $schoolId
+                ]);
+                return true;
+            } catch (\Exception $e) {
+                // Log error but return false
+                error_log('StudentProfileModel::assignSchool - Create failed: ' . $e->getMessage());
+                return false;
+            }
+        }
+    }
+
+    /**
      * Validasi data JSON sebelum insert/update
      */
     /**

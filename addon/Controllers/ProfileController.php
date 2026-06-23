@@ -56,7 +56,7 @@ class ProfileController
         $userProfile = $this->profileModel->findByUserId($currentUser);
         if (!$userProfile) {
             // Create profile if not exists
-            $profileId = $this->profileModel->createForUser($currentUser, $currentRole);
+            $profileId = $this->profileModel->createForUser($currentUser);
             $userProfile = $this->profileModel->find($profileId);
 
             // Create role-specific profile

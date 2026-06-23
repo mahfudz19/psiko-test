@@ -256,18 +256,9 @@ class ProfileModel extends Model
     /**
      * Create profile for new user (auto-called after user registration)
      */
-    public function createForUser(int $userId, string $role): int
+    public function createForUser(int $userId): int
     {
-        $data = [
-            'user_id' => $userId,
-            'phone' => null,
-            'address' => null,
-            'birth_place' => null,
-            'birth_date' => null,
-            'gender' => null,
-            'avatar' => null,
-            'social_media' => null
-        ];
+        $data = ['user_id' => $userId];
 
         return $this->create($data);
     }

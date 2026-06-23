@@ -32,6 +32,8 @@ class SchoolAdminMiddleware implements MiddlewareInterface
       return $next($request);
     }
 
+    $userRole = $this->session->get('auth.user_role');
+
     // Admin hanya bisa akses sekolah sendiri
     if ($userRole === 'admin') {
       $config = new ConfigService();
@@ -46,16 +48,16 @@ class SchoolAdminMiddleware implements MiddlewareInterface
       }
 
       // Simpan school_id di session untuk akses cepat
-      $_SESSION['admin.school_id'] = $teacherProfile['school_id'];
-      $_SESSION['admin.teacher_profile_id'] = $teacherProfile['teacher_profile_id'];
+      $_SESSION['auth.school_id'] = $teacherProfile['school_id'];
+      $_SESSION['auth.teacher_profile_id'] = $teacherProfile['teacher_profile_id'];
 
       // Validasi jika ada parameter school_id di route
-      // $routeSchoolId = $request->param('id');
-      // if ($routeSchoolId && (int)$routeSchoolId !== $teacherProfile['school_id']) {
-      //   $e = new AuthorizationException('Anda hanya bisa mengelola sekolah sendiri.');
-      //   $e->hardRedirect();
-      //   throw $e;
-      // }
+      $routeSchoolId = $request->param('id');
+      if ($routeSchoolId && (int)$routeSchoolId === $teacherProfile['school_id']) {
+        $e = new AuthorizationException('Anda hanya bisa mengelola sekolah sendiri.');
+        $e->hardRedirect();
+        throw $e;
+      }
 
       return $next($request);
     }

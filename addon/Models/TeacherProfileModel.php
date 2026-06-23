@@ -381,6 +381,42 @@ class TeacherProfileModel extends Model
     }
 
     /**
+     * Assign school to teacher profile
+     * If profile doesn't exist, create it first
+     *
+     * @param int $profileId Profile ID guru
+     * @param int $schoolId School ID yang akan di-assign
+     * @return bool True jika berhasil
+     */
+    public function assignSchool(int $profileId, int $schoolId): bool
+    {
+        // Check if teacher profile exists
+        $existing = $this->findByProfileId($profileId);
+
+        if ($existing) {
+            // Update existing record
+            $sql = "UPDATE {$this->table} SET school_id = :school_id WHERE profile_id = :profile_id";
+            return $this->getDb()->query($sql, [
+                'school_id' => $schoolId,
+                'profile_id' => $profileId
+            ]);
+        } else {
+            // Create new record
+            try {
+                $this->create([
+                    'profile_id' => $profileId,
+                    'school_id' => $schoolId
+                ]);
+                return true;
+            } catch (\Exception $e) {
+                // Log error but return false
+                error_log('TeacherProfileModel::assignSchool - Create failed: ' . $e->getMessage());
+                return false;
+            }
+        }
+    }
+
+    /**
      * Validasi data JSON sebelum insert/update
      */
     protected function validateJsonData(array $data): void

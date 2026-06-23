@@ -10,6 +10,7 @@ use Addon\Controllers\SchoolAdminController;
 use Addon\Controllers\ChatController;
 use Addon\Controllers\TestController;
 use Addon\Controllers\TestManagementController;
+use Addon\Controllers\SearchSchoolController;
 
 /** @var \App\Core\Routing\Router $router */
 
@@ -40,154 +41,165 @@ $router->group(['middleware' => ['guest']], function () use ($router) {
     $router->get('/auth/callback', [AuthController::class, 'googleCallback']);
 });
 
-// Auth routes (require login)
+$router->group(['middleware' => ['hasscholl']], function () use ($router) {
+    // Auth routes (require login)
+    $router->group(['middleware' => ['auth']], function () use ($router) {
+        // Dashboard
+        $router->get('/dashboard', [DashboardController::class, 'index']);
+
+        // Logout
+        $router->post('/logout', [AuthController::class, 'logout']);
+    });
+});
+
+// Search School routes (require login, no hasscholl middleware)
 $router->group(['middleware' => ['auth']], function () use ($router) {
-    // Dashboard
-    $router->get('/dashboard', [DashboardController::class, 'index']);
-
-    // Logout
-    $router->post('/logout', [AuthController::class, 'logout']);
+    $router->get('/search-school', [SearchSchoolController::class, 'index']);
+    $router->post('/search-school/select', [SearchSchoolController::class, 'select'], ['csrf']);
 });
 
-// Home route
-$router->get('/', [AuthController::class, 'redirectDashboard']);
+$router->group(['middleware' => ['hasscholl']], function () use ($router) {
 
-// Profile routes (require login)
-$router->group(['middleware' => ['auth']], function () use ($router) {
-    // Main profile pages
-    $router->get('/profile', [ProfileController::class, 'show']);
-    $router->get('/profile/edit', [ProfileController::class, 'edit']);
-    $router->post('/profile/update', [ProfileController::class, 'update'], ['csrf']);
-    $router->post('/profile/avatar', [ProfileController::class, 'uploadAvatar'], ['csrf']);
+    // Home route
+    $router->get('/', [AuthController::class, 'redirectDashboard']);
 
-    // Student routes
-    $router->get('/profile/academic', [ProfileController::class, 'academic']);
-    $router->post('/profile/academic', [ProfileController::class, 'updateAcademic'], ['csrf']);
-    $router->get('/profile/achievements', [ProfileController::class, 'achievements']);
-    $router->post('/profile/achievements', [ProfileController::class, 'updateAchievements'], ['csrf']);
-    $router->get('/profile/results', [ProfileController::class, 'results']);
-    $router->post('/profile/results/generate', [ProfileController::class, 'generateAiAnalysis'], ['csrf']);
+    // Profile routes (require login)
+    $router->group(['middleware' => ['auth']], function () use ($router) {
+        // Main profile pages
+        $router->get('/profile', [ProfileController::class, 'show']);
+        $router->get('/profile/edit', [ProfileController::class, 'edit']);
+        $router->post('/profile/update', [ProfileController::class, 'update'], ['csrf']);
+        $router->post('/profile/avatar', [ProfileController::class, 'uploadAvatar'], ['csrf']);
 
-    // Chat Consultation routes (untuk siswa)
-    $router->get('/chat', [ChatController::class, 'index']);
-    $router->get('/chat/create', [ChatController::class, 'create']);
-    $router->post('/chat', [ChatController::class, 'store']);
-    $router->get('/chat/:session_id', [ChatController::class, 'show']);
-    $router->post('/chat/send', [ChatController::class, 'sendMessage']);
-    $router->post('/chat/delete', [ChatController::class, 'delete']);
-});
+        // Student routes
+        $router->get('/profile/academic', [ProfileController::class, 'academic']);
+        $router->post('/profile/academic', [ProfileController::class, 'updateAcademic'], ['csrf']);
+        $router->get('/profile/achievements', [ProfileController::class, 'achievements']);
+        $router->post('/profile/achievements', [ProfileController::class, 'updateAchievements'], ['csrf']);
+        $router->get('/profile/results', [ProfileController::class, 'results']);
+        $router->post('/profile/results/generate', [ProfileController::class, 'generateAiAnalysis'], ['csrf']);
 
-// PMB routes (require login, role: user/siswa)
-$router->group(['middleware' => ['auth']], function () use ($router) {
-    // Main PMB pages
-    $router->get('/pmb', [PmbController::class, 'index']);
-    $router->get('/pmb/journey', [PmbController::class, 'journey']);
+        // Chat Consultation routes (untuk siswa)
+        $router->get('/chat', [ChatController::class, 'index']);
+        $router->get('/chat/create', [ChatController::class, 'create']);
+        $router->post('/chat', [ChatController::class, 'store']);
+        $router->get('/chat/:session_id', [ChatController::class, 'show']);
+        $router->post('/chat/send', [ChatController::class, 'sendMessage']);
+        $router->post('/chat/delete', [ChatController::class, 'delete']);
+    });
 
-    // Simulation
-    $router->get('/pmb/simulation', [PmbController::class, 'simulation']);
-    $router->post('/pmb/simulation/step', [PmbController::class, 'saveSimulationStep'], ['csrf']);
-    $router->get('/pmb/simulation/complete', [PmbController::class, 'completeSimulation']);
-    $router->get('/pmb/simulation/convert', [PmbController::class, 'convertToRealApplication']);
+    // PMB routes (require login, role: user/siswa)
+    $router->group(['middleware' => ['auth']], function () use ($router) {
+        // Main PMB pages
+        $router->get('/pmb', [PmbController::class, 'index']);
+        $router->get('/pmb/journey', [PmbController::class, 'journey']);
 
-    // Scholarship
-    $router->get('/pmb/scholarship', [PmbController::class, 'scholarship']);
-});
+        // Simulation
+        $router->get('/pmb/simulation', [PmbController::class, 'simulation']);
+        $router->post('/pmb/simulation/step', [PmbController::class, 'saveSimulationStep'], ['csrf']);
+        $router->get('/pmb/simulation/complete', [PmbController::class, 'completeSimulation']);
+        $router->get('/pmb/simulation/convert', [PmbController::class, 'convertToRealApplication']);
 
-// Test routes (require login, role: user/siswa)
-$router->group(['middleware' => ['auth']], function () use ($router) {
-    // Test Dashboard (redirect ke /profile/results)
-    $router->get('/tests', [TestController::class, 'index']);
+        // Scholarship
+        $router->get('/pmb/scholarship', [PmbController::class, 'scholarship']);
+    });
 
-    // RIASEC Test routes
-    $router->get('/tests/riasec', [TestController::class, 'riasecIndex']);
-    $router->post('/tests/riasec/start', [TestController::class, 'startTest'], ['csrf']);
-    $router->get('/tests/riasec/take', [TestController::class, 'takeTest']);
-    $router->post('/tests/riasec/submit', [TestController::class, 'submitTest'], ['csrf']);
-    $router->get('/tests/riasec/results', [TestController::class, 'viewResults']);
+    // Test routes (require login, role: user/siswa)
+    $router->group(['middleware' => ['auth']], function () use ($router) {
+        // Test Dashboard (redirect ke /profile/results)
+        $router->get('/tests', [TestController::class, 'index']);
 
-    // IQ Test routes (placeholder untuk pengembangan selanjutnya)
-    $router->get('/tests/iq', [TestController::class, 'iqIndex']);
-});
+        // RIASEC Test routes
+        $router->get('/tests/riasec', [TestController::class, 'riasecIndex']);
+        $router->post('/tests/riasec/start', [TestController::class, 'startTest'], ['csrf']);
+        $router->get('/tests/riasec/take', [TestController::class, 'takeTest']);
+        $router->post('/tests/riasec/submit', [TestController::class, 'submitTest'], ['csrf']);
+        $router->get('/tests/riasec/results', [TestController::class, 'viewResults']);
 
-$router->group(['middleware' => ['auth']], function () use ($router) {
-    $router->get('/settings', [SettingsController::class, 'index']);
-    $router->post('/settings/change-password', [AuthController::class, 'changePassword'], ['csrf']);
-});
+        // IQ Test routes (placeholder untuk pengembangan selanjutnya)
+        $router->get('/tests/iq', [TestController::class, 'iqIndex']);
+    });
 
-// Super Admin Routes
-$router->group(['middleware' => ['auth', 'role:super-admin', 'csrf']], function () use ($router) {
-    // Dashboard
-    $router->get('/admin', [AdminController::class, 'index']);
+    $router->group(['middleware' => ['auth']], function () use ($router) {
+        $router->get('/settings', [SettingsController::class, 'index']);
+        $router->post('/settings/change-password', [AuthController::class, 'changePassword'], ['csrf']);
+    });
 
-    // Schools routes
-    $router->get('/admin/schools', [AdminController::class, 'schools']);
-    $router->get('/admin/schools/create', [AdminController::class, 'createSchool']);
-    $router->post('/admin/schools', [AdminController::class, 'storeSchool']);
-    $router->get('/admin/schools/:id', [AdminController::class, 'showSchool']);
-    $router->get('/admin/schools/:id/edit', [AdminController::class, 'editSchool']);
-    $router->post('/admin/schools/:id/update', [AdminController::class, 'updateSchool']);
-    $router->post('/admin/schools/:id/delete', [AdminController::class, 'deleteSchool']);
+    // Super Admin Routes
+    $router->group(['middleware' => ['auth', 'role:super-admin', 'csrf']], function () use ($router) {
+        // Dashboard
+        $router->get('/admin', [AdminController::class, 'index']);
 
-    // Teachers routes (dalam konteks sekolah)
-    $router->get('/admin/schools/:id/teachers', [AdminController::class, 'schoolTeachers']);
-    $router->get('/admin/schools/:id/teachers/create', [AdminController::class, 'createTeacher']);
-    $router->post('/admin/schools/:id/teachers', [AdminController::class, 'storeTeacher']);
-    $router->get('/admin/schools/:id/teachers/:user_id', [AdminController::class, 'showTeacher']);
-    $router->get('/admin/schools/:id/teachers/:user_id/edit', [AdminController::class, 'editTeacher']);
-    $router->post('/admin/schools/:id/teachers/:user_id/update', [AdminController::class, 'updateTeacher']);
-    $router->post('/admin/schools/:id/teachers/:user_id/toggle-status', [AdminController::class, 'toggleTeacherStatus']);
+        // Schools routes
+        $router->get('/admin/schools', [AdminController::class, 'schools']);
+        $router->get('/admin/schools/create', [AdminController::class, 'createSchool']);
+        $router->post('/admin/schools', [AdminController::class, 'storeSchool']);
+        $router->get('/admin/schools/:id', [AdminController::class, 'showSchool']);
+        $router->get('/admin/schools/:id/edit', [AdminController::class, 'editSchool']);
+        $router->post('/admin/schools/:id/update', [AdminController::class, 'updateSchool']);
+        $router->post('/admin/schools/:id/delete', [AdminController::class, 'deleteSchool']);
 
-    // Students routes (dalam konteks sekolah)
-    $router->get('/admin/schools/:id/students', [AdminController::class, 'schoolStudents']);
-    $router->get('/admin/schools/:id/students/create', [AdminController::class, 'createStudent']);
-    $router->post('/admin/schools/:id/students', [AdminController::class, 'storeStudent']);
-    $router->get('/admin/schools/:id/students/bulk-create', [AdminController::class, 'bulkCreateStudent']);
-    $router->post('/admin/schools/:id/students/bulk-create', [AdminController::class, 'storeBulkStudent']);
-    $router->get('/admin/schools/:id/students/bulk-scores', [AdminController::class, 'bulkInputScores']);
-    $router->post('/admin/schools/:id/students/bulk-scores', [AdminController::class, 'storeBulkScores']);
-    $router->get('/admin/schools/:id/students/bulk-scores/template', [AdminController::class, 'downloadBulkScoresTemplate']);
+        // Teachers routes (dalam konteks sekolah)
+        $router->get('/admin/schools/:id/teachers', [AdminController::class, 'schoolTeachers']);
+        $router->get('/admin/schools/:id/teachers/create', [AdminController::class, 'createTeacher']);
+        $router->post('/admin/schools/:id/teachers', [AdminController::class, 'storeTeacher']);
+        $router->get('/admin/schools/:id/teachers/:user_id', [AdminController::class, 'showTeacher']);
+        $router->get('/admin/schools/:id/teachers/:user_id/edit', [AdminController::class, 'editTeacher']);
+        $router->post('/admin/schools/:id/teachers/:user_id/update', [AdminController::class, 'updateTeacher']);
+        $router->post('/admin/schools/:id/teachers/:user_id/toggle-status', [AdminController::class, 'toggleTeacherStatus']);
 
-    // Test Management routes
-    $router->get('/admin/tests', [TestManagementController::class, 'index']);
-    $router->get('/admin/tests/create', [TestManagementController::class, 'create']);
-    $router->post('/admin/tests', [TestManagementController::class, 'store']);
-    $router->get('/admin/tests/:id/edit', [TestManagementController::class, 'edit']);
-    $router->post('/admin/tests/:id/update', [TestManagementController::class, 'update']);
-    $router->post('/admin/tests/:id/delete', [TestManagementController::class, 'delete']);
-    $router->get('/admin/tests/:id/statements', [TestManagementController::class, 'manageStatements']);
-    $router->post('/admin/tests/:id/statements', [TestManagementController::class, 'addStatement']);
-    $router->post('/admin/tests/:id/statements/:statement_id/delete', [TestManagementController::class, 'deleteStatement']);
-    $router->get('/admin/tests/:id/assign', [TestManagementController::class, 'assignToSchools']);
-    $router->post('/admin/tests/:id/assign', [TestManagementController::class, 'saveAssignment']);
-    $router->post('/admin/tests/:id/toggle-active', [TestManagementController::class, 'toggleActive']);
+        // Students routes (dalam konteks sekolah)
+        $router->get('/admin/schools/:id/students', [AdminController::class, 'schoolStudents']);
+        $router->get('/admin/schools/:id/students/create', [AdminController::class, 'createStudent']);
+        $router->post('/admin/schools/:id/students', [AdminController::class, 'storeStudent']);
+        $router->get('/admin/schools/:id/students/bulk-create', [AdminController::class, 'bulkCreateStudent']);
+        $router->post('/admin/schools/:id/students/bulk-create', [AdminController::class, 'storeBulkStudent']);
+        $router->get('/admin/schools/:id/students/bulk-scores', [AdminController::class, 'bulkInputScores']);
+        $router->post('/admin/schools/:id/students/bulk-scores', [AdminController::class, 'storeBulkScores']);
+        $router->get('/admin/schools/:id/students/bulk-scores/template', [AdminController::class, 'downloadBulkScoresTemplate']);
 
-    $router->get('/admin/schools/:id/students/:student_id', [SchoolAdminController::class, 'showStudent']);
-    $router->get('/admin/schools/:id/students/:student_id/edit', [SchoolAdminController::class, 'editStudent']);
-    $router->post('/admin/schools/:id/students/:student_id/delete', [SchoolAdminController::class, 'deleteStudent']);
-});
+        // Test Management routes
+        $router->get('/admin/tests', [TestManagementController::class, 'index']);
+        $router->get('/admin/tests/create', [TestManagementController::class, 'create']);
+        $router->post('/admin/tests', [TestManagementController::class, 'store']);
+        $router->get('/admin/tests/:id/edit', [TestManagementController::class, 'edit']);
+        $router->post('/admin/tests/:id/update', [TestManagementController::class, 'update']);
+        $router->post('/admin/tests/:id/delete', [TestManagementController::class, 'delete']);
+        $router->get('/admin/tests/:id/statements', [TestManagementController::class, 'manageStatements']);
+        $router->post('/admin/tests/:id/statements', [TestManagementController::class, 'addStatement']);
+        $router->post('/admin/tests/:id/statements/:statement_id/delete', [TestManagementController::class, 'deleteStatement']);
+        $router->get('/admin/tests/:id/assign', [TestManagementController::class, 'assignToSchools']);
+        $router->post('/admin/tests/:id/assign', [TestManagementController::class, 'saveAssignment']);
+        $router->post('/admin/tests/:id/toggle-active', [TestManagementController::class, 'toggleActive']);
 
-// School Admin Routes (untuk role admin - mengelola sekolah sendiri)
-$router->group(['middleware' => ['auth', 'role:super-admin,admin', 'schooladmin', 'csrf']], function () use ($router) {
-    // Dashboard sekolah sendiri
-    $router->get('/admin/schools/my', [SchoolAdminController::class, 'mySchool']);
-    $router->get('/admin/schools/my/edit', [SchoolAdminController::class, 'editMySchool']);
-    $router->post('/admin/schools/my', [SchoolAdminController::class, 'updateMySchool']);
+        $router->get('/admin/schools/:id/students/:student_id', [SchoolAdminController::class, 'showStudent']);
+        $router->get('/admin/schools/:id/students/:student_id/edit', [SchoolAdminController::class, 'editStudent']);
+        $router->post('/admin/schools/:id/students/:student_id/delete', [SchoolAdminController::class, 'deleteStudent']);
+    });
 
-    // CRUD Students di sekolah sendiri
-    $router->get('/admin/students', [SchoolAdminController::class, 'students']);
-    $router->get('/admin/students/create', [SchoolAdminController::class, 'createStudent']);
-    $router->post('/admin/students', [SchoolAdminController::class, 'storeStudent']);
-    $router->get('/admin/students/:id', [SchoolAdminController::class, 'showStudent']);
-    $router->get('/admin/students/:id/edit', [SchoolAdminController::class, 'editStudent']);
-    $router->post('/admin/students/:id', [SchoolAdminController::class, 'updateStudent']);
-    $router->post('/admin/students/:id/delete', [SchoolAdminController::class, 'deleteStudent']);
+    // School Admin Routes (untuk role admin - mengelola sekolah sendiri)
+    $router->group(['middleware' => ['auth', 'role:super-admin,admin', 'schooladmin', 'csrf']], function () use ($router) {
+        // Dashboard sekolah sendiri
+        $router->get('/admin/schools/my', [SchoolAdminController::class, 'mySchool']);
+        $router->get('/admin/schools/my/edit', [SchoolAdminController::class, 'editMySchool']);
+        $router->post('/admin/schools/my', [SchoolAdminController::class, 'updateMySchool']);
 
-    // Bulk Import Students routes (untuk admin/teacher)
-    $router->get('/admin/students/bulk-create', [SchoolAdminController::class, 'bulkCreateStudent']);
-    $router->post('/admin/students/bulk-create', [SchoolAdminController::class, 'storeBulkStudent']);
+        // CRUD Students di sekolah sendiri
+        $router->get('/admin/students', [SchoolAdminController::class, 'students']);
+        $router->get('/admin/students/create', [SchoolAdminController::class, 'createStudent']);
+        $router->post('/admin/students', [SchoolAdminController::class, 'storeStudent']);
+        $router->get('/admin/students/:id', [SchoolAdminController::class, 'showStudent']);
+        $router->get('/admin/students/:id/edit', [SchoolAdminController::class, 'editStudent']);
+        $router->post('/admin/students/:id', [SchoolAdminController::class, 'updateStudent']);
+        $router->post('/admin/students/:id/delete', [SchoolAdminController::class, 'deleteStudent']);
 
-    // Bulk Input Scores routes (untuk admin/teacher)
-    $router->get('/admin/students/bulk-scores', [SchoolAdminController::class, 'bulkInputScores']);
-    $router->post('/admin/students/bulk-scores', [SchoolAdminController::class, 'storeBulkScores']);
-    $router->get('/admin/students/bulk-scores/template', [SchoolAdminController::class, 'downloadBulkScoresTemplate']);
+        // Bulk Import Students routes (untuk admin/teacher)
+        $router->get('/admin/students/bulk-create', [SchoolAdminController::class, 'bulkCreateStudent']);
+        $router->post('/admin/students/bulk-create', [SchoolAdminController::class, 'storeBulkStudent']);
+
+        // Bulk Input Scores routes (untuk admin/teacher)
+        $router->get('/admin/students/bulk-scores', [SchoolAdminController::class, 'bulkInputScores']);
+        $router->post('/admin/students/bulk-scores', [SchoolAdminController::class, 'storeBulkScores']);
+        $router->get('/admin/students/bulk-scores/template', [SchoolAdminController::class, 'downloadBulkScoresTemplate']);
+    });
 });

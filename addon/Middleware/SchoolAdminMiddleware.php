@@ -36,24 +36,11 @@ class SchoolAdminMiddleware implements MiddlewareInterface
 
     // Admin hanya bisa akses sekolah sendiri
     if ($userRole === 'admin') {
-      $config = new ConfigService();
-      $dbManager = new DatabaseManager($config);
-      $teacherModel = new TeacherProfileModel($dbManager);
-      $teacherProfile = $teacherModel->findByUserId($userId);
-
-      if (!$teacherProfile) {
-        $e = new AuthorizationException('Anda tidak terafiliasi dengan sekolah manapun. Hubungi administrator.');
-        $e->hardRedirect();
-        throw $e;
-      }
-
-      // Simpan school_id di session untuk akses cepat
-      $_SESSION['auth.school_id'] = $teacherProfile['school_id'];
-      $_SESSION['auth.teacher_profile_id'] = $teacherProfile['teacher_profile_id'];
+      $school_id = $this->session->get('auth.school_id');
 
       // Validasi jika ada parameter school_id di route
       $routeSchoolId = $request->param('id');
-      if ($routeSchoolId && (int)$routeSchoolId === $teacherProfile['school_id']) {
+      if ($routeSchoolId && (int)$routeSchoolId === $school_id) {
         $e = new AuthorizationException('Anda hanya bisa mengelola sekolah sendiri.');
         $e->hardRedirect();
         throw $e;

@@ -119,13 +119,20 @@ class SchoolConfigMappingModel extends Model
 
     /**
      * Get default configuration for a school
-     * 
+     *
+     * Mencari konfigurasi default untuk sekolah tertentu (per test_type).
+     * Prioritas 1: mapping dengan is_default=TRUE.
+     * Prioritas 2 (fallback): mapping pertama yang match test_type,
+     *   diurutkan by is_default DESC, name ASC. Ini memastikan siswa
+     *   tetap bisa tes walau admin belum set default.
+     *
      * @param int $schoolId ID sekolah
      * @param string|null $testType Filter by test type (optional)
      * @return array|null Default configuration or NULL
      */
     public function getDefaultConfig(int $schoolId, ?string $testType = null): ?array
     {
+        // Prioritas 1: mapping dengan is_default=TRUE
         $sql = "
             SELECT scm.*, tc.name as config_name, tc.test_type, tc.dimensions, tc.scoring_rules
             FROM {$this->table} scm
@@ -138,6 +145,33 @@ class SchoolConfigMappingModel extends Model
         }
 
         $sql .= " LIMIT 1";
+
+        $stmt = $this->getDb()->prepare($sql);
+        $params = ['school_id' => $schoolId];
+        if ($testType) {
+            $params['test_type'] = $testType;
+        }
+
+        $stmt->execute($params);
+        $row = $stmt->fetch();
+
+        if ($row !== false) {
+            return $row;
+        }
+
+        // Prioritas 2 (fallback): mapping pertama yang match test_type
+        $sql = "
+            SELECT scm.*, tc.name as config_name, tc.test_type, tc.dimensions, tc.scoring_rules
+            FROM {$this->table} scm
+            JOIN test_configurations tc ON scm.config_id = tc.id
+            WHERE scm.school_id = :school_id
+        ";
+
+        if ($testType) {
+            $sql .= " AND tc.test_type = :test_type";
+        }
+
+        $sql .= " ORDER BY scm.is_default DESC, tc.name ASC LIMIT 1";
 
         $stmt = $this->getDb()->prepare($sql);
         $params = ['school_id' => $schoolId];
@@ -173,7 +207,7 @@ class SchoolConfigMappingModel extends Model
 
     /**
      * Assign a configuration to a school
-     * 
+     *
      * @param int $schoolId ID sekolah
      * @param int $configId ID konfigurasi
      * @param bool $isDefault Set as default configuration
@@ -183,10 +217,18 @@ class SchoolConfigMappingModel extends Model
     public function assignConfig(int $schoolId, int $configId, bool $isDefault = false, array $options = []): int
     {
         // If setting as default, unset other defaults for this school
+        // dengan test_type yang sama (satu default per school_id + test_type)
         if ($isDefault) {
             $this->getDb()->query(
-                "UPDATE {$this->table} SET is_default = FALSE WHERE school_id = :school_id",
-                ['school_id' => $schoolId]
+                "UPDATE {$this->table} scm
+                 JOIN test_configurations tc ON scm.config_id = tc.id
+                 SET scm.is_default = FALSE
+                 WHERE scm.school_id = :school_id
+                   AND tc.test_type = (
+                       SELECT tc2.test_type FROM test_configurations tc2
+                       WHERE tc2.id = :config_id LIMIT 1
+                   )",
+                ['school_id' => $schoolId, 'config_id' => $configId]
             );
         }
 
@@ -217,17 +259,27 @@ class SchoolConfigMappingModel extends Model
 
     /**
      * Set a configuration as default for a school
-     * 
+     *
+     * Membuat config ini menjadi default untuk test_type-nya di sekolah tersebut.
+     * Mapping lain milik sekolah dengan test_type yang sama akan di-unset default-nya.
+     *
      * @param int $schoolId ID sekolah
      * @param int $configId ID konfigurasi
      * @return bool True on success
      */
     public function setAsDefault(int $schoolId, int $configId): bool
     {
-        // Unset other defaults first
+        // Unset other defaults first untuk (school_id, test_type) yang sama
         $this->getDb()->query(
-            "UPDATE {$this->table} SET is_default = FALSE WHERE school_id = :school_id",
-            ['school_id' => $schoolId]
+            "UPDATE {$this->table} scm
+             JOIN test_configurations tc ON scm.config_id = tc.id
+             SET scm.is_default = FALSE
+             WHERE scm.school_id = :school_id
+               AND tc.test_type = (
+                   SELECT tc2.test_type FROM test_configurations tc2
+                   WHERE tc2.id = :config_id LIMIT 1
+               )",
+            ['school_id' => $schoolId, 'config_id' => $configId]
         );
 
         // Set this one as default
@@ -235,6 +287,24 @@ class SchoolConfigMappingModel extends Model
             "UPDATE {$this->table} SET is_default = TRUE WHERE school_id = :school_id AND config_id = :config_id",
             ['school_id' => $schoolId, 'config_id' => $configId]
         );
+    }
+
+    /**
+     * Get daftar school_id yang config ini sudah jadi default-nya
+     *
+     * Digunakan UI assign page untuk menandai sekolah mana yang config ini
+     * menjadi default untuk test_type-nya.
+     *
+     * @param int $configId ID konfigurasi
+     * @return array List of school_id yang is_default=TRUE untuk config ini
+     */
+    public function getAssignedDefaultSchools(int $configId): array
+    {
+        $stmt = $this->getDb()->prepare(
+            "SELECT school_id FROM {$this->table} WHERE config_id = :config_id AND is_default = TRUE"
+        );
+        $stmt->execute(['config_id' => $configId]);
+        return array_column($stmt->fetchAll(), 'school_id');
     }
 
     /**

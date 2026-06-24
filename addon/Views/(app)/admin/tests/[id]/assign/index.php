@@ -4,7 +4,7 @@
  * @var array $config - Konfigurasi tes yang akan diassign
  * @var array $allSchools - Daftar semua sekolah
  * @var array $assignedSchoolIds - IDs sekolah yang sudah diassign
- * @var int|null $defaultSchoolId - ID sekolah default
+ * @var array $defaultSchoolIds - Array of school_id yang config ini jadi default-nya
  */
 ?>
 
@@ -50,7 +50,7 @@
         </div>
     </div>
 
-    <!-- Search Bar dengan Default Selector -->
+    <!-- Search Bar -->
     <div class="search-bar-container">
         <div class="search-input-wrapper">
             <span class="search-icon">🔍</span>
@@ -64,22 +64,12 @@
                 ✕
             </button>
         </div>
-        <div class="default-selector">
-            <label for="defaultSchoolSelect">Sekolah Default:</label>
-            <select id="defaultSchoolSelect" class="form-select">
-                <option value="">-- Pilih Default --</option>
-                <?php foreach ($assignedSchoolIds as $schoolId): ?>
-                    <?php
-                    $school = array_filter($allSchools, fn($s) => $s['id'] == $schoolId);
-                    $school = reset($school);
-                    ?>
-                    <option value="<?= $schoolId ?>" <?= $schoolId == $defaultSchoolId ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($school['name'] ?? 'Unknown') ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
     </div>
+    <p class="default-hint-text">
+        💡 Centang <strong>"Default"</strong> pada sekolah untuk menjadikan konfigurasi ini
+        sebagai config default untuk test type tersebut di sekolah itu.
+        Siswa tetap bisa tes meski sekolahnya tidak dicentang (fallback otomatis).
+    </p>
 
     <!-- Two Column Layout: Search Results (Left) | Assigned Schools (Right) -->
     <div class="section-container">
@@ -121,8 +111,9 @@
                         <?php
                         $school = array_filter($allSchools, fn($s) => $s['id'] == $schoolId);
                         $school = reset($school);
+                        $isDefault = in_array((int)$schoolId, array_map('intval', $defaultSchoolIds), true);
                         ?>
-                        <div class="list-item <?= $schoolId == $defaultSchoolId ? 'is-default' : '' ?>"
+                        <div class="list-item <?= $isDefault ? 'is-default' : '' ?>"
                             data-school-id="<?= $schoolId ?>">
                             <div class="item-content">
                                 <span class="item-icon">🏫</span>
@@ -136,9 +127,13 @@
                                 </div>
                             </div>
                             <div class="item-actions">
-                                <?php if ($schoolId == $defaultSchoolId): ?>
-                                    <span class="default-badge">⭐ Default</span>
-                                <?php endif; ?>
+                                <label class="default-toggle" title="Jadikan config default untuk test type ini di sekolah tersebut">
+                                    <input type="checkbox"
+                                        class="default-checkbox"
+                                        data-school-id="<?= $schoolId ?>"
+                                        <?= $isDefault ? 'checked' : '' ?> />
+                                    <span class="default-toggle-label">Default</span>
+                                </label>
                                 <button type="button" class="btn-icon btn-unassign"
                                     data-school-id="<?= $schoolId ?>"
                                     data-school-name="<?= htmlspecialchars($school['name']) ?>"
@@ -156,7 +151,7 @@
     <!-- Form Actions -->
     <form method="POST" action="/admin/tests/<?= $config['id'] ?>/assign" id="assignForm">
         <?= csrf_field() ?>
-        <input type="hidden" name="default_school" id="defaultSchoolInput" value="<?= $defaultSchoolId !== null ? $defaultSchoolId : '' ?>" />
+        <div id="defaultSchoolsContainer"></div>
         <div id="schoolIdsContainer"></div>
 
         <div class="form-actions">
@@ -173,7 +168,8 @@
     const allSchools = <?= json_encode($allSchools) ?>;
     // Convert to string array for consistent comparison (PHP returns integers)
     let assignedSchoolIds = <?= json_encode($assignedSchoolIds) ?>.map(id => String(id));
-    const defaultSchoolId = <?= $defaultSchoolId ?? 'null' ?>;
+    // Array of school_id (as string) yang config ini jadi default-nya
+    let defaultSchoolIds = <?= json_encode($defaultSchoolIds ?? []) ?>.map(id => String(id));
 
     // Flag to prevent duplicate initialization
     let isInitialized = false;
@@ -191,8 +187,7 @@
         const assignedListEl = document.getElementById('assignedList');
         const assignedBadgeEl = document.getElementById('assignedBadge');
         const assignedCountEl = document.getElementById('assignedCount');
-        const defaultSchoolSelect = document.getElementById('defaultSchoolSelect');
-        const defaultSchoolInput = document.getElementById('defaultSchoolInput');
+        const defaultSchoolsContainer = document.getElementById('defaultSchoolsContainer');
         const schoolIdsContainer = document.getElementById('schoolIdsContainer');
         const assignForm = document.getElementById('assignForm');
 
@@ -295,30 +290,19 @@
             searchResultsSection.style.display = 'none';
         }
 
-        // Handle Default School Change
-        function handleDefaultChange(e) {
-            const schoolId = e.target.value;
-            defaultSchoolInput.value = schoolId;
-
-            // Update visual state
-            document.querySelectorAll('.list-item.is-default').forEach(el => {
-                el.classList.remove('is-default');
-                const badge = el.querySelector('.default-badge');
-                if (badge) badge.remove();
-            });
-
-            if (schoolId) {
-                const item = document.querySelector(`.list-item[data-school-id="${schoolId}"]`);
-                if (item) {
-                    item.classList.add('is-default');
-                    // Add badge if not exists
-                    if (!item.querySelector('.default-badge')) {
-                        const badge = document.createElement('span');
-                        badge.className = 'default-badge';
-                        badge.textContent = '⭐ Default';
-                        item.querySelector('.item-actions').prepend(badge);
-                    }
+        // Helper: toggle default status untuk sebuah sekolah
+        function toggleDefault(schoolId, isChecked) {
+            const idStr = String(schoolId);
+            const item = document.querySelector(`#assignedList .list-item[data-school-id="${idStr}"]`);
+            if (isChecked) {
+                if (!defaultSchoolIds.includes(idStr)) {
+                    defaultSchoolIds.push(idStr);
                 }
+                if (item) item.classList.add('is-default');
+            } else {
+                const idx = defaultSchoolIds.indexOf(idStr);
+                if (idx > -1) defaultSchoolIds.splice(idx, 1);
+                if (item) item.classList.remove('is-default');
             }
         }
 
@@ -338,7 +322,7 @@
             const emptyState = assignedListEl.querySelector('.empty-state');
             if (emptyState) emptyState.remove();
 
-            // Create assigned item
+            // Create assigned item dengan toggle default
             const itemHtml = `
                 <div class="list-item" data-school-id="${schoolId}">
                     <div class="item-content">
@@ -353,6 +337,10 @@
                         </div>
                     </div>
                     <div class="item-actions">
+                        <label class="default-toggle" title="Jadikan config default untuk test type ini di sekolah tersebut">
+                            <input type="checkbox" class="default-checkbox" data-school-id="${schoolId}" />
+                            <span class="default-toggle-label">Default</span>
+                        </label>
                         <button type="button" class="btn-icon btn-unassign"
                             data-school-id="${schoolId}"
                             data-school-name="${escapeHtml(school.name)}">
@@ -363,12 +351,6 @@
             `;
 
             assignedListEl.insertAdjacentHTML('beforeend', itemHtml);
-
-            // Update default selector
-            const option = document.createElement('option');
-            option.value = schoolId;
-            option.textContent = school.name;
-            defaultSchoolSelect.appendChild(option);
 
             // Update counts
             updateAssignedCount();
@@ -381,24 +363,22 @@
 
         // Unassign School
         function unassignSchool(schoolId, schoolName) {
+            const idStr = String(schoolId);
+
             // Remove from assigned list
-            const item = document.querySelector(`#assignedList .list-item[data-school-id="${schoolId}"]`);
+            const item = document.querySelector(`#assignedList .list-item[data-school-id="${idStr}"]`);
             if (item) item.remove();
 
-            // Remove from assignedSchoolIds (compare as strings)
-            const index = assignedSchoolIds.indexOf(String(schoolId));
+            // Remove from assignedSchoolIds
+            const index = assignedSchoolIds.indexOf(idStr);
             if (index > -1) {
                 assignedSchoolIds.splice(index, 1);
             }
 
-            // Remove from default selector
-            const option = defaultSchoolSelect.querySelector(`option[value="${schoolId}"]`);
-            if (option) option.remove();
-
-            // Reset default if it was the default
-            if (defaultSchoolInput.value == schoolId) {
-                defaultSchoolInput.value = '';
-                defaultSchoolSelect.value = '';
+            // Remove from defaultSchoolIds
+            const defIndex = defaultSchoolIds.indexOf(idStr);
+            if (defIndex > -1) {
+                defaultSchoolIds.splice(defIndex, 1);
             }
 
             // Check if empty
@@ -417,9 +397,16 @@
             updateAssignedCount();
         }
 
-        // Handle List Actions (Assign/Unassign) - use event delegation on document
+        // Handle List Actions (Assign/Unassign/Default toggle) - use event delegation on document
         function handleListActions(e) {
             const target = e.target;
+
+            // Default checkbox toggle
+            if (target.classList.contains('default-checkbox')) {
+                toggleDefault(target.dataset.schoolId, target.checked);
+                e.stopPropagation();
+                return;
+            }
 
             // Assign button
             if (target.classList.contains('btn-assign')) {
@@ -442,6 +429,7 @@
         function handleFormSubmit(e) {
             // Clear previous hidden inputs (important for SPA)
             schoolIdsContainer.innerHTML = '';
+            defaultSchoolsContainer.innerHTML = '';
 
             // Collect school IDs (allow empty to unassign all)
             assignedSchoolIds.forEach(id => {
@@ -452,16 +440,19 @@
                 schoolIdsContainer.appendChild(input);
             });
 
-            // Handle default_school - only submit if has value
-            if (!defaultSchoolInput.value.trim()) {
-                defaultSchoolInput.remove();
-            }
+            // Collect default school IDs
+            defaultSchoolIds.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'default_schools[]';
+                input.value = id;
+                defaultSchoolsContainer.appendChild(input);
+            });
         }
 
         // Attach event listeners
         searchInput.addEventListener('input', handleSearch);
         clearSearchBtn.addEventListener('click', clearSearch);
-        defaultSchoolSelect.addEventListener('change', handleDefaultChange);
         document.addEventListener('click', handleListActions);
         assignForm.addEventListener('submit', handleFormSubmit);
     }

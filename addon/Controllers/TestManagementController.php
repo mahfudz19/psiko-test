@@ -332,24 +332,18 @@ class TestManagementController
       // Get all schools for search panel
       $allSchools = $this->schoolModel->all();
 
-      // Get assigned schools - just extract IDs and default
+      // Get assigned schools - just extract IDs
       $assignedMappings = $this->schoolConfigModel->getByConfigId($id);
       $assignedSchoolIds = array_column($assignedMappings, 'school_id');
 
-      // Find default school ID
-      $defaultSchoolId = null;
-      foreach ($assignedMappings as $mapping) {
-        if ($mapping['is_default']) {
-          $defaultSchoolId = $mapping['school_id'];
-          break;
-        }
-      }
+      // Get daftar school_id yang config ini jadi default-nya (array, bisa banyak)
+      $defaultSchoolIds = $this->schoolConfigModel->getAssignedDefaultSchools($id);
 
       $props = [
         'config' => $config,
         'allSchools' => $allSchools,
         'assignedSchoolIds' => $assignedSchoolIds,  // Simplified: just IDs
-        'defaultSchoolId' => $defaultSchoolId
+        'defaultSchoolIds' => $defaultSchoolIds     // Array of school_id yang is_default=TRUE
       ];
 
       return $response->renderPage($props, ['meta' => ['title' => 'Assign Konfigurasi ke Sekolah']]);
@@ -387,21 +381,32 @@ class TestManagementController
         $this->schoolConfigModel->removeConfig($schoolId, $configId);
       }
 
-      // Add new assignments
-      // Handle default_school - ensure it's a valid integer or null
-      $defaultSchool = isset($data['default_school']) && $data['default_school'] !== ''
-        ? (int) $data['default_school']
-        : null;
+      // Handle default_schools - array of school_id yang config ini jadi default-nya
+      $defaultSchools = $data['default_schools'] ?? [];
+      // Normalisasi ke array of int
+      $defaultSchools = array_map('intval', (array) $defaultSchools);
 
+      // Add new assignments
       foreach ($toAdd as $schoolId) {
         // Explicitly cast to boolean to ensure MySQL gets 0 or 1
-        $isDefault = ($defaultSchool !== null && (int) $schoolId === $defaultSchool);
+        $isDefault = in_array((int) $schoolId, $defaultSchools, true);
         $this->schoolConfigModel->assignConfig((int) $schoolId, $configId, (bool) $isDefault);
       }
 
-      // If default school changed, update it
-      if ($defaultSchool !== null && in_array($defaultSchool, $schoolIds)) {
-        $this->schoolConfigModel->setAsDefault($defaultSchool, $configId);
+      // Update status default untuk sekolah yang sudah ada (bukan toAdd)
+      // Cek mapping yang sudah ada, set/unset default sesuai defaultSchools
+      $existingStillAssigned = array_intersect($currentSchoolIds, $schoolIds);
+      foreach ($existingStillAssigned as $schoolId) {
+        $shouldBeDefault = in_array((int) $schoolId, $defaultSchools, true);
+        if ($shouldBeDefault) {
+          $this->schoolConfigModel->setAsDefault((int) $schoolId, $configId);
+        } else {
+          // Unset default untuk sekolah ini pada config ini
+          $this->schoolConfigModel->getDb()->query(
+            "UPDATE school_config_mappings SET is_default = FALSE WHERE school_id = :school_id AND config_id = :config_id",
+            ['school_id' => (int) $schoolId, 'config_id' => $configId]
+          );
+        }
       }
 
       return $response->redirect('/admin/tests?success=' . urlencode('Assignment konfigurasi berhasil disimpan'));

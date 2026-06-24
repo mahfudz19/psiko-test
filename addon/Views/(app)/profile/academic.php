@@ -45,7 +45,20 @@
         </div>
     <?php endif; ?>
 
-    <form data-spa action="<?= getBaseUrl("/profile/academic") ?>" class="academic-form" method="POST">
+    <form data-spa action="<?= getBaseUrl("/profile/academic") ?>" class="academic-form" method="POST" id="academicForm">
+        <!-- Validation Error Container -->
+        <div id="validation-error-container" class="validation-error-container" style="display: none; background: #fef2f2; border: 1px solid #ef4444; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            <div class="validation-error-header" style="display: flex; align-items: center; gap: 8px; color: #dc2626; font-weight: 600; margin-bottom: 12px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Validasi Gagal</span>
+            </div>
+            <ul id="validation-error-list" class="validation-error-list" style="list-style: disc; padding-left: 24px; color: #dc2626; margin: 0;"></ul>
+        </div>
+
         <!-- Section 1: Informasi Sekolah -->
         <section class="edit-section">
             <h2>
@@ -157,6 +170,10 @@
             </div>
 
             <input type="hidden" id="academic_scores_json" name="academic_scores_json" value="">
+            <!-- Data attribute untuk default value - menggunakan htmlspecialchars untuk keamanan -->
+            <div id="academic_scores_default"
+                data-default="<?= !empty($studentProfile['academic_scores']) ? htmlspecialchars($studentProfile['academic_scores'], ENT_QUOTES, 'UTF-8') : '' ?>"
+                style="display: none;"></div>
         </section>
 
         <!-- Form Actions -->
@@ -178,98 +195,100 @@
     // Global state untuk menyimpan data multi-semester
     let academicData = [];
 
-    // Initialize with existing scores if any
-    <?php if (!empty($studentProfile['academic_scores'])): ?>
+    /**
+     * Initialize academic data from encoded JSON
+     * Data dari PHP sudah berupa JSON string di database, jadi langsung parse saja
+     * @param {string} encodedData - JSON string dari data attribute
+     * @returns {Array} Array of semester objects with unique IDs
+     */
+    function initAcademicData(encodedData) {
+        console.log('[Academic] Raw encodedData:', encodedData);
+
+        // Cek jika data kosong
+        if (!encodedData || encodedData.trim() === '') {
+            console.log('[Academic] No data, returning empty array');
+            return [];
+        }
+
         try {
-            const parsed = <?= $studentProfile['academic_scores'] ?>;
-            if (Array.isArray(parsed)) {
-                academicData = parsed.map(sem => ({
-                    id: 'sem_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                    semester: sem.semester || 'Semester Baru',
-                    subjects: (sem.subjects || []).map(sub => ({
-                        id: 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                        name: sub.name || '',
-                        final_score: sub.final_score !== undefined ? sub.final_score : ''
-                    }))
-                }));
+            const parsed = JSON.parse(encodedData);
+            console.log('[Academic] Parsed data:', parsed);
+
+            if (!Array.isArray(parsed) || parsed.length === 0) {
+                console.log('[Academic] Parsed data is not array or empty');
+                return [];
             }
+
+            // Transform existing data dengan menambahkan unique IDs
+            const result = parsed.map((sem, semIndex) => ({
+                id: 'sem_' + Date.now() + '_' + semIndex + '_' + Math.random().toString(36).substr(2, 9),
+                semester: sem.semester || 'Semester ' + (semIndex + 1),
+                subjects: (sem.subjects || []).map((sub, subIndex) => ({
+                    id: 'sub_' + Date.now() + '_' + semIndex + '_' + subIndex + '_' + Math.random().toString(36).substr(2, 9),
+                    name: sub.name || '',
+                    final_score: sub.final_score !== undefined && sub.final_score !== null ? sub.final_score : ''
+                }))
+            }));
+
+            console.log('[Academic] Transformed result:', result);
+            return result;
         } catch (e) {
-            console.error("Error parsing initial academic scores", e);
-        }
-    <?php endif; ?>
-
-    // Default if empty
-    if (academicData.length === 0) {
-        addSemester();
-    } else {
-        renderSemesters();
-    }
-
-    function addSemester() {
-        academicData.push({
-            id: 'sem_' + Date.now(),
-            semester: 'Semester ' + (academicData.length + 1),
-            subjects: [{
-                id: 'sub_' + Date.now(),
-                name: '',
-                final_score: ''
-            }]
-        });
-        renderSemesters();
-    }
-
-    function removeSemester(semId) {
-        if (confirm('Hapus semester ini beserta semua nilainya?')) {
-            academicData = academicData.filter(s => s.id !== semId);
-            renderSemesters();
+            console.error("[Academic] Error parsing initial academic scores:", e);
+            console.error("[Academic] Failed encodedData:", encodedData);
+            return [];
         }
     }
 
-    function updateSemesterName(semId, newName) {
-        const sem = academicData.find(s => s.id === semId);
-        if (sem) {
-            sem.semester = newName;
-            updateHiddenInput();
+    /**
+     * Escape HTML special characters
+     * @param {string} text - Text to escape
+     * @returns {string} Escaped text
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    /**
+     * Set hidden input value setiap kali ada perubahan
+     */
+    function updateHiddenInput() {
+        const cleanData = academicData.map(sem => {
+            return {
+                semester: sem.semester,
+                subjects: sem.subjects.filter(sub => sub.name.trim() !== '').map(sub => {
+                    const cleanSub = {
+                        name: sub.name.trim()
+                    };
+                    if (sub.final_score !== '' && sub.final_score !== null) {
+                        cleanSub.final_score = Number(sub.final_score);
+                    }
+                    return cleanSub;
+                })
+            };
+        }).filter(sem => sem.subjects.length > 0);
+
+        const jsonValue = JSON.stringify(cleanData);
+        const hiddenInput = document.getElementById('academic_scores_json');
+        if (hiddenInput) {
+            hiddenInput.value = jsonValue;
         }
     }
 
-    function addSubject(semId) {
-        const sem = academicData.find(s => s.id === semId);
-        if (sem) {
-            sem.subjects.push({
-                id: 'sub_' + Date.now() + '_' + Math.random(),
-                name: '',
-                final_score: ''
-            });
-            renderSemesters();
-        }
-    }
-
-    function removeSubject(semId, subId) {
-        const sem = academicData.find(s => s.id === semId);
-        if (sem) {
-            sem.subjects = sem.subjects.filter(sub => sub.id !== subId);
-            renderSemesters();
-        }
-    }
-
-    function updateSubject(semId, subId, field, value) {
-        const sem = academicData.find(s => s.id === semId);
-        if (sem) {
-            const sub = sem.subjects.find(s => s.id === subId);
-            if (sub) {
-                sub[field] = value;
-                updateHiddenInput(); // Update hidden input immediately
-            }
-        }
-    }
-
+    /**
+     * Render semester blocks with proper event binding
+     */
     function renderSemesters() {
         const container = document.getElementById('semesters-container');
+        if (!container) return;
+
         container.innerHTML = '';
 
         if (academicData.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Belum ada data semester.</p>';
+            container.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Belum ada data semester. Klik "Tambah Semester Baru" untuk memulai.</p>';
+            updateHiddenInput();
             return;
         }
 
@@ -281,20 +300,17 @@
             sem.subjects.forEach(sub => {
                 subjectsHtml += `
                     <div class="subject-row">
-                        <input type="text" class="subject-input" placeholder="Mata Pelajaran" value="${escapeHtml(sub.name)}" 
-                            onchange="updateSubject('${sem.id}', '${sub.id}', 'name', this.value)">
-                        <input type="number" class="score-input" placeholder="Nilai (0-100)" min="0" max="100" value="${sub.final_score}" 
-                            onchange="updateSubject('${sem.id}', '${sub.id}', 'final_score', this.value)">
-                        <button type="button" class="btn-remove-subject" onclick="removeSubject('${sem.id}', '${sub.id}')" title="Hapus Mapel">×</button>
+                        <input type="text" class="subject-input" required placeholder="Mata Pelajaran" value="${escapeHtml(sub.name)}">
+                        <input type="number" class="score-input" required placeholder="Nilai (0-100)" min="0" max="100" value="${sub.final_score}">
+                        <button type="button" class="btn-remove-subject" title="Hapus Mapel">×</button>
                     </div>
                 `;
             });
 
             block.innerHTML = `
                 <div class="semester-header">
-                    <input type="text" class="semester-title-input" value="${escapeHtml(sem.semester)}" 
-                        onchange="updateSemesterName('${sem.id}', this.value)" placeholder="Nama Semester (Contoh: Semester 1 Kelas 10)">
-                    <button type="button" class="btn-icon" onclick="removeSemester('${sem.id}')" title="Hapus Semester">
+                    <input type="text" class="semester-title-input" value="${escapeHtml(sem.semester)}" placeholder="Nama Semester (Contoh: Semester 1 Kelas 10)">
+                    <button type="button" class="btn-icon" title="Hapus Semester">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -305,7 +321,7 @@
                     <div class="subjects-container">
                         ${subjectsHtml}
                     </div>
-                    <button type="button" class="btn-add-semester" onclick="addSubject('${sem.id}')" style="margin-top: 12px; font-size: 13px; padding: 8px 12px;">
+                    <button type="button" class="btn-add-subject" style="margin-top: 12px; font-size: 13px; padding: 8px 12px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -314,45 +330,398 @@
                     </button>
                 </div>
             `;
+
+            // Bind event listeners
+            bindSemesterEvents(block, sem);
             container.appendChild(block);
         });
-    }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // Set hidden input value setiap kali ada perubahan
-    function updateHiddenInput() {
-        const cleanData = academicData.map(sem => {
-            return {
-                semester: sem.semester,
-                subjects: sem.subjects.filter(sub => sub.name.trim() !== '').map(sub => {
-                    const cleanSub = {
-                        name: sub.name.trim()
-                    };
-                    if (sub.final_score !== '') {
-                        cleanSub.final_score = Number(sub.final_score);
-                    }
-                    return cleanSub;
-                })
-            };
-        }).filter(sem => sem.subjects.length > 0);
-
-        const jsonValue = JSON.stringify(cleanData);
-        document.getElementById('academic_scores_json').value = jsonValue;
-    }
-
-    // Update hidden input setiap kali renderSemesters dipanggil
-    const originalRenderSemesters = renderSemesters;
-    renderSemesters = function() {
-        originalRenderSemesters();
         updateHiddenInput();
-    };
+    }
 
-    // Initial update
-    updateHiddenInput();
+    /**
+     * Bind event listeners to semester block elements
+     * @param {HTMLElement} block - Semester block element
+     * @param {Object} sem - Semester data object
+     */
+    function bindSemesterEvents(block, sem) {
+        // Semester title input
+        const titleInput = block.querySelector('.semester-title-input');
+        if (titleInput) {
+            titleInput.addEventListener('input', function() {
+                updateSemesterName(sem.id, this.value);
+            });
+        }
+
+        // Remove semester button
+        const removeSemBtn = block.querySelector('.btn-icon');
+        if (removeSemBtn) {
+            removeSemBtn.addEventListener('click', function() {
+                removeSemester(sem.id);
+            });
+        }
+
+        // Subject inputs
+        const subjectRows = block.querySelectorAll('.subject-row');
+        subjectRows.forEach((row, idx) => {
+            const sub = sem.subjects[idx];
+            const nameInput = row.querySelector('.subject-input');
+            const scoreInput = row.querySelector('.score-input');
+            const removeBtn = row.querySelector('.btn-remove-subject');
+
+            if (nameInput && sub) {
+                nameInput.addEventListener('input', function() {
+                    updateSubject(sem.id, sub.id, 'name', this.value);
+                });
+            }
+
+            if (scoreInput && sub) {
+                scoreInput.addEventListener('input', function() {
+                    updateSubject(sem.id, sub.id, 'final_score', this.value);
+                });
+            }
+
+            if (removeBtn && sub) {
+                removeBtn.addEventListener('click', function() {
+                    removeSubject(sem.id, sub.id);
+                });
+            }
+        });
+
+        // Add subject button
+        const addSubjectBtn = block.querySelector('.btn-add-subject');
+        if (addSubjectBtn) {
+            addSubjectBtn.addEventListener('click', function() {
+                addSubject(sem.id);
+            });
+        }
+    }
+
+    /**
+     * Add new semester block
+     */
+    function addSemester() {
+        academicData.push({
+            id: 'sem_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            semester: 'Semester ' + (academicData.length + 1),
+            subjects: [{
+                id: 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                name: '',
+                final_score: ''
+            }]
+        });
+        renderSemesters();
+    }
+
+    /**
+     * Remove semester block
+     * @param {string} semId - Semester ID to remove
+     */
+    function removeSemester(semId) {
+        if (confirm('Hapus semester ini beserta semua nilainya?')) {
+            academicData = academicData.filter(s => s.id !== semId);
+            renderSemesters();
+        }
+    }
+
+    /**
+     * Update semester name
+     * @param {string} semId - Semester ID
+     * @param {string} newName - New semester name
+     */
+    function updateSemesterName(semId, newName) {
+        const sem = academicData.find(s => s.id === semId);
+        if (sem) {
+            sem.semester = newName;
+            updateHiddenInput();
+        }
+    }
+
+    /**
+     * Add subject to semester
+     * @param {string} semId - Semester ID
+     */
+    function addSubject(semId) {
+        const sem = academicData.find(s => s.id === semId);
+        if (sem) {
+            sem.subjects.push({
+                id: 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                name: '',
+                final_score: ''
+            });
+            renderSemesters();
+        }
+    }
+
+    /**
+     * Remove subject from semester
+     * @param {string} semId - Semester ID
+     * @param {string} subId - Subject ID
+     */
+    function removeSubject(semId, subId) {
+        const sem = academicData.find(s => s.id === semId);
+        if (sem) {
+            sem.subjects = sem.subjects.filter(sub => sub.id !== subId);
+            renderSemesters();
+        }
+    }
+
+    /**
+     * Update subject data
+     * @param {string} semId - Semester ID
+     * @param {string} subId - Subject ID
+     * @param {string} field - Field to update (name or final_score)
+     * @param {string} value - New value
+     */
+    function updateSubject(semId, subId, field, value) {
+        const sem = academicData.find(s => s.id === semId);
+        if (sem) {
+            const sub = sem.subjects.find(s => s.id === subId);
+            if (sub) {
+                sub[field] = value;
+                updateHiddenInput();
+            }
+        }
+    }
+
+    /**
+     * Validate form before submission
+     * @returns {Object} { valid: boolean, errors: Array }
+     */
+    function validateForm() {
+        const errors = [];
+
+        // 1. Validate Section 1: Informasi Sekolah
+        const studentId = document.getElementById('student_id')?.value?.trim();
+        if (!studentId) {
+            errors.push('NIS/NISN wajib diisi');
+        }
+
+        const gradeLevel = document.getElementById('grade_level')?.value?.trim();
+        if (!gradeLevel) {
+            errors.push('Kelas wajib dipilih');
+        }
+
+        // 2. Validate Section 2: Informasi Orang Tua/Wali
+        const parentName = document.getElementById('parent_name')?.value?.trim();
+        if (!parentName) {
+            errors.push('Nama lengkap orang tua/wali wajib diisi');
+        }
+
+        const parentPhone = document.getElementById('parent_phone')?.value?.trim();
+        if (!parentPhone) {
+            errors.push('No. telepon orang tua/wali wajib diisi');
+        } else {
+            // Validate phone number format (Indonesian format)
+            const phoneRegex = /^08[0-9]{8,11}$/;
+            if (!phoneRegex.test(parentPhone.replace(/[\s\-]/g, ''))) {
+                errors.push('Format no. telepon tidak valid. Gunakan format: 08xxxxxxxxxx');
+            }
+        }
+
+        const parentEmail = document.getElementById('parent_email')?.value?.trim();
+        if (parentEmail) {
+            // Validate email format if provided
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(parentEmail)) {
+                errors.push('Format email tidak valid');
+            }
+        }
+
+        // 3. Validate Section 3: Nilai Akademik
+        // Pastikan ada minimal 1 semester dengan minimal 1 mata pelajaran yang diisi
+        if (academicData.length === 0) {
+            errors.push('Minimal tambahkan 1 semester dengan nilai akademik');
+        } else {
+            // Cek setiap semester
+            let hasValidSubject = false;
+            const emptySemesters = [];
+            const emptySubjects = [];
+
+            academicData.forEach((sem, semIndex) => {
+                if (!sem.semester || sem.semester.trim() === '') {
+                    emptySemesters.push(`Semester ${semIndex + 1}`);
+                }
+
+                // Cek subjects di semester ini
+                const validSubjects = sem.subjects.filter(sub => sub.name && sub.name.trim() !== '');
+
+                if (validSubjects.length === 0) {
+                    emptySubjects.push(`Semester ${semIndex + 1}`);
+                } else {
+                    hasValidSubject = true;
+
+                    // Cek apakah ada subject dengan nilai kosong (warning saja, tidak error)
+                    validSubjects.forEach(sub => {
+                        if (sub.final_score === '' || sub.final_score === null) {
+                            // Ini hanya warning, tidak menghalangi submit
+                            console.warn(`[Validation] Subject "${sub.name}" tidak memiliki nilai`);
+                        } else {
+                            // Validate score range
+                            const score = Number(sub.final_score);
+                            if (isNaN(score) || score < 0 || score > 100) {
+                                errors.push(`Nilai untuk mata pelajaran "${sub.name}" harus antara 0-100`);
+                            }
+                        }
+                    });
+                }
+            });
+
+            if (!hasValidSubject) {
+                errors.push('Minimal isi 1 mata pelajaran dengan nama di salah satu semester');
+            }
+
+            if (emptySemesters.length > 0 && emptySemesters.length === academicData.length) {
+                errors.push('Semua semester belum memiliki nama');
+            }
+        }
+
+        return {
+            valid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    /**
+     * Show validation errors to user
+     * @param {Array} errors - Array of error messages
+     */
+    function showValidationErrors(errors) {
+        const container = document.getElementById('validation-error-container');
+        const list = document.getElementById('validation-error-list');
+
+        if (!container || !list) return;
+
+        // Clear previous errors
+        list.innerHTML = '';
+
+        // Add new errors
+        errors.forEach(error => {
+            const li = document.createElement('li');
+            li.textContent = error;
+            list.appendChild(li);
+        });
+
+        // Show container
+        container.style.display = 'block';
+
+        // Scroll to error container
+        container.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+        // Auto hide after 10 seconds
+        setTimeout(() => {
+            container.style.display = 'none';
+        }, 10000);
+    }
+
+    /**
+     * Hide validation errors
+     */
+    function hideValidationErrors() {
+        const container = document.getElementById('validation-error-container');
+        if (container) {
+            container.style.display = 'none';
+        }
+    }
+
+    /**
+     * Handle form submission with validation
+     */
+    function handleFormSubmit(e) {
+        e.preventDefault();
+
+        console.log('[Validation] Starting form validation...');
+
+        // Hide previous errors
+        hideValidationErrors();
+
+        // Run validation
+        const validation = validateForm();
+
+        if (!validation.valid) {
+            console.error('[Validation] Form validation failed:', validation.errors);
+            showValidationErrors(validation.errors);
+            return false;
+        }
+
+        console.log('[Validation] Form validation passed');
+
+        // Update hidden input with final data
+        updateHiddenInput();
+
+        // If validation passes, trigger SPA navigation manually
+        const form = document.getElementById('academicForm');
+        const action = form.getAttribute('action') || window.location.href;
+        const formData = new FormData(form);
+
+        // Use SPA navigation
+        if (window.navigateTo) {
+            window.navigateTo(action, {
+                method: 'POST',
+                body: formData
+            });
+        } else {
+            // Fallback to regular form submission
+            form.submit();
+        }
+    }
+
+    /**
+     * Initialize on DOM ready
+     */
+    function init() {
+        const defaultEl = document.getElementById('academic_scores_default');
+        const encodedData = defaultEl ? defaultEl.dataset.default : '';
+
+        console.log('[Academic] init() called, encodedData:', encodedData);
+
+        academicData = initAcademicData(encodedData);
+
+        if (academicData.length === 0) {
+            console.log('[Academic] No existing data, adding empty semester');
+            addSemester();
+        } else {
+            console.log('[Academic] Rendering existing data');
+            renderSemesters();
+        }
+    }
+
+    /**
+     * Attach form submit handler
+     */
+    function attachFormHandler() {
+        const form = document.getElementById('academicForm');
+        if (form) {
+            // Remove existing handler if any
+            form.removeEventListener('submit', handleFormSubmit);
+            // Add new handler
+            form.addEventListener('submit', handleFormSubmit);
+            console.log('[Validation] Form handler attached');
+        }
+    }
+
+    // Initialize on DOMContentLoaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+            attachFormHandler();
+        });
+    } else {
+        init();
+        attachFormHandler();
+    }
+
+    // Listen for SPA navigation events to re-initialize
+    // Ini memastikan default value di-render ulang saat soft navigation SPA
+    window.addEventListener('spa:navigated', function() {
+        console.log('[Academic] spa:navigated event fired');
+        // Beri delay kecil untuk memastikan DOM sudah siap
+        setTimeout(function() {
+            init();
+            attachFormHandler();
+        }, 50);
+    });
 </script>

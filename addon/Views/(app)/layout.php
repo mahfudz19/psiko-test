@@ -170,14 +170,14 @@
               </svg>
               <span class="sidebar-link-text">RIASEC</span>
             </a>
-            <a data-spa href="/tests/iq" class="sidebar-link sidebar-link-sub <?= $currentPath === '/tests/iq' ? 'active' : '' ?>">
+            <!-- <a data-spa href="/tests/iq" class="sidebar-link sidebar-link-sub <?= $currentPath === '/tests/iq' ? 'active' : '' ?>">
               <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Z" />
                 <path d="M12 12v8" />
                 <path d="m8 16 4 4 4-4" />
               </svg>
               <span class="sidebar-link-text">IQ Test</span>
-            </a>
+            </a> -->
           </div>
         </div>
       <?php endif; ?>
